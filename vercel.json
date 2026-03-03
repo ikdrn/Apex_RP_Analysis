@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/get-rp.rs",
+      "use": "@vercel/rust"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/apex-rp-analysis/browser"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/get-rp",
+      "dest": "api/get-rp.rs"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
