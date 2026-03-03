@@ -152,8 +152,9 @@ export class AppComponent implements OnInit {
         };
         this.loading = false;
       },
-      error: () => {
-        this.error = 'データの取得に失敗しました。時間をおいて再試行してください。';
+      error: (err) => {
+        const detail = err?.error?.error ?? err?.message ?? '';
+        this.error = `データの取得に失敗しました。${detail ? '(' + detail + ')' : '時間をおいて再試行してください。'}`;
         this.loading = false;
       }
     });
