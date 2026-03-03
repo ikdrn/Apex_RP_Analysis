@@ -2,8 +2,8 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/get-rp.rs",
-      "use": "@vercel/rust"
+      "src": "api/get-rp.ts",
+      "use": "@vercel/node"
     },
     {
       "src": "package.json",
@@ -16,7 +16,7 @@
   "routes": [
     {
       "src": "/api/get-rp",
-      "dest": "api/get-rp.rs"
+      "dest": "api/get-rp.ts"
     },
     {
       "handle": "filesystem"
