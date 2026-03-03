@@ -1,0 +1,55 @@
+<div class="min-h-screen bg-gray-50 text-gray-800">
+  <main class="mx-auto max-w-5xl px-6 py-10">
+    <header class="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <h1 class="text-2xl font-semibold text-slate-900">Apex RP Analysis</h1>
+      <p class="mt-2 text-sm text-gray-600">過去30日間のRP推移を、グラフと一覧テーブルで確認できます。</p>
+    </header>
+
+    <section class="rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div class="flex border-b border-gray-200">
+        <button
+          class="px-5 py-3 text-sm font-medium"
+          [ngClass]="activeTab === 'analysis' ? 'border-b-2 border-slate-800 text-slate-900' : 'text-gray-500'"
+          (click)="activeTab = 'analysis'"
+        >
+          Analysis
+        </button>
+        <button
+          class="px-5 py-3 text-sm font-medium"
+          [ngClass]="activeTab === 'table' ? 'border-b-2 border-slate-800 text-slate-900' : 'text-gray-500'"
+          (click)="activeTab = 'table'"
+        >
+          Data Table
+        </button>
+      </div>
+
+      <div class="p-6">
+        <p *ngIf="loading" class="text-sm text-gray-600">データを読み込み中です...</p>
+        <p *ngIf="error" class="text-sm text-red-700">{{ error }}</p>
+
+        <div *ngIf="!loading && !error && activeTab === 'analysis'" class="h-[360px]">
+          <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
+        </div>
+
+        <div *ngIf="!loading && !error && activeTab === 'table'" class="overflow-x-auto">
+          <table class="min-w-full border border-gray-200 text-sm">
+            <thead class="bg-gray-100 text-gray-700">
+              <tr>
+                <th class="border-b border-gray-200 px-4 py-2 text-left">ID</th>
+                <th class="border-b border-gray-200 px-4 py-2 text-left">RP</th>
+                <th class="border-b border-gray-200 px-4 py-2 text-left">created_at</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of records" class="hover:bg-gray-50">
+                <td class="border-b border-gray-100 px-4 py-2">{{ row.id }}</td>
+                <td class="border-b border-gray-100 px-4 py-2">{{ row.rp }}</td>
+                <td class="border-b border-gray-100 px-4 py-2">{{ row.created_at }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
