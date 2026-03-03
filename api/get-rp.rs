@@ -5,7 +5,7 @@ use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
 
 #[derive(Debug, Deserialize, Serialize)]
 struct PlayerRp {
-    id: i32,
+    id: String,
     rp: i32,
     created_at: String,
 }
