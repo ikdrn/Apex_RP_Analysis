@@ -21,13 +21,21 @@ async fn handler(req: Request) -> Result<Response<Body>, Error> {
             .body(Body::Empty)?);
     }
 
-    let supabase_url = std::env::var("SUPABASE_URL")?;
-    let service_key = std::env::var("SUPABASE_SERVICE_ROLE_KEY")?;
+    let supabase_url = std::env::var("SUPABASE_URL").map_err(|_| {
+        vercel_runtime::Error::from("Missing env var: SUPABASE_URL")
+    })?;
+    let service_key = std::env::var("SUPABASE_SERVICE_ROLE_KEY").map_err(|_| {
+        vercel_runtime::Error::from("Missing env var: SUPABASE_SERVICE_ROLE_KEY")
+    })?;
 
-    let since = (Utc::now() - Duration::days(30)).to_rfc3339();
+    // Use Z suffix instead of +00:00 to avoid URL encoding issues with '+'
+    let since = (Utc::now() - Duration::days(30))
+        .format("%Y-%m-%dT%H:%M:%SZ")
+        .to_string();
     let endpoint = format!(
         "{}/rest/v1/player_rp?select=id,rp,created_at&created_at=gte.{}&order=created_at.asc",
-        supabase_url, since
+        supabase_url.trim_end_matches('/'),
+        since
     );
 
     let client = reqwest::Client::new();
