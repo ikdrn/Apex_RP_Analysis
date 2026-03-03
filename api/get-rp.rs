@@ -10,7 +10,17 @@ struct PlayerRp {
     created_at: String,
 }
 
-async fn handler(_req: Request) -> Result<Response<Body>, Error> {
+async fn handler(req: Request) -> Result<Response<Body>, Error> {
+    // Handle CORS preflight
+    if req.method() == "OPTIONS" {
+        return Ok(Response::builder()
+            .status(StatusCode::NO_CONTENT)
+            .header("access-control-allow-origin", "*")
+            .header("access-control-allow-methods", "GET, OPTIONS")
+            .header("access-control-allow-headers", "Content-Type, Authorization")
+            .body(Body::Empty)?);
+    }
+
     let supabase_url = std::env::var("SUPABASE_URL")?;
     let service_key = std::env::var("SUPABASE_SERVICE_ROLE_KEY")?;
 
@@ -22,7 +32,7 @@ async fn handler(_req: Request) -> Result<Response<Body>, Error> {
 
     let client = reqwest::Client::new();
     let response = client
-        .get(endpoint)
+        .get(&endpoint)
         .header("apikey", &service_key)
         .header(AUTHORIZATION, format!("Bearer {}", service_key))
         .header(CONTENT_TYPE, "application/json")
@@ -37,6 +47,7 @@ async fn handler(_req: Request) -> Result<Response<Body>, Error> {
         return Ok(Response::builder()
             .status(StatusCode::INTERNAL_SERVER_ERROR)
             .header("content-type", "application/json")
+            .header("access-control-allow-origin", "*")
             .body(Body::Text(
                 serde_json::json!({ "error": error_message }).to_string(),
             ))?);
@@ -46,6 +57,7 @@ async fn handler(_req: Request) -> Result<Response<Body>, Error> {
     Ok(Response::builder()
         .status(StatusCode::OK)
         .header("content-type", "application/json")
+        .header("access-control-allow-origin", "*")
         .body(Body::Text(serde_json::to_string(&parsed)?))?)
 }
 
