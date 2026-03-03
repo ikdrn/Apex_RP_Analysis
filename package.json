@@ -1,0 +1,38 @@
+{
+  "name": "apex-rp-analysis",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test"
+  },
+  "dependencies": {
+    "@angular/animations": "17.3.12",
+    "@angular/cdk": "17.3.10",
+    "@angular/common": "17.3.12",
+    "@angular/compiler": "17.3.12",
+    "@angular/core": "17.3.12",
+    "@angular/forms": "17.3.12",
+    "@angular/platform-browser": "17.3.12",
+    "@angular/platform-browser-dynamic": "17.3.12",
+    "@angular/router": "17.3.12",
+    "chart.js": "4.4.2",
+    "ng2-charts": "6.0.1",
+    "rxjs": "7.8.1",
+    "tslib": "2.6.2",
+    "zone.js": "0.14.10"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "17.3.17",
+    "@angular/cli": "17.3.17",
+    "@angular/compiler-cli": "17.3.12",
+    "autoprefixer": "10.4.19",
+    "postcss": "8.4.38",
+    "tailwindcss": "3.4.3",
+    "typescript": "5.4.5"
+  },
+  "overrides": {
+    "@angular/cdk": "17.3.10"
+  }
+}
