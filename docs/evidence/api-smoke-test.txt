@@ -1,0 +1,5 @@
+[get-rp] success { days: 7, count: 1 }
+GET status: 200
+GET count: 1
+POST status: 405
+POST error: Method Not Allowed

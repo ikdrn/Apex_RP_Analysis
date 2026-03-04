@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/get-rp.ts",
+      "src": "api/get-rp.js",
       "use": "@vercel/node"
     },
     {
@@ -16,7 +16,7 @@
   "routes": [
     {
       "src": "/api/get-rp",
-      "dest": "api/get-rp.ts"
+      "dest": "api/get-rp.js"
     },
     {
       "handle": "filesystem"

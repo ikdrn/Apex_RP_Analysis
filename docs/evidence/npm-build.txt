@@ -1,0 +1,15 @@
+
+> apex-rp-analysis@1.0.0 build
+> ng build
+
+Initial chunk files | Names         |  Raw size | Estimated transfer size
+main.js             | main          | 381.60 kB |               111.79 kB
+polyfills.js        | polyfills     |  33.71 kB |                11.02 kB
+styles.css          | styles        |  11.56 kB |                 2.57 kB
+
+                    | Initial total | 426.87 kB |               125.37 kB
+
+Output location: /workspace/Apex_RP_Analysis/dist/apex-rp-analysis
+
+Application bundle generation complete. [13.379 seconds]
+
