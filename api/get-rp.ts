@@ -1,6 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse,
+): Promise<VercelResponse | void> {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -34,9 +37,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: `Supabase error: ${body}` });
     }
 
-    res.status(200).json(JSON.parse(body));
+    return res.status(200).json(JSON.parse(body));
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    res.status(500).json({ error: message });
+    return res.status(500).json({ error: message });
   }
 }
