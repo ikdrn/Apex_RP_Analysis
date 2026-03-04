@@ -29,5 +29,8 @@
       }
     }
   },
-  "defaultProject": "apex-rp-analysis"
+  "defaultProject": "apex-rp-analysis",
+  "cli": {
+    "analytics": false
+  }
 }

@@ -1,16 +1,44 @@
 <div class="min-h-screen bg-gray-50">
   <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
 
-    <!-- Header -->
     <header class="mb-6">
-      <div class="flex items-center gap-3 mb-1">
+      <div class="mb-1 flex items-center gap-3">
         <div class="h-7 w-1.5 rounded-full bg-blue-800"></div>
         <h1 class="text-2xl font-bold tracking-tight text-gray-900">Apex RP Analysis</h1>
       </div>
-      <p class="ml-5 text-sm text-gray-500">過去30日間のRP推移をグラフと一覧テーブルで確認できます。</p>
+      <p class="ml-5 text-sm text-gray-500">期間を切り替えながら、RP推移をグラフと表で確認できます。</p>
     </header>
 
-    <!-- Stats cards -->
+    <div class="mb-4 flex flex-wrap items-center gap-2">
+      <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">表示期間</span>
+      <button
+        *ngFor="let days of rangeOptions"
+        class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
+        [ngClass]="selectedRange === days
+          ? 'border-blue-700 bg-blue-700 text-white'
+          : 'border-gray-300 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-700'"
+        (click)="onRangeChange(days)"
+      >
+        {{ days }}日
+      </button>
+
+      <button
+        class="ml-auto rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-700"
+        (click)="refresh()"
+        [disabled]="loading || refreshing"
+      >
+        {{ refreshing ? '更新中...' : '最新データに更新' }}
+      </button>
+
+      <button
+        class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        (click)="downloadCsv()"
+        [disabled]="records.length === 0 || loading"
+      >
+        CSVダウンロード
+      </button>
+    </div>
+
     <div *ngIf="!loading && !error" class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
       <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
         <p class="text-xs font-medium uppercase tracking-wide text-gray-400">最新RP</p>
@@ -25,7 +53,7 @@
         <p class="mt-1 text-xl font-bold text-gray-900">{{ minRp !== null ? minRp.toLocaleString() : '—' }}</p>
       </div>
       <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
-        <p class="text-xs font-medium uppercase tracking-wide text-gray-400">30日変化</p>
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-400">期間内の変化</p>
         <p class="mt-1 text-xl font-bold"
           [class.text-emerald-700]="(rpChange ?? 0) >= 0"
           [class.text-red-600]="(rpChange ?? 0) < 0">
@@ -34,10 +62,7 @@
       </div>
     </div>
 
-    <!-- Main card -->
     <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
-
-      <!-- Tabs -->
       <div class="flex border-b border-gray-200">
         <button
           class="px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
@@ -59,10 +84,7 @@
         </button>
       </div>
 
-      <!-- Content -->
       <div class="p-6">
-
-        <!-- Loading -->
         <div *ngIf="loading" class="flex items-center justify-center py-20">
           <div class="flex flex-col items-center gap-3">
             <div class="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-800"></div>
@@ -70,15 +92,19 @@
           </div>
         </div>
 
-        <!-- Error -->
         <div *ngIf="error" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-          <p class="text-sm font-medium text-red-700">{{ error }}</p>
+          <p class="mb-2 text-sm font-medium text-red-700">{{ error }}</p>
+          <p class="text-xs text-red-600">設定が未完了の場合は、Vercelの環境変数（SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）を確認してください。</p>
         </div>
 
-        <!-- Analysis tab: chart -->
-        <div *ngIf="!loading && !error && activeTab === 'analysis'">
+        <div *ngIf="!loading && !error && records.length === 0" class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-6 text-center">
+          <p class="text-sm font-medium text-amber-700">この期間のデータはまだありません。</p>
+          <p class="mt-1 text-xs text-amber-600">時間をおいて「最新データに更新」を押してください。</p>
+        </div>
+
+        <div *ngIf="!loading && !error && activeTab === 'analysis' && records.length > 0">
           <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-700">RP推移（過去30日）</h2>
+            <h2 class="text-sm font-semibold text-gray-700">RP推移（過去{{ selectedRange }}日）</h2>
             <span class="text-xs text-gray-400">{{ records.length }} レコード</span>
           </div>
           <div class="h-[340px]">
@@ -86,8 +112,7 @@
           </div>
         </div>
 
-        <!-- Data Table tab -->
-        <div *ngIf="!loading && !error && activeTab === 'table'">
+        <div *ngIf="!loading && !error && activeTab === 'table' && records.length > 0">
           <div class="mb-4 flex items-center justify-between">
             <h2 class="text-sm font-semibold text-gray-700">データ一覧</h2>
             <span class="text-xs text-gray-400">{{ records.length }} 件</span>
@@ -102,23 +127,18 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 bg-white">
-                <tr *ngFor="let row of records" class="hover:bg-gray-50 transition-colors">
+                <tr *ngFor="let row of records" class="transition-colors hover:bg-gray-50">
                   <td class="px-4 py-2.5 text-gray-500">{{ row.id }}</td>
                   <td class="px-4 py-2.5 text-right font-medium text-gray-900">{{ row.rp.toLocaleString() }}</td>
                   <td class="px-4 py-2.5 text-gray-500">{{ row.created_at | date:'yyyy/MM/dd HH:mm' }}</td>
                 </tr>
               </tbody>
             </table>
-            <div *ngIf="records.length === 0" class="py-12 text-center text-sm text-gray-400">
-              データがありません。
-            </div>
           </div>
         </div>
-
       </div>
     </div>
 
-    <!-- Footer -->
     <p class="mt-6 text-center text-xs text-gray-400">Apex RP Analysis &bull; Powered by Supabase &amp; Vercel</p>
   </div>
 </div>
