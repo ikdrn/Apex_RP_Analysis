@@ -32,6 +32,8 @@ type RpRecord = {
   created_at: string;
 };
 
+type RangeOption = 7 | 30 | 90;
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -39,10 +41,14 @@ type RpRecord = {
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
-  activeTab: 'analysis' | 'table' = 'analysis';
+  activeTab: 'analysis' | 'table' | 'design' = 'analysis';
   loading = true;
+  refreshing = false;
   error = '';
   records: RpRecord[] = [];
+  selectedRange: RangeOption = 30;
+  readonly rangeOptions: RangeOption[] = [7, 30, 90];
+  readonly apiPath = '/api/get-rp';
 
   get latestRp(): number | null {
     if (this.records.length === 0) return null;
@@ -133,7 +139,52 @@ export class AppComponent implements OnInit {
   constructor(private readonly http: HttpClient) {}
 
   ngOnInit(): void {
-    this.http.get<RpRecord[]>('/api/get-rp').subscribe({
+    this.loadRecords();
+  }
+
+  showDesignDoc(): void {
+    this.activeTab = 'design';
+  }
+
+  onRangeChange(days: RangeOption): void {
+    if (this.selectedRange === days) {
+      return;
+    }
+
+    this.selectedRange = days;
+    this.loadRecords();
+  }
+
+  refresh(): void {
+    this.loadRecords(true);
+  }
+
+  downloadCsv(): void {
+    if (this.records.length === 0) {
+      return;
+    }
+
+    const header = ['id', 'rp', 'created_at'];
+    const rows = this.records.map((row) => [row.id, row.rp, row.created_at]);
+    const csv = [header, ...rows]
+      .map((line) => line.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `apex-rp-${this.selectedRange}days.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private loadRecords(isRefresh = false): void {
+    this.error = '';
+    this.loading = !isRefresh;
+    this.refreshing = isRefresh;
+
+    this.http.get<RpRecord[]>(this.apiPath, { params: { days: String(this.selectedRange) } }).subscribe({
       next: (data) => {
         this.records = data;
         this.lineChartData = {
@@ -151,11 +202,13 @@ export class AppComponent implements OnInit {
           ]
         };
         this.loading = false;
+        this.refreshing = false;
       },
       error: (err) => {
         const detail = err?.error?.error ?? err?.message ?? '';
-        this.error = `データの取得に失敗しました。${detail ? '(' + detail + ')' : '時間をおいて再試行してください。'}`;
+        this.error = `データの取得に失敗しました。${detail ? ` (${detail})` : ' 時間をおいて再試行してください。'}`;
         this.loading = false;
+        this.refreshing = false;
       }
     });
   }

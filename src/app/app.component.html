@@ -1,17 +1,50 @@
 <div class="min-h-screen bg-gray-50">
   <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
 
-    <!-- Header -->
-    <header class="mb-6">
-      <div class="flex items-center gap-3 mb-1">
-        <div class="h-7 w-1.5 rounded-full bg-blue-800"></div>
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">Apex RP Analysis</h1>
+    <header class="mb-6 flex items-start justify-between gap-4">
+      <div>
+        <div class="mb-1 flex items-center gap-3">
+          <div class="h-7 w-1.5 rounded-full bg-blue-800"></div>
+          <h1 class="text-2xl font-bold tracking-tight text-gray-900">Apex RP Analysis</h1>
+        </div>
+        <p class="ml-5 text-sm text-gray-500">期間を切り替えながら、RP推移をグラフと表で確認できます。</p>
       </div>
-      <p class="ml-5 text-sm text-gray-500">過去30日間のRP推移をグラフと一覧テーブルで確認できます。</p>
+      <button class="mt-1 text-xs text-blue-700 underline underline-offset-2 hover:text-blue-900" (click)="showDesignDoc()">
+        設計書を見る
+      </button>
     </header>
 
-    <!-- Stats cards -->
-    <div *ngIf="!loading && !error" class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div *ngIf="activeTab !== 'design'" class="mb-4 flex flex-wrap items-center gap-2">
+      <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">表示期間</span>
+      <button
+        *ngFor="let days of rangeOptions"
+        class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
+        [ngClass]="selectedRange === days
+          ? 'border-blue-700 bg-blue-700 text-white'
+          : 'border-gray-300 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-700'"
+        (click)="onRangeChange(days)"
+      >
+        {{ days }}日
+      </button>
+
+      <button
+        class="ml-auto rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-700"
+        (click)="refresh()"
+        [disabled]="loading || refreshing"
+      >
+        {{ refreshing ? '更新中...' : '最新データに更新' }}
+      </button>
+
+      <button
+        class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        (click)="downloadCsv()"
+        [disabled]="records.length === 0 || loading"
+      >
+        CSVダウンロード
+      </button>
+    </div>
+
+    <div *ngIf="!loading && !error && activeTab !== 'design'" class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
       <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
         <p class="text-xs font-medium uppercase tracking-wide text-gray-400">最新RP</p>
         <p class="mt-1 text-xl font-bold text-gray-900">{{ latestRp !== null ? latestRp.toLocaleString() : '—' }}</p>
@@ -25,7 +58,7 @@
         <p class="mt-1 text-xl font-bold text-gray-900">{{ minRp !== null ? minRp.toLocaleString() : '—' }}</p>
       </div>
       <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
-        <p class="text-xs font-medium uppercase tracking-wide text-gray-400">30日変化</p>
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-400">期間内の変化</p>
         <p class="mt-1 text-xl font-bold"
           [class.text-emerald-700]="(rpChange ?? 0) >= 0"
           [class.text-red-600]="(rpChange ?? 0) < 0">
@@ -34,10 +67,7 @@
       </div>
     </div>
 
-    <!-- Main card -->
     <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
-
-      <!-- Tabs -->
       <div class="flex border-b border-gray-200">
         <button
           class="px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
@@ -57,68 +87,132 @@
         >
           Data Table
         </button>
+        <button
+          class="px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
+          [ngClass]="activeTab === 'design'
+            ? 'border-b-2 border-blue-800 text-blue-900'
+            : 'text-gray-500 hover:text-gray-700'"
+          (click)="activeTab = 'design'"
+        >
+          設計書
+        </button>
       </div>
 
-      <!-- Content -->
       <div class="p-6">
-
-        <!-- Loading -->
-        <div *ngIf="loading" class="flex items-center justify-center py-20">
-          <div class="flex flex-col items-center gap-3">
-            <div class="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-800"></div>
-            <p class="text-sm text-gray-500">データを読み込み中...</p>
-          </div>
-        </div>
-
-        <!-- Error -->
-        <div *ngIf="error" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-          <p class="text-sm font-medium text-red-700">{{ error }}</p>
-        </div>
-
-        <!-- Analysis tab: chart -->
-        <div *ngIf="!loading && !error && activeTab === 'analysis'">
-          <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-700">RP推移（過去30日）</h2>
-            <span class="text-xs text-gray-400">{{ records.length }} レコード</span>
-          </div>
-          <div class="h-[340px]">
-            <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
-          </div>
-        </div>
-
-        <!-- Data Table tab -->
-        <div *ngIf="!loading && !error && activeTab === 'table'">
-          <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-700">データ一覧</h2>
-            <span class="text-xs text-gray-400">{{ records.length }} 件</span>
-          </div>
-          <div class="overflow-x-auto rounded-lg border border-gray-200">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">ID</th>
-                  <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">RP</th>
-                  <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">記録日時</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100 bg-white">
-                <tr *ngFor="let row of records" class="hover:bg-gray-50 transition-colors">
-                  <td class="px-4 py-2.5 text-gray-500">{{ row.id }}</td>
-                  <td class="px-4 py-2.5 text-right font-medium text-gray-900">{{ row.rp.toLocaleString() }}</td>
-                  <td class="px-4 py-2.5 text-gray-500">{{ row.created_at | date:'yyyy/MM/dd HH:mm' }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div *ngIf="records.length === 0" class="py-12 text-center text-sm text-gray-400">
-              データがありません。
+        <ng-container *ngIf="activeTab !== 'design'">
+          <div *ngIf="loading" class="flex items-center justify-center py-20">
+            <div class="flex flex-col items-center gap-3">
+              <div class="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-800"></div>
+              <p class="text-sm text-gray-500">データを読み込み中...</p>
             </div>
           </div>
-        </div>
 
+          <div *ngIf="error" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+            <p class="mb-2 text-sm font-medium text-red-700">{{ error }}</p>
+            <p class="text-xs text-red-600">設定が未完了の場合は、Vercelの環境変数（SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）を確認してください。</p>
+          </div>
+
+          <div *ngIf="!loading && !error && records.length === 0" class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-6 text-center">
+            <p class="text-sm font-medium text-amber-700">この期間のデータはまだありません。</p>
+            <p class="mt-1 text-xs text-amber-600">時間をおいて「最新データに更新」を押してください。</p>
+          </div>
+
+          <div *ngIf="!loading && !error && activeTab === 'analysis' && records.length > 0">
+            <div class="mb-4 flex items-center justify-between">
+              <h2 class="text-sm font-semibold text-gray-700">RP推移（過去{{ selectedRange }}日）</h2>
+              <span class="text-xs text-gray-400">{{ records.length }} レコード</span>
+            </div>
+            <div class="h-[340px]">
+              <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
+            </div>
+          </div>
+
+          <div *ngIf="!loading && !error && activeTab === 'table' && records.length > 0">
+            <div class="mb-4 flex items-center justify-between">
+              <h2 class="text-sm font-semibold text-gray-700">データ一覧</h2>
+              <span class="text-xs text-gray-400">{{ records.length }} 件</span>
+            </div>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">ID</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">RP</th>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">記録日時</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                  <tr *ngFor="let row of records" class="transition-colors hover:bg-gray-50">
+                    <td class="px-4 py-2.5 text-gray-500">{{ row.id }}</td>
+                    <td class="px-4 py-2.5 text-right font-medium text-gray-900">{{ row.rp.toLocaleString() }}</td>
+                    <td class="px-4 py-2.5 text-gray-500">{{ row.created_at | date:'yyyy/MM/dd HH:mm' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </ng-container>
+
+        <div *ngIf="activeTab === 'design'" class="space-y-6 text-sm text-gray-700">
+          <p class="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-800">
+            この設計書は、非エンジニアやジュニアエンジニアでも読めるように「目的→仕組み→テスト」の順でまとめています。
+          </p>
+
+          <section>
+            <h3 class="text-base font-bold text-gray-900">1. 要件定義書</h3>
+            <ul class="mt-2 list-disc space-y-1 pl-5">
+              <li><b>背景・目的:</b> RP推移を誰でも見える化し、日々の変化を早く判断できるようにする。</li>
+              <li><b>スコープ:</b> Web画面（グラフ/表/CSV）とAPI（取得・期間指定・基本的な保護）。</li>
+              <li><b>業務フロー:</b> As-Is=手作業確認、To-Be=画面アクセス→期間選択→確認→必要ならCSV出力。</li>
+              <li><b>機能要件:</b> 期間切替、再取得、一覧表示、CSV、エラー表示、設計書閲覧。</li>
+              <li><b>非機能要件:</b> APIの安定性（レート制限）、可用性（Vercel）、セキュリティ（CORS/任意Basic認証）。</li>
+              <li><b>外部I/F要件:</b> Supabase REST APIとHTTPS通信。</li>
+              <li><b>データ移行要件:</b> 既存の `player_rp` をそのまま利用（移行処理なし）。</li>
+              <li><b>導入・運用要件:</b> Vercel環境変数設定とログ監視、必要時に設定更新。</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 class="text-base font-bold text-gray-900">2. 基本設計書</h3>
+            <ul class="mt-2 list-disc space-y-1 pl-5">
+              <li><b>システム構成図:</b> Browser → Vercel(Angular + API) → Supabase。</li>
+              <li><b>画面遷移図:</b> 同一画面内タブ遷移（Analysis / Data Table / 設計書）。</li>
+              <li><b>画面レイアウト:</b> ヘッダー、操作ボタン、統計カード、メインタブ領域。</li>
+              <li><b>帳票レイアウト:</b> CSV（id, rp, created_at）。</li>
+              <li><b>テーブル定義/ER:</b> `player_rp(id, rp, created_at)` を参照。1テーブル構成。</li>
+              <li><b>外部連携仕様:</b> GET `/api/get-rp?days=7|30|90` → Supabase REST呼び出し。</li>
+              <li><b>業務ロジック一覧:</b> 集計表示（最新/最大/最小/変化量）、期間フィルタ。</li>
+              <li><b>権限・ロール:</b> 基本は閲覧者、必要ならBasic認証で保護。</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 class="text-base font-bold text-gray-900">3. 詳細設計書</h3>
+            <ul class="mt-2 list-disc space-y-1 pl-5">
+              <li><b>モジュール/クラス:</b> `AppComponent`（UI制御）、`api/get-rp.js`（API処理）。</li>
+              <li><b>シーケンス:</b> 画面起動→AngularがAPI呼び出し→APIがSupabase参照→結果表示。</li>
+              <li><b>関数仕様:</b> `loadRecords`, `onRangeChange`, `refresh`, `downloadCsv`, API `handler`。</li>
+              <li><b>詳細ロジック:</b> days検証（7/30/90）、失敗時エラー文言、成功時グラフ更新。</li>
+              <li><b>共通部品:</b> Chart.js / ng2-charts / Angular HttpClient。</li>
+              <li><b>DB物理設計:</b> 既存DB利用。将来は `created_at` インデックス強化を推奨。</li>
+              <li><b>エラーハンドリング/ログ:</b> APIで`console.error/warn/info`、画面に説明文表示。</li>
+              <li><b>APIリファレンス:</b> GET `/api/get-rp`（query: `days`、response: RPレコード配列）。</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 class="text-base font-bold text-gray-900">4. 各テスト仕様書</h3>
+            <ul class="mt-2 list-disc space-y-1 pl-5">
+              <li><b>UT:</b> 関数単位（期間切替、CSV生成、エラー分岐、境界値: days不正値→30）。</li>
+              <li><b>IT:</b> 画面→API→DB連携、タブ遷移、連続操作（切替→更新→CSV）。</li>
+              <li><b>ST:</b> 全体動作、ビルド健全性、レスポンス遅延時表示、ログ確認。</li>
+              <li><b>証跡:</b> `docs/test-evidence.md` と `docs/evidence/*.txt` に保存。</li>
+            </ul>
+          </section>
+        </div>
       </div>
     </div>
 
-    <!-- Footer -->
     <p class="mt-6 text-center text-xs text-gray-400">Apex RP Analysis &bull; Powered by Supabase &amp; Vercel</p>
   </div>
 </div>

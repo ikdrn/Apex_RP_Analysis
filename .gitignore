@@ -14,3 +14,8 @@ npm-debug.log*
 
 # local notes
 claude.md
+
+# test artifacts (generated locally)
+docs/evidence/*.txt
+docs/evidence/*.png
+docs/evidence/*.log
