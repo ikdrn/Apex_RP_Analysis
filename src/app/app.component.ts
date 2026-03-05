@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { NgChartsModule } from 'ng2-charts';
+import { DesignDocComponent } from './components/design-doc/design-doc.component';
 import {
   Chart,
   CategoryScale,
@@ -37,7 +38,7 @@ type RangeOption = 7 | 30 | 90;
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, DatePipe, NgChartsModule],
+  imports: [CommonModule, DatePipe, NgChartsModule, DesignDocComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
