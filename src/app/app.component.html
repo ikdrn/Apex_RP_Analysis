@@ -153,62 +153,8 @@
           </div>
         </ng-container>
 
-        <div *ngIf="activeTab === 'design'" class="space-y-6 text-sm text-gray-700">
-          <p class="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-800">
-            この設計書は、非エンジニアやジュニアエンジニアでも読めるように「目的→仕組み→テスト」の順でまとめています。
-          </p>
-
-          <section>
-            <h3 class="text-base font-bold text-gray-900">1. 要件定義書</h3>
-            <ul class="mt-2 list-disc space-y-1 pl-5">
-              <li><b>背景・目的:</b> RP推移を誰でも見える化し、日々の変化を早く判断できるようにする。</li>
-              <li><b>スコープ:</b> Web画面（グラフ/表/CSV）とAPI（取得・期間指定・基本的な保護）。</li>
-              <li><b>業務フロー:</b> As-Is=手作業確認、To-Be=画面アクセス→期間選択→確認→必要ならCSV出力。</li>
-              <li><b>機能要件:</b> 期間切替、再取得、一覧表示、CSV、エラー表示、設計書閲覧。</li>
-              <li><b>非機能要件:</b> APIの安定性（レート制限）、可用性（Vercel）、セキュリティ（CORS/任意Basic認証）。</li>
-              <li><b>外部I/F要件:</b> Supabase REST APIとHTTPS通信。</li>
-              <li><b>データ移行要件:</b> 既存の `player_rp` をそのまま利用（移行処理なし）。</li>
-              <li><b>導入・運用要件:</b> Vercel環境変数設定とログ監視、必要時に設定更新。</li>
-            </ul>
-          </section>
-
-          <section>
-            <h3 class="text-base font-bold text-gray-900">2. 基本設計書</h3>
-            <ul class="mt-2 list-disc space-y-1 pl-5">
-              <li><b>システム構成図:</b> Browser → Vercel(Angular + API) → Supabase。</li>
-              <li><b>画面遷移図:</b> 同一画面内タブ遷移（Analysis / Data Table / 設計書）。</li>
-              <li><b>画面レイアウト:</b> ヘッダー、操作ボタン、統計カード、メインタブ領域。</li>
-              <li><b>帳票レイアウト:</b> CSV（id, rp, created_at）。</li>
-              <li><b>テーブル定義/ER:</b> `player_rp(id, rp, created_at)` を参照。1テーブル構成。</li>
-              <li><b>外部連携仕様:</b> GET `/api/get-rp?days=7|30|90` → Supabase REST呼び出し。</li>
-              <li><b>業務ロジック一覧:</b> 集計表示（最新/最大/最小/変化量）、期間フィルタ。</li>
-              <li><b>権限・ロール:</b> 基本は閲覧者、必要ならBasic認証で保護。</li>
-            </ul>
-          </section>
-
-          <section>
-            <h3 class="text-base font-bold text-gray-900">3. 詳細設計書</h3>
-            <ul class="mt-2 list-disc space-y-1 pl-5">
-              <li><b>モジュール/クラス:</b> `AppComponent`（UI制御）、`api/get-rp.js`（API処理）。</li>
-              <li><b>シーケンス:</b> 画面起動→AngularがAPI呼び出し→APIがSupabase参照→結果表示。</li>
-              <li><b>関数仕様:</b> `loadRecords`, `onRangeChange`, `refresh`, `downloadCsv`, API `handler`。</li>
-              <li><b>詳細ロジック:</b> days検証（7/30/90）、失敗時エラー文言、成功時グラフ更新。</li>
-              <li><b>共通部品:</b> Chart.js / ng2-charts / Angular HttpClient。</li>
-              <li><b>DB物理設計:</b> 既存DB利用。将来は `created_at` インデックス強化を推奨。</li>
-              <li><b>エラーハンドリング/ログ:</b> APIで`console.error/warn/info`、画面に説明文表示。</li>
-              <li><b>APIリファレンス:</b> GET `/api/get-rp`（query: `days`、response: RPレコード配列）。</li>
-            </ul>
-          </section>
-
-          <section>
-            <h3 class="text-base font-bold text-gray-900">4. 各テスト仕様書</h3>
-            <ul class="mt-2 list-disc space-y-1 pl-5">
-              <li><b>UT:</b> 関数単位（期間切替、CSV生成、エラー分岐、境界値: days不正値→30）。</li>
-              <li><b>IT:</b> 画面→API→DB連携、タブ遷移、連続操作（切替→更新→CSV）。</li>
-              <li><b>ST:</b> 全体動作、ビルド健全性、レスポンス遅延時表示、ログ確認。</li>
-              <li><b>証跡:</b> `docs/test-evidence.md` と `docs/evidence/*.txt` に保存。</li>
-            </ul>
-          </section>
+        <div *ngIf="activeTab === 'design'">
+          <app-design-doc></app-design-doc>
         </div>
       </div>
     </div>
