@@ -192,7 +192,8 @@ export class AppComponent implements OnInit {
           labels: data.map((item) =>
             new Date(item.created_at).toLocaleDateString('ja-JP', {
               month: 'numeric',
-              day: 'numeric'
+              day: 'numeric',
+              timeZone: 'Asia/Tokyo'
             })
           ),
           datasets: [
