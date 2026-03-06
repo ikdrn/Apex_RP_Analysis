@@ -145,7 +145,7 @@
                   <tr *ngFor="let row of records" class="transition-colors hover:bg-gray-50">
                     <td class="px-4 py-2.5 text-gray-500">{{ row.id }}</td>
                     <td class="px-4 py-2.5 text-right font-medium text-gray-900">{{ row.rp.toLocaleString() }}</td>
-                    <td class="px-4 py-2.5 text-gray-500">{{ row.created_at | date:'yyyy/MM/dd HH:mm':'Asia/Tokyo' }}</td>
+                    <td class="px-4 py-2.5 text-gray-500">{{ row.created_at }}</td>
                   </tr>
                 </tbody>
               </table>
