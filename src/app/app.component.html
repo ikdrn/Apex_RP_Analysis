@@ -44,25 +44,50 @@
       </button>
     </div>
 
-    <div *ngIf="!loading && !error && activeTab !== 'design'" class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
+    <!-- 統計カード（5枚: 最新RP+ランク / 最高RP / 最低RP / 期間内の変化 / 平均RP/日） -->
+    <div *ngIf="!loading && !error && activeTab !== 'design'" class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <!-- 最新RP + ランクバッジ -->
+      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm sm:col-span-1">
         <p class="text-xs font-medium uppercase tracking-wide text-gray-400">最新RP</p>
         <p class="mt-1 text-xl font-bold text-gray-900">{{ latestRp !== null ? latestRp.toLocaleString() : '—' }}</p>
+        <span
+          *ngIf="latestRp !== null"
+          class="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+          [ngClass]="rankColorClass"
+        >
+          {{ rankLabel }}
+        </span>
       </div>
+
+      <!-- 最高RP -->
       <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
         <p class="text-xs font-medium uppercase tracking-wide text-gray-400">最高RP</p>
         <p class="mt-1 text-xl font-bold text-gray-900">{{ maxRp !== null ? maxRp.toLocaleString() : '—' }}</p>
       </div>
+
+      <!-- 最低RP -->
       <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
         <p class="text-xs font-medium uppercase tracking-wide text-gray-400">最低RP</p>
         <p class="mt-1 text-xl font-bold text-gray-900">{{ minRp !== null ? minRp.toLocaleString() : '—' }}</p>
       </div>
+
+      <!-- 期間内の変化 -->
       <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
         <p class="text-xs font-medium uppercase tracking-wide text-gray-400">期間内の変化</p>
         <p class="mt-1 text-xl font-bold"
           [class.text-emerald-700]="(rpChange ?? 0) >= 0"
           [class.text-red-600]="(rpChange ?? 0) < 0">
           {{ rpChange !== null ? ((rpChange >= 0 ? '+' : '') + rpChange.toLocaleString()) : '—' }}
+        </p>
+      </div>
+
+      <!-- 平均RP/日 -->
+      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-400">平均RP/日</p>
+        <p class="mt-1 text-xl font-bold"
+          [class.text-blue-700]="(rpPerDay ?? 0) >= 0"
+          [class.text-red-600]="(rpPerDay ?? 0) < 0">
+          {{ rpPerDay !== null ? ((rpPerDay >= 0 ? '+' : '') + rpPerDay.toLocaleString()) : '—' }}
         </p>
       </div>
     </div>
@@ -86,6 +111,15 @@
           (click)="activeTab = 'table'"
         >
           Data Table
+        </button>
+        <button
+          class="px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
+          [ngClass]="activeTab === 'daily'
+            ? 'border-b-2 border-blue-800 text-blue-900'
+            : 'text-gray-500 hover:text-gray-700'"
+          (click)="activeTab = 'daily'"
+        >
+          Daily
         </button>
         <button
           class="px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
@@ -117,6 +151,7 @@
             <p class="mt-1 text-xs text-amber-600">時間をおいて「最新データに更新」を押してください。</p>
           </div>
 
+          <!-- Analysis タブ: 折れ線グラフ -->
           <div *ngIf="!loading && !error && activeTab === 'analysis' && records.length > 0">
             <div class="mb-4 flex items-center justify-between">
               <h2 class="text-sm font-semibold text-gray-700">RP推移（過去{{ selectedRange }}日）</h2>
@@ -127,6 +162,7 @@
             </div>
           </div>
 
+          <!-- Data Table タブ: レコード一覧（ランク列あり） -->
           <div *ngIf="!loading && !error && activeTab === 'table' && records.length > 0">
             <div class="mb-4 flex items-center justify-between">
               <h2 class="text-sm font-semibold text-gray-700">データ一覧</h2>
@@ -138,6 +174,7 @@
                   <tr>
                     <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">ID</th>
                     <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">RP</th>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">ランク</th>
                     <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">記録日時</th>
                   </tr>
                 </thead>
@@ -145,7 +182,56 @@
                   <tr *ngFor="let row of records" class="transition-colors hover:bg-gray-50">
                     <td class="px-4 py-2.5 text-gray-500">{{ row.id }}</td>
                     <td class="px-4 py-2.5 text-right font-medium text-gray-900">{{ row.rp.toLocaleString() }}</td>
+                    <td class="px-4 py-2.5">
+                      <span
+                        class="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                        [ngClass]="getRankInfo(row.rp).colorClass"
+                      >
+                        {{ getRankInfo(row.rp).tier ? getRankInfo(row.rp).name + ' ' + getRankInfo(row.rp).tier : getRankInfo(row.rp).name }}
+                      </span>
+                    </td>
                     <td class="px-4 py-2.5 text-gray-500">{{ row.created_at }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Daily タブ: 日次集計 -->
+          <div *ngIf="!loading && !error && activeTab === 'daily' && records.length > 0">
+            <div class="mb-4 flex items-center justify-between">
+              <h2 class="text-sm font-semibold text-gray-700">日次集計（過去{{ selectedRange }}日）</h2>
+              <span class="text-xs text-gray-400">{{ dailySummary.length }} 日分</span>
+            </div>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">日付</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">最高RP</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">最低RP</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">1日の変化</th>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">最終ランク</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                  <tr *ngFor="let day of dailySummary" class="transition-colors hover:bg-gray-50">
+                    <td class="px-4 py-2.5 font-medium text-gray-700">{{ day.date }}</td>
+                    <td class="px-4 py-2.5 text-right text-gray-900">{{ day.maxRp.toLocaleString() }}</td>
+                    <td class="px-4 py-2.5 text-right text-gray-900">{{ day.minRp.toLocaleString() }}</td>
+                    <td class="px-4 py-2.5 text-right font-medium"
+                      [class.text-emerald-700]="day.change >= 0"
+                      [class.text-red-600]="day.change < 0">
+                      {{ (day.change >= 0 ? '+' : '') + day.change.toLocaleString() }}
+                    </td>
+                    <td class="px-4 py-2.5">
+                      <span
+                        class="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                        [ngClass]="getRankInfo(day.lastRp).colorClass"
+                      >
+                        {{ getRankInfo(day.lastRp).tier ? getRankInfo(day.lastRp).name + ' ' + getRankInfo(day.lastRp).tier : getRankInfo(day.lastRp).name }}
+                      </span>
+                    </td>
                   </tr>
                 </tbody>
               </table>

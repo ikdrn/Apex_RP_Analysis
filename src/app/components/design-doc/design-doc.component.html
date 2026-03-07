@@ -1,7 +1,7 @@
 <div class="space-y-4">
   <!-- ガイダンスバナー -->
   <p class="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-800">
-    この設計書は、非エンジニアやジュニアエンジニアでも読めるように「目的→仕組み→テスト」の順でまとめています。
+    この設計書は、非エンジニアやジュニアエンジニアでも読めるように「目的→仕組み→テスト→将来構想」の順でまとめています。
   </p>
 
   <!-- 左右分割レイアウト -->
@@ -28,11 +28,47 @@
       <div *ngIf="selectedSection" class="rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
         <h2 class="mb-4 text-base font-bold text-gray-900">{{ selectedSection.title }}</h2>
 
-        <div class="space-y-3 text-sm text-gray-700">
+        <div class="space-y-4 text-sm text-gray-700">
           <div *ngFor="let item of selectedSection.items" class="border-l-2 border-blue-200 pl-4 py-2">
             <p>
-              <b class="text-gray-900">{{ item.label }}:</b> {{ item.content }}
+              <b class="text-gray-900">{{ item.label }}:</b>
+              <span class="ml-1">{{ item.content }}</span>
             </p>
+
+            <!-- 箇条書きリスト -->
+            <ul *ngIf="item.subItems?.length"
+                class="mt-1.5 ml-2 space-y-1 list-disc list-inside text-xs text-gray-600">
+              <li *ngFor="let sub of item.subItems">{{ sub }}</li>
+            </ul>
+
+            <!-- テーブル -->
+            <div *ngIf="item.table" class="mt-2 overflow-x-auto rounded border border-gray-200">
+              <table class="min-w-full text-xs border-collapse">
+                <thead>
+                  <tr class="bg-gray-100">
+                    <th
+                      *ngFor="let h of item.table.headers"
+                      class="border-b border-gray-200 px-3 py-1.5 text-left font-semibold text-gray-700 whitespace-nowrap"
+                    >
+                      {{ h }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="let row of item.table.rows; let i = index"
+                    [ngClass]="i % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
+                  >
+                    <td
+                      *ngFor="let cell of row"
+                      class="border-b border-gray-100 px-3 py-1.5 text-gray-600 align-top"
+                    >
+                      {{ cell }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
