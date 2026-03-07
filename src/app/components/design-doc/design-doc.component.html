@@ -1,9 +1,4 @@
 <div class="space-y-4">
-  <!-- ガイダンスバナー -->
-  <p class="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-800">
-    この設計書は、非エンジニアやジュニアエンジニアでも読めるように「目的→仕組み→テスト→将来構想」の順でまとめています。
-  </p>
-
   <!-- 左右分割レイアウト -->
   <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
     <!-- 左側: ナビゲーション -->
@@ -12,7 +7,7 @@
       <div class="flex flex-row gap-2 overflow-x-auto lg:flex-col">
         <button
           *ngFor="let section of sections"
-          class="flex-shrink-0 rounded-lg border px-3 py-2 text-xs font-medium transition-colors"
+          class="flex-shrink-0 rounded-lg border px-3 py-2 text-xs font-medium transition-colors text-left"
           [ngClass]="selectedSectionId === section.id
             ? 'border-blue-700 bg-blue-700 text-white'
             : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'"
@@ -26,29 +21,80 @@
     <!-- 右側: コンテンツ -->
     <div class="lg:col-span-3">
       <div *ngIf="selectedSection" class="rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
-        <h2 class="mb-4 text-base font-bold text-gray-900">{{ selectedSection.title }}</h2>
+        <h2 class="mb-5 text-base font-bold text-gray-900 border-b border-gray-100 pb-3">{{ selectedSection.title }}</h2>
 
-        <div class="space-y-4 text-sm text-gray-700">
-          <div *ngFor="let item of selectedSection.items" class="border-l-2 border-blue-200 pl-4 py-2">
-            <p>
-              <b class="text-gray-900">{{ item.label }}:</b>
-              <span class="ml-1">{{ item.content }}</span>
-            </p>
+        <div class="space-y-6 text-sm">
+          <div *ngFor="let item of selectedSection.items" class="border-l-2 border-blue-200 pl-4 py-1">
+
+            <!-- ラベル（見出し） -->
+            <p class="font-semibold text-gray-900">{{ item.label }}</p>
+
+            <!-- 本文 -->
+            <p *ngIf="item.content" class="mt-1 text-xs text-gray-600 leading-relaxed">{{ item.content }}</p>
+
+            <!-- 強調注記 -->
+            <div *ngIf="item.note" class="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+              <span class="mt-0.5 shrink-0 font-bold text-amber-500 text-xs">!</span>
+              <p class="text-xs text-amber-800 leading-relaxed">{{ item.note }}</p>
+            </div>
 
             <!-- 箇条書きリスト -->
             <ul *ngIf="item.subItems?.length"
-                class="mt-1.5 ml-2 space-y-1 list-disc list-inside text-xs text-gray-600">
-              <li *ngFor="let sub of item.subItems">{{ sub }}</li>
+                class="mt-2 ml-2 space-y-1 list-disc list-inside text-xs text-gray-600">
+              <li *ngFor="let sub of item.subItems" class="leading-relaxed">{{ sub }}</li>
             </ul>
 
+            <!-- ダイアグラム: 横フロー -->
+            <div *ngIf="item.diagram?.type === 'flow-h'" class="mt-3 overflow-x-auto">
+              <div class="flex items-stretch gap-2 min-w-max">
+                <ng-container *ngFor="let node of item.diagram!.nodes; let last = last">
+                  <div class="flex flex-col items-center justify-center rounded-lg border-2 px-3 py-2 text-center min-w-[88px]"
+                       [ngClass]="getDiagramNodeClass(node.color)">
+                    <span class="text-xs font-bold leading-tight">{{ node.label }}</span>
+                    <span *ngIf="node.sublabel" class="mt-0.5 text-xs font-medium opacity-80 leading-tight">{{ node.sublabel }}</span>
+                    <span *ngIf="node.description" class="mt-1 text-xs opacity-60 leading-tight">{{ node.description }}</span>
+                  </div>
+                  <div *ngIf="!last" class="flex items-center text-xl text-gray-400 select-none px-1">→</div>
+                </ng-container>
+              </div>
+            </div>
+
+            <!-- ダイアグラム: 比較（As-Is vs To-Be） -->
+            <div *ngIf="item.diagram?.type === 'comparison'" class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div class="rounded-lg border border-red-200 bg-red-50 p-3">
+                <p class="mb-2 text-xs font-bold text-red-700">{{ item.diagram!.leftTitle }}</p>
+                <ul class="space-y-1.5">
+                  <li *ngFor="let li of item.diagram!.leftItems"
+                      class="flex items-start gap-1.5 text-xs text-red-800 leading-relaxed">
+                    <span class="mt-0.5 shrink-0">✗</span>
+                    <span>{{ li }}</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="rounded-lg border border-green-200 bg-green-50 p-3">
+                <p class="mb-2 text-xs font-bold text-green-700">{{ item.diagram!.rightTitle }}</p>
+                <ul class="space-y-1.5">
+                  <li *ngFor="let ri of item.diagram!.rightItems"
+                      class="flex items-start gap-1.5 text-xs text-green-800 leading-relaxed">
+                    <span class="mt-0.5 shrink-0">✓</span>
+                    <span>{{ ri }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- コードブロック（シーケンス図・ER図・ワイヤーフレーム等） -->
+            <pre *ngIf="item.code"
+                 class="mt-3 overflow-x-auto rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 text-xs text-green-300 font-mono leading-5 whitespace-pre">{{ item.code }}</pre>
+
             <!-- テーブル -->
-            <div *ngIf="item.table" class="mt-2 overflow-x-auto rounded border border-gray-200">
+            <div *ngIf="item.table" class="mt-3 overflow-x-auto rounded border border-gray-200">
               <table class="min-w-full text-xs border-collapse">
                 <thead>
                   <tr class="bg-gray-100">
                     <th
                       *ngFor="let h of item.table.headers"
-                      class="border-b border-gray-200 px-3 py-1.5 text-left font-semibold text-gray-700 whitespace-nowrap"
+                      class="border-b border-gray-200 px-3 py-2 text-left font-semibold text-gray-700 whitespace-nowrap"
                     >
                       {{ h }}
                     </th>
@@ -69,6 +115,7 @@
                 </tbody>
               </table>
             </div>
+
           </div>
         </div>
       </div>
