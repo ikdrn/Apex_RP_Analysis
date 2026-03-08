@@ -71,6 +71,23 @@ export class AppComponent implements OnInit {
     return this.records[this.records.length - 1].rp - this.records[0].rp;
   }
 
+  get avgRp(): number | null {
+    if (this.records.length === 0) return null;
+    return Math.round(
+      this.records.reduce((sum, r) => sum + r.rp, 0) / this.records.length
+    );
+  }
+
+  get rpPerDay(): number | null {
+    if (this.records.length < 2) return null;
+    const first = new Date(this.records[0].created_at).getTime();
+    const last = new Date(this.records[this.records.length - 1].created_at).getTime();
+    const days = (last - first) / (1000 * 60 * 60 * 24);
+    if (days < 0.01) return null;
+    const change = this.records[this.records.length - 1].rp - this.records[0].rp;
+    return Math.round((change / days) * 10) / 10;
+  }
+
   lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
     datasets: [
@@ -188,14 +205,35 @@ export class AppComponent implements OnInit {
     this.http.get<RpRecord[]>(this.apiPath, { params: { days: String(this.selectedRange) } }).subscribe({
       next: (data) => {
         this.records = data;
-        this.lineChartData = {
-          labels: data.map((item) =>
-            new Date(item.created_at).toLocaleDateString('ja-JP', {
-              month: 'numeric',
-              day: 'numeric',
+
+        const dateOnlyStrings = data.map((item) =>
+          new Date(item.created_at).toLocaleDateString('ja-JP', {
+            month: 'numeric',
+            day: 'numeric',
+            timeZone: 'Asia/Tokyo'
+          })
+        );
+
+        const dateCount = new Map<string, number>();
+        for (const d of dateOnlyStrings) {
+          dateCount.set(d, (dateCount.get(d) ?? 0) + 1);
+        }
+
+        const labels = data.map((item, i) => {
+          const dateStr = dateOnlyStrings[i];
+          if ((dateCount.get(dateStr) ?? 0) > 1) {
+            const hh = new Date(item.created_at).toLocaleTimeString('ja-JP', {
+              hour: '2-digit',
+              minute: '2-digit',
               timeZone: 'Asia/Tokyo'
-            })
-          ),
+            });
+            return `${dateStr} ${hh}`;
+          }
+          return dateStr;
+        });
+
+        this.lineChartData = {
+          labels,
           datasets: [
             {
               ...this.lineChartData.datasets[0],

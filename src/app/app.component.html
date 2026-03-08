@@ -44,7 +44,7 @@
       </button>
     </div>
 
-    <div *ngIf="!loading && !error && activeTab !== 'design'" class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div *ngIf="!loading && !error && activeTab !== 'design'" class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
       <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
         <p class="text-xs font-medium uppercase tracking-wide text-gray-400">最新RP</p>
         <p class="mt-1 text-xl font-bold text-gray-900">{{ latestRp !== null ? latestRp.toLocaleString() : '—' }}</p>
@@ -63,6 +63,20 @@
           [class.text-emerald-700]="(rpChange ?? 0) >= 0"
           [class.text-red-600]="(rpChange ?? 0) < 0">
           {{ rpChange !== null ? ((rpChange >= 0 ? '+' : '') + rpChange.toLocaleString()) : '—' }}
+        </p>
+      </div>
+      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-400">平均RP</p>
+        <p class="mt-1 text-xl font-bold text-gray-900">
+          {{ avgRp !== null ? avgRp.toLocaleString() : '—' }}
+        </p>
+      </div>
+      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-400">1日あたりの変化</p>
+        <p class="mt-1 text-xl font-bold"
+          [class.text-emerald-700]="(rpPerDay ?? 0) >= 0"
+          [class.text-red-600]="(rpPerDay ?? 0) < 0">
+          {{ rpPerDay !== null ? ((rpPerDay >= 0 ? '+' : '') + rpPerDay.toFixed(1) + '/日') : '—' }}
         </p>
       </div>
     </div>
@@ -145,7 +159,7 @@
                   <tr *ngFor="let row of records" class="transition-colors hover:bg-gray-50">
                     <td class="px-4 py-2.5 text-gray-500">{{ row.id }}</td>
                     <td class="px-4 py-2.5 text-right font-medium text-gray-900">{{ row.rp.toLocaleString() }}</td>
-                    <td class="px-4 py-2.5 text-gray-500">{{ row.created_at }}</td>
+                    <td class="px-4 py-2.5 text-gray-500">{{ row.created_at | date:'yyyy/MM/dd HH:mm':'Asia/Tokyo' }}</td>
                   </tr>
                 </tbody>
               </table>
