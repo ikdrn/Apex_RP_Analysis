@@ -121,7 +121,7 @@ module.exports = async function handler(req, res) {
 
   const rawDays = typeof req.query?.days === 'string' ? req.query.days : '30';
   const parsedDays = Number.parseInt(rawDays, 10);
-  const allowedDays = [7, 30, 90];
+  const allowedDays = [7, 30];
   const days = allowedDays.includes(parsedDays) ? parsedDays : 30;
 
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
