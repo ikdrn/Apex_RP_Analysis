@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewChecked, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DesignDocSection, DesignDocItem } from './design-doc-section.interface';
+import mermaid from 'mermaid';
 
 @Component({
   selector: 'app-design-doc',
@@ -8,8 +9,12 @@ import { DesignDocSection, DesignDocItem } from './design-doc-section.interface'
   imports: [CommonModule],
   templateUrl: './design-doc.component.html'
 })
-export class DesignDocComponent implements OnInit {
+export class DesignDocComponent implements OnInit, AfterViewChecked, OnChanges {
+  @Input() isDark = false;
+
   selectedSectionId: 'requirements' | 'basic-design' | 'detailed-design' | 'testing' = 'requirements';
+  private mermaidInitialized = false;
+  private needsRender = false;
 
   sections: DesignDocSection[] = [
     {
@@ -31,11 +36,11 @@ export class DesignDocComponent implements OnInit {
         },
         {
           label: '機能要件',
-          content: '期間切替、再取得、一覧表示、CSV、エラー表示、設計書閲覧。'
+          content: '期間切替、再取得、一覧表示（連番ID）、CSV、エラー表示、設計書閲覧、ダークモード切替、日付ソート（昇順/降順）、日別集計タブ、テーブル検索フィルター。'
         },
         {
           label: '非機能要件',
-          content: 'APIの安定性（レート制限）、可用性（Vercel）、セキュリティ（CORS/任意Basic認証）。'
+          content: 'APIの安定性（レート制限）、可用性（Vercel）、セキュリティ（CORS/任意Basic認証）、テーマ設定のlocalStorage永続化。'
         },
         {
           label: '外部I/F要件',
@@ -58,15 +63,37 @@ export class DesignDocComponent implements OnInit {
       items: [
         {
           label: 'システム構成図',
-          content: 'Browser → Vercel(Angular + API) → Supabase。'
+          content: '',
+          diagram: `flowchart LR
+    Browser["🌐 Browser\\nAngular SPA"]
+    Vercel["⚡ Vercel\\nAngular + Serverless API"]
+    Supabase["🗄️ Supabase\\nPostgreSQL"]
+    Browser -->|"GET /api/get-rp?days=N"| Vercel
+    Vercel -->|"REST API\\n(service_role_key)"| Supabase
+    Supabase -->|"JSON array"| Vercel
+    Vercel -->|"JSON 200 OK"| Browser`
         },
         {
           label: '画面遷移図',
-          content: '同一画面内タブ遷移（Analysis / Data Table / 設計書）。'
+          content: '',
+          diagram: `stateDiagram-v2
+    [*] --> Analysis : 初期表示
+    Analysis --> DataTable : Data Tableタブ
+    Analysis --> Daily : Dailyタブ
+    Analysis --> DesignDoc : 設計書タブ
+    DataTable --> Analysis : Analysisタブ
+    DataTable --> Daily : Dailyタブ
+    DataTable --> DesignDoc : 設計書タブ
+    Daily --> Analysis : Analysisタブ
+    Daily --> DataTable : Data Tableタブ
+    Daily --> DesignDoc : 設計書タブ
+    DesignDoc --> Analysis : Analysisタブ
+    DesignDoc --> DataTable : Data Tableタブ
+    DesignDoc --> Daily : Dailyタブ`
         },
         {
           label: '画面レイアウト',
-          content: 'ヘッダー、操作ボタン、統計カード、メインタブ領域。'
+          content: 'ヘッダー（タイトル・ダークモードトグル・設計書リンク）、操作ボタン（期間切替・更新・CSV）、統計カード×6、メインタブ領域（Analysis / Data Table / Daily / 設計書）。'
         },
         {
           label: '帳票レイアウト',
@@ -74,7 +101,13 @@ export class DesignDocComponent implements OnInit {
         },
         {
           label: 'テーブル定義/ER',
-          content: '`player_rp(id, rp, created_at)` を参照。1テーブル構成。'
+          content: '',
+          diagram: `erDiagram
+    player_rp {
+        bigint id PK
+        integer rp
+        timestamptz created_at
+    }`
         },
         {
           label: '外部連携仕様',
@@ -82,7 +115,7 @@ export class DesignDocComponent implements OnInit {
         },
         {
           label: '業務ロジック一覧',
-          content: '集計表示（最新/最大/最小/変化量）、期間フィルタ。'
+          content: '集計表示（最新/最大/最小/変化量）、期間フィルタ、日付ソート（昇順/降順）、日別集計、連番付与、テーブル検索フィルター。'
         },
         {
           label: '権限・ロール',
@@ -97,23 +130,35 @@ export class DesignDocComponent implements OnInit {
       items: [
         {
           label: 'モジュール/クラス',
-          content: '`AppComponent`（UI制御）、`api/get-rp.js`（API処理）。'
+          content: '`AppComponent`（UI制御）、`DesignDocComponent`（設計書表示）、`api/get-rp.js`（API処理）。'
         },
         {
           label: 'シーケンス',
-          content: '画面起動→AngularがAPI呼び出し→APIがSupabase参照→結果表示。'
+          content: '',
+          diagram: `sequenceDiagram
+    participant U as Browser
+    participant A as Angular
+    participant V as Vercel API
+    participant D as Supabase
+    U->>A: 画面起動 / 期間変更
+    A->>V: GET /api/get-rp?days=N
+    V->>V: レート制限チェック
+    V->>D: SELECT id,rp,created_at WHERE created_at >= since ORDER BY created_at ASC
+    D-->>V: RpRecord[]
+    V-->>A: JSON 200 OK
+    A-->>U: グラフ・表・日別集計を更新`
         },
         {
           label: '関数仕様',
-          content: '`loadRecords`, `onRangeChange`, `refresh`, `downloadCsv`, API `handler`。'
+          content: '`loadRecords`, `onRangeChange`, `refresh`, `downloadCsv`, `toggleDark`, `get dailyRecords`, `get sortedRecords`, `get filteredSortedRecords`, API `handler`。'
         },
         {
           label: '詳細ロジック',
-          content: 'days検証（7/30/90）、失敗時エラー文言、成功時グラフ更新。'
+          content: 'days検証（7/30/90）、失敗時エラー文言、成功時グラフ更新、ダークモードはlocalStorageに永続化、ソートはcreated_at基準昇順/降順、日別集計はdate単位でグループ化。'
         },
         {
           label: '共通部品',
-          content: 'Chart.js / ng2-charts / Angular HttpClient。'
+          content: 'Chart.js / ng2-charts / Angular HttpClient / mermaid。'
         },
         {
           label: 'DB物理設計',
@@ -136,11 +181,11 @@ export class DesignDocComponent implements OnInit {
       items: [
         {
           label: 'UT',
-          content: '関数単位（期間切替、CSV生成、エラー分岐、境界値: days不正値→30）。'
+          content: '関数単位（期間切替、CSV生成、エラー分岐、境界値: days不正値→30、ダークモード切替、ソートロジック昇順/降順、日別集計グループ化・変化量計算）。'
         },
         {
           label: 'IT',
-          content: '画面→API→DB連携、タブ遷移、連続操作（切替→更新→CSV）。'
+          content: '画面→API→DB連携、タブ遷移（Analysis/DataTable/Daily/設計書）、連続操作（切替→更新→CSV）、Daily タブ遷移・ソート操作、ダークモード永続化確認。'
         },
         {
           label: 'ST',
@@ -155,11 +200,50 @@ export class DesignDocComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    // 初期セクションを設定
+    this.initMermaid();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isDark'] && !changes['isDark'].firstChange) {
+      this.initMermaid();
+      this.needsRender = true;
+    }
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.needsRender) {
+      this.needsRender = false;
+      this.renderMermaid();
+    }
+  }
+
+  private initMermaid(): void {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: this.isDark ? 'dark' : 'default',
+      securityLevel: 'loose',
+      fontFamily: 'Inter, "Noto Sans JP", sans-serif'
+    });
+    this.mermaidInitialized = true;
+    this.needsRender = true;
+  }
+
+  renderMermaid(): void {
+    if (!this.mermaidInitialized) return;
+    const elements = document.querySelectorAll('.mermaid:not([data-processed="true"])');
+    if (elements.length > 0) {
+      mermaid.run({ nodes: Array.from(elements) as HTMLElement[] });
+    }
   }
 
   selectSection(sectionId: 'requirements' | 'basic-design' | 'detailed-design' | 'testing'): void {
     this.selectedSectionId = sectionId;
+    // Reset mermaid processed state for new section diagrams
+    setTimeout(() => {
+      const elements = document.querySelectorAll('.mermaid');
+      elements.forEach(el => el.removeAttribute('data-processed'));
+      this.renderMermaid();
+    }, 0);
   }
 
   get selectedSection(): DesignDocSection | undefined {

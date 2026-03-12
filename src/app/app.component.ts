@@ -1,6 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { NgChartsModule } from 'ng2-charts';
 import { DesignDocComponent } from './components/design-doc/design-doc.component';
 import {
@@ -35,14 +36,24 @@ type RpRecord = {
 
 type RangeOption = 7 | 30 | 90;
 
+type DailyRecord = {
+  date: string;
+  firstRp: number;
+  lastRp: number;
+  maxRp: number;
+  minRp: number;
+  change: number;
+  count: number;
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, DatePipe, NgChartsModule, DesignDocComponent],
+  imports: [CommonModule, DatePipe, FormsModule, NgChartsModule, DesignDocComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
-  activeTab: 'analysis' | 'table' | 'design' = 'analysis';
+  activeTab: 'analysis' | 'table' | 'daily' | 'design' = 'analysis';
   loading = true;
   refreshing = false;
   error = '';
@@ -50,6 +61,16 @@ export class AppComponent implements OnInit {
   selectedRange: RangeOption = 30;
   readonly rangeOptions: RangeOption[] = [7, 30, 90];
   readonly apiPath = '/api/get-rp';
+
+  // Dark mode
+  isDark = false;
+
+  // Data Table sort & filter
+  tableSortDir: 'asc' | 'desc' = 'asc';
+  tableFilter = '';
+
+  // Daily tab sort
+  dailySortDir: 'asc' | 'desc' = 'desc';
 
   get latestRp(): number | null {
     if (this.records.length === 0) return null;
@@ -86,6 +107,63 @@ export class AppComponent implements OnInit {
     if (days < 0.01) return null;
     const change = this.records[this.records.length - 1].rp - this.records[0].rp;
     return Math.round((change / days) * 10) / 10;
+  }
+
+  get sortedRecords(): RpRecord[] {
+    const copy = [...this.records];
+    copy.sort((a, b) => {
+      const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      return this.tableSortDir === 'asc' ? diff : -diff;
+    });
+    return copy;
+  }
+
+  get filteredSortedRecords(): RpRecord[] {
+    const q = this.tableFilter.trim().toLowerCase();
+    if (!q) return this.sortedRecords;
+    return this.sortedRecords.filter((r) => {
+      const dateStr = new Date(r.created_at)
+        .toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
+        .toLowerCase();
+      return (
+        String(r.rp).includes(q) ||
+        dateStr.includes(q)
+      );
+    });
+  }
+
+  get dailyRecords(): DailyRecord[] {
+    const map = new Map<string, RpRecord[]>();
+    for (const r of this.records) {
+      const dateKey = new Date(r.created_at).toLocaleDateString('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: 'Asia/Tokyo'
+      });
+      if (!map.has(dateKey)) map.set(dateKey, []);
+      map.get(dateKey)!.push(r);
+    }
+
+    const result: DailyRecord[] = [];
+    for (const [date, recs] of map.entries()) {
+      const rps = recs.map(r => r.rp);
+      result.push({
+        date,
+        firstRp: recs[0].rp,
+        lastRp: recs[recs.length - 1].rp,
+        maxRp: Math.max(...rps),
+        minRp: Math.min(...rps),
+        change: recs[recs.length - 1].rp - recs[0].rp,
+        count: recs.length
+      });
+    }
+
+    result.sort((a, b) => {
+      const diff = a.date.localeCompare(b.date);
+      return this.dailySortDir === 'asc' ? diff : -diff;
+    });
+    return result;
   }
 
   lineChartData: ChartConfiguration<'line'>['data'] = {
@@ -157,7 +235,18 @@ export class AppComponent implements OnInit {
   constructor(private readonly http: HttpClient) {}
 
   ngOnInit(): void {
+    const saved = localStorage.getItem('dark-mode');
+    if (saved === 'true') {
+      this.isDark = true;
+      document.documentElement.classList.add('dark');
+    }
     this.loadRecords();
+  }
+
+  toggleDark(): void {
+    this.isDark = !this.isDark;
+    document.documentElement.classList.toggle('dark', this.isDark);
+    localStorage.setItem('dark-mode', String(this.isDark));
   }
 
   showDesignDoc(): void {
@@ -175,6 +264,14 @@ export class AppComponent implements OnInit {
 
   refresh(): void {
     this.loadRecords(true);
+  }
+
+  toggleTableSort(): void {
+    this.tableSortDir = this.tableSortDir === 'asc' ? 'desc' : 'asc';
+  }
+
+  toggleDailySort(): void {
+    this.dailySortDir = this.dailySortDir === 'asc' ? 'desc' : 'asc';
   }
 
   downloadCsv(): void {
