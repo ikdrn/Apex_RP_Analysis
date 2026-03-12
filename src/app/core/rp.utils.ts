@@ -1,5 +1,6 @@
 import { DailyRecord, RpRecord, RpSummary, SortDirection } from './rp.model';
 
+// 画面表示は日本時間（JST）に統一します。
 const JST_LOCALE = 'ja-JP';
 const JST_TIMEZONE = 'Asia/Tokyo';
 
@@ -18,11 +19,6 @@ export function toJstTimeLabel(isoString: string): string {
     timeZone: JST_TIMEZONE,
   });
 }
-
-export function toJstDateTimeLabel(isoString: string): string {
-  return new Date(isoString).toLocaleString(JST_LOCALE, { timeZone: JST_TIMEZONE });
-}
-
 export function buildChartLabels(records: RpRecord[]): string[] {
   const dateStrings = records.map((record) => toJstDateLabel(record.created_at));
   const dateCount = new Map<string, number>();

@@ -51,6 +51,7 @@ export class AppComponent implements OnInit {
   readonly rangeOptions: RangeOption[] = [7, 30];
 
   isDark = false;
+  // データ一覧は古い順/新しい順をボタンで切替できます。
   tableSortDir: SortDirection = 'asc';
   dailySortDir: SortDirection = 'desc';
   private summary: RpSummary = buildSummary([]);
