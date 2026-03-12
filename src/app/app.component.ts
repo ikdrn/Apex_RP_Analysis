@@ -1,11 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { NgChartsModule } from 'ng2-charts';
-import { EMPTY, Subject, catchError, switchMap, tap } from 'rxjs';
-import { DesignDocComponent } from './components/design-doc/design-doc.component';
 import {
   Chart,
   CategoryScale,
@@ -18,6 +14,12 @@ import {
   Filler,
   type ChartConfiguration
 } from 'chart.js';
+import { NgChartsModule } from 'ng2-charts';
+import { EMPTY, Subject, catchError, switchMap, tap } from 'rxjs';
+import { DesignDocComponent } from './components/design-doc/design-doc.component';
+import { RpDataService } from './core/rp-data.service';
+import { AppTab, DailyRecord, RangeOption, RpRecord, RpSummary, SortDirection } from './core/rp.model';
+import { buildChartLabels, buildDailyRecords, buildSummary, filterRecords, sortRecordsByDate } from './core/rp.utils';
 
 Chart.register(
   LineController,
@@ -30,57 +32,6 @@ Chart.register(
   Filler
 );
 
-type RpRecord = {
-  id: number;
-  rp: number;
-  created_at: string;
-};
-
-type RangeOption = 7 | 30;
-
-type DailyRecord = {
-  date: string;
-  firstRp: number;
-  lastRp: number;
-  maxRp: number;
-  minRp: number;
-  change: number;
-  count: number;
-};
-
-const JST_LOCALE = 'ja-JP';
-const JST_TIMEZONE = 'Asia/Tokyo';
-
-function toJstDateLabel(isoString: string): string {
-  return new Date(isoString).toLocaleDateString(JST_LOCALE, {
-    month: 'numeric',
-    day: 'numeric',
-    timeZone: JST_TIMEZONE
-  });
-}
-
-function toJstTimeLabel(isoString: string): string {
-  return new Date(isoString).toLocaleTimeString(JST_LOCALE, {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: JST_TIMEZONE
-  });
-}
-
-function buildChartLabels(records: RpRecord[]): string[] {
-  const dateStrings = records.map((r) => toJstDateLabel(r.created_at));
-  const dateCount = new Map<string, number>();
-  for (const d of dateStrings) {
-    dateCount.set(d, (dateCount.get(d) ?? 0) + 1);
-  }
-  return records.map((r, i) => {
-    const dateStr = dateStrings[i];
-    return (dateCount.get(dateStr) ?? 0) > 1
-      ? `${dateStr} ${toJstTimeLabel(r.created_at)}`
-      : dateStr;
-  });
-}
-
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -88,11 +39,10 @@ function buildChartLabels(records: RpRecord[]): string[] {
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
-  private readonly http = inject(HttpClient);
-  private readonly apiPath = '/api/get-rp';
+  private readonly dataService = inject(RpDataService);
   private readonly loadTrigger$ = new Subject<{ days: RangeOption; isRefresh: boolean }>();
 
-  activeTab: 'analysis' | 'table' | 'daily' | 'design' = 'analysis';
+  activeTab: AppTab = 'analysis';
   loading = true;
   refreshing = false;
   error = '';
@@ -101,95 +51,45 @@ export class AppComponent implements OnInit {
   readonly rangeOptions: RangeOption[] = [7, 30];
 
   isDark = false;
-  tableSortDir: 'asc' | 'desc' = 'asc';
+  tableSortDir: SortDirection = 'asc';
   tableFilter = '';
-  dailySortDir: 'asc' | 'desc' = 'desc';
+  dailySortDir: SortDirection = 'desc';
+  private summary: RpSummary = buildSummary([]);
 
   get latestRp(): number | null {
-    return this.records.length > 0 ? this.records[this.records.length - 1].rp : null;
+    return this.summary.latestRp;
   }
 
   get maxRp(): number | null {
-    if (this.records.length === 0) return null;
-    return this.records.reduce((max, r) => Math.max(max, r.rp), -Infinity);
+    return this.summary.maxRp;
   }
 
   get minRp(): number | null {
-    if (this.records.length === 0) return null;
-    return this.records.reduce((min, r) => Math.min(min, r.rp), Infinity);
+    return this.summary.minRp;
   }
 
   get rpChange(): number | null {
-    if (this.records.length < 2) return null;
-    return this.records[this.records.length - 1].rp - this.records[0].rp;
+    return this.summary.rpChange;
   }
 
   get avgRp(): number | null {
-    if (this.records.length === 0) return null;
-    return Math.round(this.records.reduce((sum, r) => sum + r.rp, 0) / this.records.length);
+    return this.summary.avgRp;
   }
 
   get rpPerDay(): number | null {
-    if (this.records.length < 2) return null;
-    const firstMs = new Date(this.records[0].created_at).getTime();
-    const lastMs = new Date(this.records[this.records.length - 1].created_at).getTime();
-    const days = (lastMs - firstMs) / (1000 * 60 * 60 * 24);
-    if (days < 0.01) return null;
-    const change = this.records[this.records.length - 1].rp - this.records[0].rp;
-    return Math.round((change / days) * 10) / 10;
+    return this.summary.rpPerDay;
   }
 
   get sortedRecords(): RpRecord[] {
-    const copy = [...this.records];
-    copy.sort((a, b) => {
-      const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      return this.tableSortDir === 'asc' ? diff : -diff;
-    });
-    return copy;
+    return sortRecordsByDate(this.records, this.tableSortDir);
   }
 
   get filteredSortedRecords(): RpRecord[] {
-    const q = this.tableFilter.trim().toLowerCase();
-    if (!q) return this.sortedRecords;
-    return this.sortedRecords.filter((r) => {
-      const dateStr = new Date(r.created_at)
-        .toLocaleString(JST_LOCALE, { timeZone: JST_TIMEZONE })
-        .toLowerCase();
-      return String(r.rp).includes(q) || dateStr.includes(q);
-    });
+    return filterRecords(this.sortedRecords, this.tableFilter);
   }
 
   get dailyRecords(): DailyRecord[] {
-    const map = new Map<string, RpRecord[]>();
-    for (const r of this.records) {
-      const dateKey = new Date(r.created_at).toLocaleDateString(JST_LOCALE, {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        timeZone: JST_TIMEZONE
-      });
-      if (!map.has(dateKey)) map.set(dateKey, []);
-      map.get(dateKey)!.push(r);
-    }
-
-    const result: DailyRecord[] = [];
-    for (const [date, recs] of map.entries()) {
-      result.push({
-        date,
-        firstRp: recs[0].rp,
-        lastRp: recs[recs.length - 1].rp,
-        maxRp: recs.reduce((max, r) => Math.max(max, r.rp), -Infinity),
-        minRp: recs.reduce((min, r) => Math.min(min, r.rp), Infinity),
-        change: recs[recs.length - 1].rp - recs[0].rp,
-        count: recs.length
-      });
-    }
-
-    result.sort((a, b) => {
-      const diff = a.date.localeCompare(b.date);
-      return this.dailySortDir === 'asc' ? diff : -diff;
-    });
-    return result;
+    return buildDailyRecords(this.records, this.dailySortDir);
   }
 
   lineChartData: ChartConfiguration<'line'>['data'] = {
@@ -261,7 +161,7 @@ export class AppComponent implements OnInit {
           this.refreshing = isRefresh;
         }),
         switchMap(({ days }) =>
-          this.http.get<RpRecord[]>(this.apiPath, { params: { days: String(days) } }).pipe(
+          this.dataService.fetchRecords(days).pipe(
             catchError((err: unknown) => {
               this.onLoadError(err);
               return EMPTY;
@@ -334,9 +234,10 @@ export class AppComponent implements OnInit {
 
   private onDataLoaded(data: RpRecord[]): void {
     this.records = data;
+    this.summary = buildSummary(data);
     this.lineChartData = {
       labels: buildChartLabels(data),
-      datasets: [{ ...this.lineChartData.datasets[0], data: data.map((r) => r.rp) }]
+      datasets: [{ ...this.lineChartData.datasets[0], data: data.map((record) => record.rp) }]
     };
     this.loading = false;
     this.refreshing = false;

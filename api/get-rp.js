@@ -5,6 +5,7 @@
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 60;
 const BUCKET_CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+const SUPPORTED_DAYS = [7, 30];
 
 const requestBuckets = new Map();
 let lastBucketCleanup = Date.now();
@@ -84,12 +85,44 @@ function validateBasicAuth(req) {
   }
 }
 
-module.exports = async function handler(req, res) {
+function parseDays(rawDays) {
+  const parsedDays = Number.parseInt(rawDays, 10);
+  return SUPPORTED_DAYS.includes(parsedDays) ? parsedDays : 30;
+}
+
+function buildSupabaseEndpoint({ supabaseUrl, days }) {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  return `${supabaseUrl.replace(/\/$/, '')}/rest/v1/player_rp?select=id,rp,created_at&created_at=gte.${since}&order=created_at.asc`;
+}
+
+async function fetchRpRecords({ endpoint, serviceKey }) {
+  const response = await fetch(endpoint, {
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const body = await response.text();
+
+  if (!response.ok) {
+    throw new Error(`SUPABASE_HTTP_${response.status}:${body}`);
+  }
+
+  return JSON.parse(body);
+}
+
+function setCorsHeaders(req, res) {
   const allowedOrigin = getAllowedOrigin(req);
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Vary', 'Origin');
+}
+
+module.exports = async function handler(req, res) {
+  setCorsHeaders(req, res);
 
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
@@ -120,34 +153,22 @@ module.exports = async function handler(req, res) {
   }
 
   const rawDays = typeof req.query?.days === 'string' ? req.query.days : '30';
-  const parsedDays = Number.parseInt(rawDays, 10);
-  const allowedDays = [7, 30];
-  const days = allowedDays.includes(parsedDays) ? parsedDays : 30;
-
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-  const endpoint = `${supabaseUrl.replace(/\/$/, '')}/rest/v1/player_rp?select=id,rp,created_at&created_at=gte.${since}&order=created_at.asc`;
+  const days = parseDays(rawDays);
 
   try {
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: serviceKey,
-        Authorization: `Bearer ${serviceKey}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const body = await response.text();
-
-    if (!response.ok) {
-      console.error('[get-rp] supabase error', { status: response.status, body });
-      return res.status(500).json({ error: `Supabase error: ${body}` });
-    }
-
-    const parsedBody = JSON.parse(body);
-    console.info('[get-rp] success', { days, count: Array.isArray(parsedBody) ? parsedBody.length : 0 });
-    return res.status(200).json(parsedBody);
+    const endpoint = buildSupabaseEndpoint({ supabaseUrl, days });
+    const records = await fetchRpRecords({ endpoint, serviceKey });
+    console.info('[get-rp] success', { days, count: Array.isArray(records) ? records.length : 0 });
+    return res.status(200).json(records);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
+
+    if (message.startsWith('SUPABASE_HTTP_')) {
+      const [, detail = ''] = message.split(':');
+      console.error('[get-rp] supabase error', { detail });
+      return res.status(500).json({ error: `Supabase error: ${detail}` });
+    }
+
     console.error('[get-rp] unexpected error', { message });
     return res.status(500).json({ error: message });
   }
