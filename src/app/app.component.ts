@@ -36,7 +36,7 @@ type RpRecord = {
   created_at: string;
 };
 
-type RangeOption = 7 | 30 | 90;
+type RangeOption = 7 | 30;
 
 type DailyRecord = {
   date: string;
@@ -98,7 +98,7 @@ export class AppComponent implements OnInit {
   error = '';
   records: RpRecord[] = [];
   selectedRange: RangeOption = 30;
-  readonly rangeOptions: RangeOption[] = [7, 30, 90];
+  readonly rangeOptions: RangeOption[] = [7, 30];
 
   isDark = false;
   tableSortDir: 'asc' | 'desc' = 'asc';
