@@ -4,7 +4,10 @@
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 60;
+const BUCKET_CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+
 const requestBuckets = new Map();
+let lastBucketCleanup = Date.now();
 
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
@@ -14,8 +17,22 @@ function getClientIp(req) {
   return req.socket?.remoteAddress || 'unknown';
 }
 
+function cleanExpiredBuckets(now) {
+  for (const [ip, bucket] of requestBuckets) {
+    if (now - bucket.windowStart >= RATE_LIMIT_WINDOW_MS) {
+      requestBuckets.delete(ip);
+    }
+  }
+  lastBucketCleanup = now;
+}
+
 function isRateLimited(clientIp) {
   const now = Date.now();
+
+  if (now - lastBucketCleanup >= BUCKET_CLEANUP_INTERVAL_MS) {
+    cleanExpiredBuckets(now);
+  }
+
   const bucket = requestBuckets.get(clientIp);
 
   if (!bucket || now - bucket.windowStart >= RATE_LIMIT_WINDOW_MS) {
@@ -24,22 +41,18 @@ function isRateLimited(clientIp) {
   }
 
   bucket.count += 1;
-  if (bucket.count > RATE_LIMIT_MAX_REQUESTS) {
-    return true;
-  }
-
-  return false;
+  return bucket.count > RATE_LIMIT_MAX_REQUESTS;
 }
 
 function getAllowedOrigin(req) {
   const configuredOrigin = process.env['ALLOWED_ORIGIN'];
-  const requestOrigin = req.headers.origin;
 
   if (!configuredOrigin || configuredOrigin === '*') {
     return '*';
   }
 
-  return requestOrigin === configuredOrigin ? configuredOrigin : configuredOrigin;
+  const requestOrigin = req.headers.origin;
+  return requestOrigin === configuredOrigin ? configuredOrigin : 'null';
 }
 
 function validateBasicAuth(req) {

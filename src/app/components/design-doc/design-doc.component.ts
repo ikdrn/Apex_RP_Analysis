@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewChecked, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DesignDocSection, DesignDocItem } from './design-doc-section.interface';
+import { DesignDocSection } from './design-doc-section.interface';
 import mermaid from 'mermaid';
 
 @Component({
@@ -12,48 +12,24 @@ import mermaid from 'mermaid';
 export class DesignDocComponent implements OnInit, AfterViewChecked, OnChanges {
   @Input() isDark = false;
 
-  selectedSectionId: 'requirements' | 'basic-design' | 'detailed-design' | 'testing' = 'requirements';
+  selectedSectionId: DesignDocSection['id'] = 'requirements';
   private mermaidInitialized = false;
   private needsRender = false;
 
-  sections: DesignDocSection[] = [
+  readonly sections: DesignDocSection[] = [
     {
       id: 'requirements',
       title: '1. 要件定義書',
       order: 1,
       items: [
-        {
-          label: '背景・目的',
-          content: 'RP推移を誰でも見える化し、日々の変化を早く判断できるようにする。'
-        },
-        {
-          label: 'スコープ',
-          content: 'Web画面（グラフ/表/CSV）とAPI（取得・期間指定・基本的な保護）。'
-        },
-        {
-          label: '業務フロー',
-          content: 'As-Is=手作業確認、To-Be=画面アクセス→期間選択→確認→必要ならCSV出力。'
-        },
-        {
-          label: '機能要件',
-          content: '期間切替、再取得、一覧表示（連番ID）、CSV、エラー表示、設計書閲覧、ダークモード切替、日付ソート（昇順/降順）、日別集計タブ、テーブル検索フィルター。'
-        },
-        {
-          label: '非機能要件',
-          content: 'APIの安定性（レート制限）、可用性（Vercel）、セキュリティ（CORS/任意Basic認証）、テーマ設定のlocalStorage永続化。'
-        },
-        {
-          label: '外部I/F要件',
-          content: 'Supabase REST APIとHTTPS通信。'
-        },
-        {
-          label: 'データ移行要件',
-          content: '既存の `player_rp` をそのまま利用（移行処理なし）。'
-        },
-        {
-          label: '導入・運用要件',
-          content: 'Vercel環境変数設定とログ監視、必要時に設定更新。'
-        }
+        { label: '背景・目的', content: 'RP推移を誰でも見える化し、日々の変化を早く判断できるようにする。' },
+        { label: 'スコープ', content: 'Web画面（グラフ/表/CSV）とAPI（取得・期間指定・基本的な保護）。' },
+        { label: '業務フロー', content: 'As-Is=手作業確認、To-Be=画面アクセス→期間選択→確認→必要ならCSV出力。' },
+        { label: '機能要件', content: '期間切替、再取得、一覧表示（連番ID）、CSV、エラー表示、設計書閲覧、ダークモード切替、日付ソート（昇順/降順）、日別集計タブ、テーブル検索フィルター。' },
+        { label: '非機能要件', content: 'APIの安定性（レート制限）、可用性（Vercel）、セキュリティ（CORS/任意Basic認証）、テーマ設定のlocalStorage永続化。' },
+        { label: '外部I/F要件', content: 'Supabase REST APIとHTTPS通信。' },
+        { label: 'データ移行要件', content: '既存の `player_rp` をそのまま利用（移行処理なし）。' },
+        { label: '導入・運用要件', content: 'Vercel環境変数設定とログ監視、必要時に設定更新。' }
       ]
     },
     {
@@ -91,14 +67,8 @@ export class DesignDocComponent implements OnInit, AfterViewChecked, OnChanges {
     DesignDoc --> DataTable : Data Tableタブ
     DesignDoc --> Daily : Dailyタブ`
         },
-        {
-          label: '画面レイアウト',
-          content: 'ヘッダー（タイトル・ダークモードトグル・設計書リンク）、操作ボタン（期間切替・更新・CSV）、統計カード×6、メインタブ領域（Analysis / Data Table / Daily / 設計書）。'
-        },
-        {
-          label: '帳票レイアウト',
-          content: 'CSV（id, rp, created_at）。'
-        },
+        { label: '画面レイアウト', content: 'ヘッダー（タイトル・ダークモードトグル・設計書リンク）、操作ボタン（期間切替・更新・CSV）、統計カード×6、メインタブ領域（Analysis / Data Table / Daily / 設計書）。' },
+        { label: '帳票レイアウト', content: 'CSV（id, rp, created_at）。' },
         {
           label: 'テーブル定義/ER',
           content: '',
@@ -109,18 +79,9 @@ export class DesignDocComponent implements OnInit, AfterViewChecked, OnChanges {
         timestamptz created_at
     }`
         },
-        {
-          label: '外部連携仕様',
-          content: 'GET `/api/get-rp?days=7|30|90` → Supabase REST呼び出し。'
-        },
-        {
-          label: '業務ロジック一覧',
-          content: '集計表示（最新/最大/最小/変化量）、期間フィルタ、日付ソート（昇順/降順）、日別集計、連番付与、テーブル検索フィルター。'
-        },
-        {
-          label: '権限・ロール',
-          content: '基本は閲覧者、必要ならBasic認証で保護。'
-        }
+        { label: '外部連携仕様', content: 'GET `/api/get-rp?days=7|30|90` → Supabase REST呼び出し。' },
+        { label: '業務ロジック一覧', content: '集計表示（最新/最大/最小/変化量）、期間フィルタ、日付ソート（昇順/降順）、日別集計、連番付与、テーブル検索フィルター。' },
+        { label: '権限・ロール', content: '基本は閲覧者、必要ならBasic認証で保護。' }
       ]
     },
     {
@@ -128,10 +89,7 @@ export class DesignDocComponent implements OnInit, AfterViewChecked, OnChanges {
       title: '3. 詳細設計書',
       order: 3,
       items: [
-        {
-          label: 'モジュール/クラス',
-          content: '`AppComponent`（UI制御）、`DesignDocComponent`（設計書表示）、`api/get-rp.js`（API処理）。'
-        },
+        { label: 'モジュール/クラス', content: '`AppComponent`（UI制御）、`DesignDocComponent`（設計書表示）、`api/get-rp.js`（API処理）。' },
         {
           label: 'シーケンス',
           content: '',
@@ -148,30 +106,12 @@ export class DesignDocComponent implements OnInit, AfterViewChecked, OnChanges {
     V-->>A: JSON 200 OK
     A-->>U: グラフ・表・日別集計を更新`
         },
-        {
-          label: '関数仕様',
-          content: '`loadRecords`, `onRangeChange`, `refresh`, `downloadCsv`, `toggleDark`, `get dailyRecords`, `get sortedRecords`, `get filteredSortedRecords`, API `handler`。'
-        },
-        {
-          label: '詳細ロジック',
-          content: 'days検証（7/30/90）、失敗時エラー文言、成功時グラフ更新、ダークモードはlocalStorageに永続化、ソートはcreated_at基準昇順/降順、日別集計はdate単位でグループ化。'
-        },
-        {
-          label: '共通部品',
-          content: 'Chart.js / ng2-charts / Angular HttpClient / mermaid。'
-        },
-        {
-          label: 'DB物理設計',
-          content: '既存DB利用。将来は `created_at` インデックス強化を推奨。'
-        },
-        {
-          label: 'エラーハンドリング/ログ',
-          content: 'APIで`console.error/warn/info`、画面に説明文表示。'
-        },
-        {
-          label: 'APIリファレンス',
-          content: 'GET `/api/get-rp`（query: `days`、response: RPレコード配列）。'
-        }
+        { label: '関数仕様', content: '`loadRecords`, `onRangeChange`, `refresh`, `downloadCsv`, `toggleDark`, `get dailyRecords`, `get sortedRecords`, `get filteredSortedRecords`, API `handler`。' },
+        { label: '詳細ロジック', content: 'days検証（7/30/90）、失敗時エラー文言、成功時グラフ更新、ダークモードはlocalStorageに永続化、ソートはcreated_at基準昇順/降順、日別集計はdate単位でグループ化。' },
+        { label: '共通部品', content: 'Chart.js / ng2-charts / Angular HttpClient / mermaid。' },
+        { label: 'DB物理設計', content: '既存DB利用。将来は `created_at` インデックス強化を推奨。' },
+        { label: 'エラーハンドリング/ログ', content: 'APIで`console.error/warn/info`、画面に説明文表示。' },
+        { label: 'APIリファレンス', content: 'GET `/api/get-rp`（query: `days`、response: RPレコード配列）。' }
       ]
     },
     {
@@ -179,22 +119,10 @@ export class DesignDocComponent implements OnInit, AfterViewChecked, OnChanges {
       title: '4. 各テスト仕様書',
       order: 4,
       items: [
-        {
-          label: 'UT',
-          content: '関数単位（期間切替、CSV生成、エラー分岐、境界値: days不正値→30、ダークモード切替、ソートロジック昇順/降順、日別集計グループ化・変化量計算）。'
-        },
-        {
-          label: 'IT',
-          content: '画面→API→DB連携、タブ遷移（Analysis/DataTable/Daily/設計書）、連続操作（切替→更新→CSV）、Daily タブ遷移・ソート操作、ダークモード永続化確認。'
-        },
-        {
-          label: 'ST',
-          content: '全体動作、ビルド健全性、レスポンス遅延時表示、ログ確認。'
-        },
-        {
-          label: '証跡',
-          content: '`docs/test-evidence.md` と `docs/evidence/*.txt` に保存。'
-        }
+        { label: 'UT', content: '関数単位（期間切替、CSV生成、エラー分岐、境界値: days不正値→30、ダークモード切替、ソートロジック昇順/降順、日別集計グループ化・変化量計算）。' },
+        { label: 'IT', content: '画面→API→DB連携、タブ遷移（Analysis/DataTable/Daily/設計書）、連続操作（切替→更新→CSV）、Daily タブ遷移・ソート操作、ダークモード永続化確認。' },
+        { label: 'ST', content: '全体動作、ビルド健全性、レスポンス遅延時表示、ログ確認。' },
+        { label: '証跡', content: '`docs/test-evidence.md` と `docs/evidence/*.txt` に保存。' }
       ]
     }
   ];
@@ -236,17 +164,16 @@ export class DesignDocComponent implements OnInit, AfterViewChecked, OnChanges {
     }
   }
 
-  selectSection(sectionId: 'requirements' | 'basic-design' | 'detailed-design' | 'testing'): void {
+  selectSection(sectionId: DesignDocSection['id']): void {
     this.selectedSectionId = sectionId;
-    // Reset mermaid processed state for new section diagrams
     setTimeout(() => {
       const elements = document.querySelectorAll('.mermaid');
-      elements.forEach(el => el.removeAttribute('data-processed'));
+      elements.forEach((el) => el.removeAttribute('data-processed'));
       this.renderMermaid();
     }, 0);
   }
 
   get selectedSection(): DesignDocSection | undefined {
-    return this.sections.find(s => s.id === this.selectedSectionId);
+    return this.sections.find((s) => s.id === this.selectedSectionId);
   }
 }
