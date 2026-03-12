@@ -40,6 +40,7 @@ Chart.register(
 })
 export class AppComponent implements OnInit {
   private readonly dataService = inject(RpDataService);
+  // API再取得を1つの入口にまとめるためのイベントストリームです。
   private readonly loadTrigger$ = new Subject<{ days: RangeOption; isRefresh: boolean }>();
 
   activeTab: AppTab = 'analysis';
@@ -226,6 +227,7 @@ export class AppComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
+  // ダーク/ライト切替時に、グラフの色を見やすく調整します。
   private applyChartTheme(): void {
     const axisColor = this.isDark ? '#cbd5e1' : '#6b7280';
     const gridColor = this.isDark ? 'rgba(148, 163, 184, 0.18)' : '#f3f4f6';

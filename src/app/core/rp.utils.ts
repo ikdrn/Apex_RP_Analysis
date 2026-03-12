@@ -19,6 +19,8 @@ export function toJstTimeLabel(isoString: string): string {
     timeZone: JST_TIMEZONE,
   });
 }
+
+// 同じ日付に複数レコードがある場合は、時刻もラベルに含めます。
 export function buildChartLabels(records: RpRecord[]): string[] {
   const dateStrings = records.map((record) => toJstDateLabel(record.created_at));
   const dateCount = new Map<string, number>();
@@ -35,6 +37,7 @@ export function buildChartLabels(records: RpRecord[]): string[] {
   });
 }
 
+// 画面上の集計カード用データ（最新・最高・最低など）を作ります。
 export function buildSummary(records: RpRecord[]): RpSummary {
   if (records.length === 0) {
     return {
