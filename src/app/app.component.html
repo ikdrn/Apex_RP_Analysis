@@ -7,7 +7,7 @@
           <div class="h-7 w-1.5 rounded-full bg-blue-800 dark:bg-blue-500"></div>
           <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Apex RP Analysis</h1>
         </div>
-        <p class="ml-5 text-sm text-gray-500 dark:text-gray-400">期間を切り替えながら、RP推移をグラフと表で確認できます。</p>
+        <p class="ml-5 text-sm text-gray-500 dark:text-gray-400">ぺこんぽ &bull; 期間を切り替えながら、RP推移をグラフと表で確認できます。</p>
       </div>
       <div class="mt-1 flex items-center gap-3">
         <!-- Dark Mode Toggle -->
@@ -174,49 +174,37 @@
           <div *ngIf="!loading && !error && activeTab === 'table' && records.length > 0">
             <div class="mb-4 flex flex-wrap items-center gap-3">
               <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">データ一覧</h2>
-              <!-- Search filter -->
-              <div class="relative flex-1 min-w-[160px] max-w-xs">
-                <input
-                  type="text"
-                  [(ngModel)]="tableFilter"
-                  placeholder="RP・日付で絞り込み..."
-                  class="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 pl-8 text-xs text-gray-700 placeholder-gray-400 focus:border-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-500"
-                />
-                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-xs">🔍</span>
-              </div>
-              <span class="ml-auto text-xs text-gray-400 dark:text-gray-500">{{ filteredSortedRecords.length }} / {{ records.length }} 件</span>
+              <button
+                class="ml-auto flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors border-gray-300 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:text-blue-400"
+                (click)="toggleTableSort()"
+              >
+                日付順: {{ tableSortDir === 'asc' ? '昇順 ↑' : '降順 ↓' }}
+              </button>
+              <span class="text-xs text-gray-400 dark:text-gray-500">{{ sortedRecords.length }} 件</span>
             </div>
             <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
               <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                      <button class="sort-btn text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400" (click)="toggleTableSort()">
-                        # <span>{{ tableSortDir === 'asc' ? '↑' : '↓' }}</span>
-                      </button>
-                    </th>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">#</th>
                     <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">RP</th>
-                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                      <button class="sort-btn text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400" (click)="toggleTableSort()">
-                        記録日時 <span>{{ tableSortDir === 'asc' ? '↑' : '↓' }}</span>
-                      </button>
-                    </th>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">記録日時</th>
                     <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">△RP</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                  <tr *ngFor="let row of filteredSortedRecords; let i = index" class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr *ngFor="let row of sortedRecords; let i = index" class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td class="px-4 py-2.5 font-mono text-xs text-gray-400 dark:text-gray-500">
-                      {{ tableSortDir === 'asc' ? (i + 1) : (filteredSortedRecords.length - i) }}
+                      {{ tableSortDir === 'asc' ? (i + 1) : (sortedRecords.length - i) }}
                     </td>
                     <td class="px-4 py-2.5 text-right font-medium text-gray-900 dark:text-gray-100">{{ row.rp.toLocaleString() }}</td>
                     <td class="px-4 py-2.5 text-gray-500 dark:text-gray-400">{{ row.created_at | date:'yyyy/MM/dd HH:mm':'Asia/Tokyo' }}</td>
                     <td class="px-4 py-2.5 text-right text-xs font-medium"
                       [ngClass]="i === 0
                         ? 'text-gray-400 dark:text-gray-500'
-                        : ((row.rp - filteredSortedRecords[i-1].rp) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')">
+                        : ((row.rp - sortedRecords[i-1].rp) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')">
                       <ng-container *ngIf="i > 0">
-                        {{ (row.rp - filteredSortedRecords[i-1].rp) >= 0 ? '+' : '' }}{{ (row.rp - filteredSortedRecords[i-1].rp).toLocaleString() }}
+                        {{ (row.rp - sortedRecords[i-1].rp) >= 0 ? '+' : '' }}{{ (row.rp - sortedRecords[i-1].rp).toLocaleString() }}
                       </ng-container>
                       <ng-container *ngIf="i === 0">—</ng-container>
                     </td>
@@ -231,8 +219,7 @@
             <div class="mb-4 flex flex-wrap items-center gap-3">
               <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">日別サマリー</h2>
               <button
-                class="ml-auto flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
-                [ngClass]="'border-gray-300 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:text-blue-400'"
+                class="ml-auto flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors border-gray-300 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:text-blue-400"
                 (click)="toggleDailySort()"
               >
                 日付順: {{ dailySortDir === 'asc' ? '昇順 ↑' : '降順 ↓' }}
@@ -243,11 +230,7 @@
               <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                      <button class="sort-btn text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400" (click)="toggleDailySort()">
-                        日付 <span>{{ dailySortDir === 'asc' ? '↑' : '↓' }}</span>
-                      </button>
-                    </th>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">日付</th>
                     <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">開始RP</th>
                     <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">終了RP</th>
                     <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">最高</th>
