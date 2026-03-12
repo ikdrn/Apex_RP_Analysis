@@ -33,7 +33,7 @@ type RpRecord = {
   created_at: string;
 };
 
-type RangeOption = 7 | 30 | 90;
+type RangeOption = 7 | 30;
 
 @Component({
   selector: 'app-root',
@@ -48,7 +48,7 @@ export class AppComponent implements OnInit {
   error = '';
   records: RpRecord[] = [];
   selectedRange: RangeOption = 30;
-  readonly rangeOptions: RangeOption[] = [7, 30, 90];
+  readonly rangeOptions: RangeOption[] = [7, 30];
   readonly apiPath = '/api/get-rp';
 
   get latestRp(): number | null {
