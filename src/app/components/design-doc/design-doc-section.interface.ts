@@ -1,6 +1,7 @@
 export interface DesignDocItem {
   label: string;
   content: string;
+  diagram?: string;
 }
 
 export interface DesignDocSection {
