@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
 import {
   Chart,
   CategoryScale,
@@ -19,7 +18,7 @@ import { EMPTY, Subject, catchError, switchMap, tap } from 'rxjs';
 import { DesignDocComponent } from './components/design-doc/design-doc.component';
 import { RpDataService } from './core/rp-data.service';
 import { AppTab, DailyRecord, RangeOption, RpRecord, RpSummary, SortDirection } from './core/rp.model';
-import { buildChartLabels, buildDailyRecords, buildSummary, filterRecords, sortRecordsByDate } from './core/rp.utils';
+import { buildChartLabels, buildDailyRecords, buildSummary, sortRecordsByDate } from './core/rp.utils';
 
 Chart.register(
   LineController,
@@ -35,7 +34,7 @@ Chart.register(
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgChartsModule, DesignDocComponent],
+  imports: [CommonModule, NgChartsModule, DesignDocComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
@@ -51,41 +50,19 @@ export class AppComponent implements OnInit {
   readonly rangeOptions: RangeOption[] = [7, 30];
 
   isDark = false;
-  tableSortDir: SortDirection = 'asc';
-  tableFilter = '';
+  tableSortDir: SortDirection = 'desc';
   dailySortDir: SortDirection = 'desc';
   private summary: RpSummary = buildSummary([]);
 
-  get latestRp(): number | null {
-    return this.summary.latestRp;
-  }
-
-  get maxRp(): number | null {
-    return this.summary.maxRp;
-  }
-
-  get minRp(): number | null {
-    return this.summary.minRp;
-  }
-
-  get rpChange(): number | null {
-    return this.summary.rpChange;
-  }
-
-  get avgRp(): number | null {
-    return this.summary.avgRp;
-  }
-
-  get rpPerDay(): number | null {
-    return this.summary.rpPerDay;
-  }
+  get latestRp(): number | null { return this.summary.latestRp; }
+  get maxRp(): number | null { return this.summary.maxRp; }
+  get minRp(): number | null { return this.summary.minRp; }
+  get rpChange(): number | null { return this.summary.rpChange; }
+  get avgRp(): number | null { return this.summary.avgRp; }
+  get rpPerDay(): number | null { return this.summary.rpPerDay; }
 
   get sortedRecords(): RpRecord[] {
     return sortRecordsByDate(this.records, this.tableSortDir);
-  }
-
-  get filteredSortedRecords(): RpRecord[] {
-    return filterRecords(this.sortedRecords, this.tableFilter);
   }
 
   get dailyRecords(): DailyRecord[] {
@@ -112,13 +89,10 @@ export class AppComponent implements OnInit {
     ]
   };
 
-  readonly lineChartOptions: ChartConfiguration<'line'>['options'] = {
+  lineChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    interaction: {
-      mode: 'index',
-      intersect: false
-    },
+    interaction: { mode: 'index', intersect: false },
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -129,9 +103,7 @@ export class AppComponent implements OnInit {
         borderWidth: 1,
         padding: 10,
         cornerRadius: 6,
-        callbacks: {
-          label: (ctx) => ` RP: ${ctx.parsed.y?.toLocaleString() ?? ''}`
-        }
+        callbacks: { label: (ctx) => ` RP: ${ctx.parsed.y?.toLocaleString() ?? ''}` }
       }
     },
     scales: {
@@ -141,11 +113,7 @@ export class AppComponent implements OnInit {
         border: { color: '#e5e7eb' }
       },
       y: {
-        ticks: {
-          color: '#6b7280',
-          font: { size: 11 },
-          callback: (value) => value.toLocaleString()
-        },
+        ticks: { color: '#6b7280', font: { size: 11 }, callback: (value) => value.toLocaleString() },
         grid: { color: '#f3f4f6' },
         border: { color: '#e5e7eb' }
       }
@@ -186,6 +154,7 @@ export class AppComponent implements OnInit {
     this.isDark = !this.isDark;
     document.documentElement.classList.toggle('dark', this.isDark);
     localStorage.setItem('dark-mode', String(this.isDark));
+    this.applyChartTheme();
   }
 
   showDesignDoc(): void {
@@ -228,6 +197,43 @@ export class AppComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
+  private applyChartTheme(): void {
+    const dark = this.isDark;
+    const gridColor       = dark ? '#374151' : '#f3f4f6';
+    const borderColor     = dark ? '#4b5563' : '#e5e7eb';
+    const tickColor       = dark ? '#d1d5db' : '#6b7280';
+    const lineColor       = dark ? '#60a5fa' : '#1e40af';
+    const fillColor       = dark ? 'rgba(96, 165, 250, 0.15)' : 'rgba(30, 64, 175, 0.08)';
+    const pointBorderColor = dark ? '#111827' : '#ffffff';
+
+    this.lineChartOptions = {
+      ...this.lineChartOptions,
+      scales: {
+        x: {
+          ticks: { color: tickColor, font: { size: 11 }, maxRotation: 45 },
+          grid: { color: gridColor },
+          border: { color: borderColor }
+        },
+        y: {
+          ticks: { color: tickColor, font: { size: 11 }, callback: (value) => value.toLocaleString() },
+          grid: { color: gridColor },
+          border: { color: borderColor }
+        }
+      }
+    };
+
+    this.lineChartData = {
+      ...this.lineChartData,
+      datasets: [{
+        ...this.lineChartData.datasets[0],
+        borderColor: lineColor,
+        backgroundColor: fillColor,
+        pointBackgroundColor: lineColor,
+        pointBorderColor
+      }]
+    };
+  }
+
   private loadRecords(isRefresh = false): void {
     this.loadTrigger$.next({ days: this.selectedRange, isRefresh });
   }
@@ -239,6 +245,7 @@ export class AppComponent implements OnInit {
       labels: buildChartLabels(data),
       datasets: [{ ...this.lineChartData.datasets[0], data: data.map((record) => record.rp) }]
     };
+    this.applyChartTheme();
     this.loading = false;
     this.refreshing = false;
   }
