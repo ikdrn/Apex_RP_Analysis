@@ -1,208 +1,236 @@
 <div class="min-h-screen bg-gray-50 transition-colors duration-300 dark:bg-gray-900">
-  <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+  <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
 
-    <header class="mb-6 flex items-start justify-between gap-4">
-      <div>
-        <div class="mb-1 flex items-center gap-3">
-          <div class="h-7 w-1.5 rounded-full bg-blue-800 dark:bg-blue-500"></div>
-          <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Apex RP Analysis</h1>
-        </div>
-        <p class="ml-5 text-sm text-gray-500 dark:text-gray-400">ぺこんぽ &bull; 期間を切り替えながら、RP推移をグラフと表で確認できます。</p>
+    <!-- ── Header ── -->
+    <header class="mb-6 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="h-5 w-0.5 rounded-full bg-blue-600 dark:bg-blue-400"></div>
+        <h1 class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Apex RP Analysis</h1>
+        <span class="hidden text-xs text-gray-400 dark:text-gray-600 sm:inline">· ぺこんぽ</span>
       </div>
-      <div class="mt-1 flex items-center gap-3">
-        <!-- Dark Mode Toggle -->
-        <button
-          class="dark-toggle"
-          (click)="toggleDark()"
-          [attr.aria-label]="isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え'"
-          title="{{ isDark ? 'ライトモード' : 'ダークモード' }}"
-        >
-          <div class="dark-toggle__track" [class.is-dark]="isDark">
-            <div class="dark-toggle__thumb" [class.is-dark]="isDark">
-              <span class="dark-toggle__icon">{{ isDark ? '🌙' : '☀️' }}</span>
-            </div>
+      <button
+        class="dark-toggle"
+        (click)="toggleDark()"
+        [attr.aria-label]="isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え'"
+        title="{{ isDark ? 'ライトモード' : 'ダークモード' }}"
+      >
+        <div class="dark-toggle__track" [class.is-dark]="isDark">
+          <div class="dark-toggle__thumb" [class.is-dark]="isDark">
+            <span class="dark-toggle__icon">{{ isDark ? '🌙' : '☀️' }}</span>
           </div>
-        </button>
-        <button class="text-xs text-blue-700 underline underline-offset-2 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" (click)="showDesignDoc()">
-          設計書を見る
-        </button>
-      </div>
+        </div>
+      </button>
     </header>
 
-    <div *ngIf="activeTab !== 'design'" class="mb-4 flex flex-wrap items-center gap-2">
-      <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">表示期間</span>
-      <button
-        *ngFor="let days of rangeOptions"
-        class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-        [ngClass]="selectedRange === days
-          ? 'border-blue-700 bg-blue-700 text-white'
-          : 'border-gray-300 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:text-blue-400'"
-        (click)="onRangeChange(days)"
-      >
-        {{ days }}日
-      </button>
+    <!-- ── Controls (hidden on design doc tab) ── -->
+    <div *ngIf="activeTab !== 'design'" class="mb-5 flex flex-wrap items-center gap-2">
+      <!-- Period selector pills -->
+      <div class="flex gap-1">
+        <button
+          *ngFor="let days of rangeOptions"
+          class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors focus:outline-none"
+          [ngClass]="selectedRange === days
+            ? 'bg-blue-600 text-white shadow-sm'
+            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'"
+          (click)="onRangeChange(days)"
+        >{{ days }}日</button>
+      </div>
 
-      <button
-        class="ml-auto rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:text-blue-400"
-        (click)="refresh()"
-        [disabled]="loading || refreshing"
-      >
-        {{ refreshing ? '更新中...' : '最新データに更新' }}
-      </button>
-
-      <button
-        class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:text-blue-400"
-        (click)="downloadCsv()"
-        [disabled]="records.length === 0 || loading"
-      >
-        CSVダウンロード
-      </button>
-    </div>
-
-    <div *ngIf="!loading && !error && activeTab !== 'design'" class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <p class="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">最新RP</p>
-        <p class="mt-1 text-xl font-bold text-gray-900 dark:text-white">{{ latestRp !== null ? latestRp.toLocaleString() : '—' }}</p>
-      </div>
-      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <p class="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">最高RP</p>
-        <p class="mt-1 text-xl font-bold text-gray-900 dark:text-white">{{ maxRp !== null ? maxRp.toLocaleString() : '—' }}</p>
-      </div>
-      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <p class="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">最低RP</p>
-        <p class="mt-1 text-xl font-bold text-gray-900 dark:text-white">{{ minRp !== null ? minRp.toLocaleString() : '—' }}</p>
-      </div>
-      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <p class="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">期間内の変化</p>
-        <p class="mt-1 text-xl font-bold"
-          [class.text-emerald-700]="(rpChange ?? 0) >= 0"
-          [class.text-red-600]="(rpChange ?? 0) < 0"
-          [class.dark:text-emerald-400]="(rpChange ?? 0) >= 0"
-          [class.dark:text-red-400]="(rpChange ?? 0) < 0">
-          {{ rpChange !== null ? ((rpChange >= 0 ? '+' : '') + rpChange.toLocaleString()) : '—' }}
-        </p>
-      </div>
-      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <p class="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">平均RP</p>
-        <p class="mt-1 text-xl font-bold text-gray-900 dark:text-white">
-          {{ avgRp !== null ? avgRp.toLocaleString() : '—' }}
-        </p>
-      </div>
-      <div class="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <p class="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">1日あたりの変化</p>
-        <p class="mt-1 text-xl font-bold"
-          [class.text-emerald-700]="(rpPerDay ?? 0) >= 0"
-          [class.text-red-600]="(rpPerDay ?? 0) < 0"
-          [class.dark:text-emerald-400]="(rpPerDay ?? 0) >= 0"
-          [class.dark:text-red-400]="(rpPerDay ?? 0) < 0">
-          {{ rpPerDay !== null ? ((rpPerDay >= 0 ? '+' : '') + rpPerDay.toFixed(1) + '/日') : '—' }}
-        </p>
+      <!-- Action buttons: pushed right, intentionally asymmetric gap -->
+      <div class="ml-auto flex items-center gap-2">
+        <button
+          class="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+          (click)="refresh()"
+          [disabled]="loading || refreshing"
+        >
+          <span *ngIf="refreshing" class="inline-block h-3 w-3 animate-spin rounded-full border border-white/40 border-t-white"></span>
+          {{ refreshing ? '更新中' : '更新' }}
+        </button>
+        <button
+          class="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-200"
+          (click)="downloadCsv()"
+          [disabled]="records.length === 0 || loading"
+        >CSV</button>
       </div>
     </div>
 
+    <!-- ── Hero Stats (asymmetric: large hero left, compact grid right) ── -->
+    <div
+      *ngIf="!loading && !error && activeTab !== 'design'"
+      class="mb-5 transition-opacity duration-200"
+      [class.opacity-60]="refreshing"
+    >
+      <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-10">
+
+        <!-- Primary hero: Latest RP + period change -->
+        <div class="shrink-0">
+          <p class="mb-0.5 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">最新 RP</p>
+          <div class="flex items-end gap-3">
+            <span class="text-5xl font-bold tabular-nums leading-none text-gray-900 dark:text-white">
+              {{ latestRp !== null ? latestRp.toLocaleString() : '—' }}
+            </span>
+            <span
+              *ngIf="rpChange !== null"
+              class="mb-1 text-base font-semibold tabular-nums"
+              [ngClass]="(rpChange ?? 0) >= 0
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-red-500 dark:text-red-400'"
+            >{{ (rpChange ?? 0) >= 0 ? '+' : '' }}{{ rpChange!.toLocaleString() }}</span>
+          </div>
+          <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">過去 {{ selectedRange }} 日</p>
+        </div>
+
+        <!-- Supporting stats: compact, no cards/borders -->
+        <div class="grid grid-cols-2 gap-x-8 gap-y-2.5 sm:flex sm:gap-8">
+          <div>
+            <p class="text-xs text-gray-400 dark:text-gray-500">最高</p>
+            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-700 dark:text-gray-200">
+              {{ maxRp !== null ? maxRp.toLocaleString() : '—' }}
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 dark:text-gray-500">最低</p>
+            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-700 dark:text-gray-200">
+              {{ minRp !== null ? minRp.toLocaleString() : '—' }}
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 dark:text-gray-500">平均</p>
+            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-700 dark:text-gray-200">
+              {{ avgRp !== null ? avgRp.toLocaleString() : '—' }}
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 dark:text-gray-500">1日あたり</p>
+            <p
+              class="mt-0.5 text-sm font-semibold tabular-nums"
+              [ngClass]="(rpPerDay ?? 0) >= 0
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-red-500 dark:text-red-400'"
+            >{{ rpPerDay !== null ? ((rpPerDay >= 0 ? '+' : '') + rpPerDay.toFixed(1) + '/日') : '—' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Main Panel ── -->
     <div class="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+
+      <!-- Tab bar: Analysis tabs left, 設計書 pushed right -->
       <div class="flex border-b border-gray-200 dark:border-gray-700">
         <button
-          class="px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
+          class="border-b-2 px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
           [ngClass]="activeTab === 'analysis'
-            ? 'border-b-2 border-blue-800 text-blue-900 dark:border-blue-400 dark:text-blue-300'
-            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+            ? 'border-blue-600 text-blue-700 dark:border-blue-400 dark:text-blue-300'
+            : 'border-transparent text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-200'"
           (click)="activeTab = 'analysis'"
-        >
-          Analysis
-        </button>
+        >グラフ</button>
         <button
-          class="px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
+          class="border-b-2 px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
           [ngClass]="activeTab === 'table'
-            ? 'border-b-2 border-blue-800 text-blue-900 dark:border-blue-400 dark:text-blue-300'
-            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+            ? 'border-blue-600 text-blue-700 dark:border-blue-400 dark:text-blue-300'
+            : 'border-transparent text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-200'"
           (click)="activeTab = 'table'"
-        >
-          Data Table
-        </button>
+        >データ</button>
         <button
-          class="px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
+          class="border-b-2 px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
           [ngClass]="activeTab === 'daily'
-            ? 'border-b-2 border-blue-800 text-blue-900 dark:border-blue-400 dark:text-blue-300'
-            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+            ? 'border-blue-600 text-blue-700 dark:border-blue-400 dark:text-blue-300'
+            : 'border-transparent text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-200'"
           (click)="activeTab = 'daily'"
-        >
-          Daily
-        </button>
+        >日別</button>
+        <!-- Design doc: intentionally separated to far right -->
         <button
-          class="px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
+          class="ml-auto border-b-2 px-5 py-3 text-sm font-medium transition-colors focus:outline-none"
           [ngClass]="activeTab === 'design'
-            ? 'border-b-2 border-blue-800 text-blue-900 dark:border-blue-400 dark:text-blue-300'
-            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+            ? 'border-blue-600 text-blue-700 dark:border-blue-400 dark:text-blue-300'
+            : 'border-transparent text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400'"
           (click)="activeTab = 'design'"
-        >
-          設計書
-        </button>
+        >設計書</button>
       </div>
 
-      <div class="p-6">
+      <!-- Tab content -->
+      <div class="p-5 sm:p-6">
         <ng-container *ngIf="activeTab !== 'design'">
-          <div *ngIf="loading" class="flex items-center justify-center py-20">
+
+          <!-- Loading state -->
+          <div *ngIf="loading" class="flex items-center justify-center py-24">
             <div class="flex flex-col items-center gap-3">
-              <div class="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-800 dark:border-gray-600 dark:border-t-blue-400"></div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">データを読み込み中...</p>
+              <div class="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600 dark:border-gray-700 dark:border-t-blue-400"></div>
+              <p class="text-xs text-gray-400 dark:text-gray-500">読み込み中...</p>
             </div>
           </div>
 
-          <div *ngIf="error" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900 dark:bg-red-950">
-            <p class="mb-2 text-sm font-medium text-red-700 dark:text-red-400">{{ error }}</p>
-            <p class="text-xs text-red-600 dark:text-red-500">設定が未完了の場合は、Vercelの環境変数（SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）を確認してください。</p>
+          <!-- Error state -->
+          <div *ngIf="error" class="rounded-lg border border-red-100 bg-red-50 px-4 py-4 dark:border-red-900/40 dark:bg-red-950/40">
+            <div class="flex items-start gap-3">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-red-700 dark:text-red-400">{{ error }}</p>
+                <p class="mt-1 text-xs text-red-500 dark:text-red-500">
+                  環境変数（SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）を確認してください。
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div *ngIf="!loading && !error && records.length === 0" class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-6 text-center dark:border-amber-900 dark:bg-amber-950">
-            <p class="text-sm font-medium text-amber-700 dark:text-amber-400">この期間のデータはまだありません。</p>
-            <p class="mt-1 text-xs text-amber-600 dark:text-amber-500">時間をおいて「最新データに更新」を押してください。</p>
+          <!-- Empty state -->
+          <div *ngIf="!loading && !error && records.length === 0" class="py-20 text-center">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">この期間のデータはまだありません</p>
+            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">時間をおいて「更新」ボタンを押してください。</p>
           </div>
 
-          <!-- Analysis Tab -->
+          <!-- ── Analysis Tab: Hero chart ── -->
           <div *ngIf="!loading && !error && activeTab === 'analysis' && records.length > 0">
-            <div class="mb-4 flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">RP推移（過去{{ selectedRange }}日）</h2>
-              <span class="text-xs text-gray-400 dark:text-gray-500">{{ records.length }} レコード</span>
-            </div>
-            <div class="h-[340px]">
+            <p class="mb-3 text-xs text-gray-400 dark:text-gray-500">
+              RP 推移 · {{ records.length }} レコード
+            </p>
+            <div class="h-[400px]">
               <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
             </div>
           </div>
 
-          <!-- Data Table Tab -->
+          <!-- ── Data Table Tab ── -->
           <div *ngIf="!loading && !error && activeTab === 'table' && records.length > 0">
-            <div class="mb-4 flex flex-wrap items-center gap-3">
-              <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">データ一覧</h2>
+            <div class="mb-3 flex items-center gap-2">
               <button
-                class="ml-auto flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors border-gray-300 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:text-blue-400"
+                class="rounded border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-200"
                 (click)="toggleTableSort()"
-              >
-                日付順: {{ tableSortDir === 'asc' ? '昇順 ↑' : '降順 ↓' }}
-              </button>
-              <span class="text-xs text-gray-400 dark:text-gray-500">{{ sortedRecords.length }} 件</span>
+              >{{ tableSortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}</button>
+              <span class="ml-auto text-xs text-gray-400 dark:text-gray-500">{{ sortedRecords.length }} 件</span>
             </div>
-            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-              <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-900">
-                  <tr>
-                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">#</th>
-                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">RP</th>
-                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">記録日時</th>
-                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">△RP</th>
+            <div class="overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-700">
+              <table class="min-w-full divide-y divide-gray-100 text-sm dark:divide-gray-700">
+                <thead>
+                  <tr class="bg-gray-50 dark:bg-gray-900">
+                    <th class="w-10 px-4 py-2.5 text-left text-xs font-medium text-gray-400 dark:text-gray-500">#</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-400 dark:text-gray-500">RP</th>
+                    <th class="px-4 py-2.5 text-left text-xs font-medium text-gray-400 dark:text-gray-500">日時</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-400 dark:text-gray-500">△</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                  <tr *ngFor="let row of sortedRecords; let i = index" class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td class="px-4 py-2.5 font-mono text-xs text-gray-400 dark:text-gray-500">
+                <tbody class="divide-y divide-gray-50 bg-white dark:divide-gray-700/50 dark:bg-gray-800">
+                  <tr
+                    *ngFor="let row of sortedRecords; let i = index"
+                    class="transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/40"
+                  >
+                    <td class="px-4 py-2.5 font-mono text-xs text-gray-300 dark:text-gray-600">
                       {{ tableSortDir === 'asc' ? (i + 1) : (sortedRecords.length - i) }}
                     </td>
-                    <td class="px-4 py-2.5 text-right font-medium text-gray-900 dark:text-gray-100">{{ row.rp.toLocaleString() }}</td>
-                    <td class="px-4 py-2.5 text-gray-500 dark:text-gray-400">{{ row.created_at | date:'yyyy/MM/dd HH:mm':'Asia/Tokyo' }}</td>
-                    <td class="px-4 py-2.5 text-right text-xs font-medium"
+                    <td class="px-4 py-2.5 text-right font-medium tabular-nums text-gray-900 dark:text-gray-100">
+                      {{ row.rp.toLocaleString() }}
+                    </td>
+                    <td class="px-4 py-2.5 tabular-nums text-gray-500 dark:text-gray-400">
+                      {{ row.created_at | date:'MM/dd HH:mm':'Asia/Tokyo' }}
+                    </td>
+                    <td
+                      class="px-4 py-2.5 text-right font-mono text-xs"
                       [ngClass]="i === 0
-                        ? 'text-gray-400 dark:text-gray-500'
-                        : ((row.rp - sortedRecords[i-1].rp) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')">
+                        ? 'text-gray-300 dark:text-gray-600'
+                        : ((row.rp - sortedRecords[i-1].rp) >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-400 dark:text-red-400')"
+                    >
                       <ng-container *ngIf="i > 0">
                         {{ (row.rp - sortedRecords[i-1].rp) >= 0 ? '+' : '' }}{{ (row.rp - sortedRecords[i-1].rp).toLocaleString() }}
                       </ng-container>
@@ -214,56 +242,60 @@
             </div>
           </div>
 
-          <!-- Daily Tab -->
+          <!-- ── Daily Tab ── -->
           <div *ngIf="!loading && !error && activeTab === 'daily' && records.length > 0">
-            <div class="mb-4 flex flex-wrap items-center gap-3">
-              <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">日別サマリー</h2>
+            <div class="mb-3 flex items-center gap-2">
               <button
-                class="ml-auto flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors border-gray-300 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:text-blue-400"
+                class="rounded border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-200"
                 (click)="toggleDailySort()"
-              >
-                日付順: {{ dailySortDir === 'asc' ? '昇順 ↑' : '降順 ↓' }}
-              </button>
-              <span class="text-xs text-gray-400 dark:text-gray-500">{{ dailyRecords.length }} 日分</span>
+              >{{ dailySortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}</button>
+              <span class="ml-auto text-xs text-gray-400 dark:text-gray-500">{{ dailyRecords.length }} 日分</span>
             </div>
-            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-              <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-900">
-                  <tr>
-                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">日付</th>
-                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">開始RP</th>
-                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">終了RP</th>
-                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">最高</th>
-                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">最低</th>
-                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">変化量</th>
-                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">記録数</th>
+            <div class="overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-700">
+              <table class="min-w-full divide-y divide-gray-100 text-sm dark:divide-gray-700">
+                <thead>
+                  <tr class="bg-gray-50 dark:bg-gray-900">
+                    <th class="px-4 py-2.5 text-left text-xs font-medium text-gray-400 dark:text-gray-500">日付</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-400 dark:text-gray-500">開始</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-400 dark:text-gray-500">終了</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-medium text-emerald-500 dark:text-emerald-600">高値</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-medium text-red-400 dark:text-red-600">安値</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-400 dark:text-gray-500">変化</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-400 dark:text-gray-500">件数</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                  <tr *ngFor="let day of dailyRecords" class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
+                <tbody class="divide-y divide-gray-50 bg-white dark:divide-gray-700/50 dark:bg-gray-800">
+                  <tr
+                    *ngFor="let day of dailyRecords"
+                    class="transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/40"
+                  >
                     <td class="px-4 py-2.5 font-medium text-gray-700 dark:text-gray-200">{{ day.date }}</td>
-                    <td class="px-4 py-2.5 text-right text-gray-600 dark:text-gray-300">{{ day.firstRp.toLocaleString() }}</td>
-                    <td class="px-4 py-2.5 text-right font-medium text-gray-900 dark:text-white">{{ day.lastRp.toLocaleString() }}</td>
-                    <td class="px-4 py-2.5 text-right text-emerald-600 dark:text-emerald-400">{{ day.maxRp.toLocaleString() }}</td>
-                    <td class="px-4 py-2.5 text-right text-red-500 dark:text-red-400">{{ day.minRp.toLocaleString() }}</td>
-                    <td class="px-4 py-2.5 text-right text-xs font-semibold"
-                      [ngClass]="day.change >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'">
-                      {{ day.change >= 0 ? '+' : '' }}{{ day.change.toLocaleString() }}
-                    </td>
-                    <td class="px-4 py-2.5 text-right text-gray-400 dark:text-gray-500">{{ day.count }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums text-gray-500 dark:text-gray-400">{{ day.firstRp.toLocaleString() }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums font-medium text-gray-900 dark:text-white">{{ day.lastRp.toLocaleString() }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums text-emerald-500 dark:text-emerald-400">{{ day.maxRp.toLocaleString() }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums text-red-400 dark:text-red-400">{{ day.minRp.toLocaleString() }}</td>
+                    <td
+                      class="px-4 py-2.5 text-right tabular-nums text-xs font-semibold"
+                      [ngClass]="day.change >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-400 dark:text-red-400'"
+                    >{{ day.change >= 0 ? '+' : '' }}{{ day.change.toLocaleString() }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums text-gray-300 dark:text-gray-600">{{ day.count }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
+
         </ng-container>
 
+        <!-- Design doc tab -->
         <div *ngIf="activeTab === 'design'">
           <app-design-doc [isDark]="isDark"></app-design-doc>
         </div>
       </div>
     </div>
 
-    <p class="mt-6 text-center text-xs text-gray-400 dark:text-gray-600">Apex RP Analysis &bull; Powered by Supabase &amp; Vercel</p>
+    <p class="mt-5 text-center text-xs text-gray-300 dark:text-gray-700">
+      Apex RP Analysis · Supabase + Vercel
+    </p>
   </div>
 </div>
