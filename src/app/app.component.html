@@ -205,10 +205,10 @@
               <table class="min-w-full divide-y divide-gray-100 text-sm dark:divide-gray-700">
                 <thead>
                   <tr class="bg-gray-50 dark:bg-gray-900">
-                    <th class="w-10 px-4 py-2.5 text-left text-xs font-medium text-gray-400 dark:text-gray-500">#</th>
+                    <th class="w-10 px-4 py-2.5 text-left text-xs font-medium text-gray-400 dark:text-gray-500">No</th>
                     <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-400 dark:text-gray-500">RP</th>
                     <th class="px-4 py-2.5 text-left text-xs font-medium text-gray-400 dark:text-gray-500">日時</th>
-                    <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-400 dark:text-gray-500">△</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-medium text-gray-400 dark:text-gray-500">差分</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 bg-white dark:divide-gray-700/50 dark:bg-gray-800">
@@ -223,7 +223,7 @@
                       {{ row.rp.toLocaleString() }}
                     </td>
                     <td class="px-4 py-2.5 tabular-nums text-gray-500 dark:text-gray-400">
-                      {{ row.created_at | date:'MM/dd HH:mm':'Asia/Tokyo' }}
+                      {{ row.created_at | date:'MM/dd HH:mm':'UTC' }}
                     </td>
                     <td
                       class="px-4 py-2.5 text-right font-mono text-xs"

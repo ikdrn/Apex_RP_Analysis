@@ -57,6 +57,53 @@ body {
   transform: translateX(22px);
 }
 
+/* ===== Design doc inline HTML tables ===== */
+.design-doc-html table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0;
+}
+.design-doc-html th,
+.design-doc-html td {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.design-doc-html th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+}
+.dark .design-doc-html th {
+  background: #1f2937;
+  color: #d1d5db;
+  border-color: #374151;
+}
+.dark .design-doc-html td {
+  border-color: #374151;
+  color: #d1d5db;
+}
+.design-doc-html p {
+  margin: 0.25rem 0;
+  white-space: pre-line;
+}
+.design-doc-html ul {
+  margin: 0.25rem 0 0.25rem 1.25rem;
+  list-style: disc;
+}
+.design-doc-html li {
+  margin: 0.15rem 0;
+}
+.design-doc-html strong {
+  font-weight: 600;
+  color: #1f2937;
+}
+.dark .design-doc-html strong {
+  color: #f3f4f6;
+}
+
 /* ===== Mermaid diagram container ===== */
 .mermaid svg {
   max-width: 100%;
