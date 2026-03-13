@@ -1,6 +1,7 @@
 export interface DesignDocItem {
   label: string;
-  content: string;
+  content?: string;
+  contentHtml?: string;
   diagram?: string;
 }
 

@@ -1,7 +1,9 @@
 import { DailyRecord, RpRecord, RpSummary, SortDirection } from './rp.model';
 
 const JST_LOCALE = 'ja-JP';
-const JST_TIMEZONE = 'Asia/Tokyo';
+// DB stores JST time without timezone offset (stored as +00 due to pg_cron INSERT behavior).
+// Displaying as UTC shows the correct JST value without double-converting (+9h).
+const JST_TIMEZONE = 'UTC';
 
 export function toJstDateLabel(isoString: string): string {
   return new Date(isoString).toLocaleDateString(JST_LOCALE, {

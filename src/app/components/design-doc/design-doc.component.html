@@ -36,6 +36,7 @@
               </td>
               <td class="px-4 py-3 align-top text-gray-700 dark:text-gray-300">
                 <p *ngIf="item.content" class="whitespace-pre-line leading-relaxed text-xs">{{ item.content }}</p>
+                <div *ngIf="item.contentHtml" class="design-doc-html text-xs leading-relaxed" [innerHTML]="safe(item.contentHtml)"></div>
                 <div *ngIf="item.diagram" class="mt-3 overflow-x-auto rounded-lg border border-gray-100 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-900">
                   <div class="mermaid flex justify-center">{{ item.diagram }}</div>
                 </div>
