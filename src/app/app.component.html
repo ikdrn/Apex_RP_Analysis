@@ -72,12 +72,13 @@
             <span
               *ngIf="rpChange !== null"
               class="mb-1 text-base font-semibold tabular-nums"
-              [ngClass]="(rpChange ?? 0) >= 0
+              [ngClass]="rpChange >= 0
                 ? 'text-emerald-600 dark:text-emerald-400'
                 : 'text-red-500 dark:text-red-400'"
-            >{{ (rpChange ?? 0) >= 0 ? '+' : '' }}{{ rpChange!.toLocaleString() }}</span>
+            >{{ rpChange >= 0 ? '+' : '' }}{{ rpChange.toLocaleString() }}</span>
           </div>
           <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">過去 {{ selectedRange }} 日</p>
+          <p class="mt-2 text-sm font-medium text-blue-700 dark:text-blue-300">現在ランク: {{ latestRank }}</p>
         </div>
 
         <!-- Supporting stats: compact, no cards/borders -->
@@ -111,6 +112,22 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div
+      *ngIf="!loading && !error && activeTab !== 'design'"
+      class="mb-5 rounded-lg border border-blue-100 bg-blue-50/60 p-4 dark:border-blue-900/40 dark:bg-blue-950/20"
+    >
+      <p class="text-sm font-semibold text-blue-800 dark:text-blue-200">ランク目安（RP）</p>
+      <p class="mt-1 text-xs text-blue-700 dark:text-blue-300">
+        どのRP帯がどのランクか、ひと目で分かる表です。
+      </p>
+      <ul class="mt-3 grid gap-1 text-sm text-blue-900 dark:text-blue-100 sm:grid-cols-2">
+        <li *ngFor="let threshold of rankThresholds" class="flex items-center justify-between rounded bg-white/70 px-2.5 py-1.5 dark:bg-gray-900/30">
+          <span class="font-medium">{{ threshold.rank }}</span>
+          <span class="tabular-nums">{{ threshold.minRp.toLocaleString() }} 以上</span>
+        </li>
+      </ul>
     </div>
 
     <!-- ── Main Panel ── -->

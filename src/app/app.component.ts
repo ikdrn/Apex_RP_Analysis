@@ -20,6 +20,12 @@ import { RpDataService } from './core/rp-data.service';
 import { AppTab, DailyRecord, RangeOption, RpRecord, RpSummary, SortDirection } from './core/rp.model';
 import { buildChartLabels, buildDailyRecords, buildSummary, sortRecordsByDate } from './core/rp.utils';
 
+
+type RankThreshold = {
+  minRp: number;
+  rank: string;
+};
+
 Chart.register(
   LineController,
   LineElement,
@@ -49,6 +55,15 @@ export class AppComponent implements OnInit {
   selectedRange: RangeOption = 30;
   readonly rangeOptions: RangeOption[] = [7, 30];
 
+  readonly rankThresholds: RankThreshold[] = [
+    { minRp: 16000, rank: 'マスター' },
+    { minRp: 15000, rank: 'ダイヤ1' },
+    { minRp: 14000, rank: 'ダイヤ2' },
+    { minRp: 13000, rank: 'ダイヤ3' },
+    { minRp: 12000, rank: 'ダイヤ4' },
+  ];
+
+
   isDark = false;
   tableSortDir: SortDirection = 'desc';
   dailySortDir: SortDirection = 'desc';
@@ -60,6 +75,17 @@ export class AppComponent implements OnInit {
   get rpChange(): number | null { return this.summary.rpChange; }
   get avgRp(): number | null { return this.summary.avgRp; }
   get rpPerDay(): number | null { return this.summary.rpPerDay; }
+
+
+  get latestRank(): string {
+    if (this.latestRp === null) {
+      return '—';
+    }
+
+    const currentRp = this.latestRp;
+    const matched = this.rankThresholds.find((threshold) => currentRp >= threshold.minRp);
+    return matched ? matched.rank : 'ダイヤ未満';
+  }
 
   get sortedRecords(): RpRecord[] {
     return sortRecordsByDate(this.records, this.tableSortDir);
