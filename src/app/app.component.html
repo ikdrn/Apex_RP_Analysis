@@ -244,14 +244,14 @@
                     </td>
                     <td
                       class="px-4 py-2.5 text-right font-mono text-xs"
-                      [ngClass]="i === 0
+                      [ngClass]="getRecordDiff(row) === null
                         ? 'text-gray-300 dark:text-gray-600'
-                        : ((row.rp - sortedRecords[i-1].rp) >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-400 dark:text-red-400')"
+                        : ((getRecordDiff(row) ?? 0) >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-400 dark:text-red-400')"
                     >
-                      <ng-container *ngIf="i > 0">
-                        {{ (row.rp - sortedRecords[i-1].rp) >= 0 ? '+' : '' }}{{ (row.rp - sortedRecords[i-1].rp).toLocaleString() }}
+                      <ng-container *ngIf="getRecordDiff(row) !== null">
+                        {{ (getRecordDiff(row) ?? 0) >= 0 ? '+' : '' }}{{ (getRecordDiff(row) ?? 0).toLocaleString() }}
                       </ng-container>
-                      <ng-container *ngIf="i === 0">—</ng-container>
+                      <ng-container *ngIf="getRecordDiff(row) === null">—</ng-container>
                     </td>
                   </tr>
                 </tbody>

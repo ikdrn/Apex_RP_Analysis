@@ -18,7 +18,7 @@ import { EMPTY, Subject, catchError, switchMap, tap } from 'rxjs';
 import { DesignDocComponent } from './components/design-doc/design-doc.component';
 import { RpDataService } from './core/rp-data.service';
 import { AppTab, DailyRecord, RangeOption, RpRecord, RpSummary, SortDirection } from './core/rp.model';
-import { buildChartLabels, buildDailyRecords, buildSummary, sortRecordsByDate } from './core/rp.utils';
+import { buildChartLabels, buildDailyRecords, buildRecordDiffMap, buildSummary, sortRecordsByDate } from './core/rp.utils';
 
 
 type RankThreshold = {
@@ -68,6 +68,7 @@ export class AppComponent implements OnInit {
   tableSortDir: SortDirection = 'desc';
   dailySortDir: SortDirection = 'desc';
   private summary: RpSummary = buildSummary([]);
+  private recordDiffs = new Map<number, number | null>();
 
   get latestRp(): number | null { return this.summary.latestRp; }
   get maxRp(): number | null { return this.summary.maxRp; }
@@ -93,6 +94,10 @@ export class AppComponent implements OnInit {
 
   get dailyRecords(): DailyRecord[] {
     return buildDailyRecords(this.records, this.dailySortDir);
+  }
+
+  getRecordDiff(record: RpRecord): number | null {
+    return this.recordDiffs.get(record.id) ?? null;
   }
 
   lineChartData: ChartConfiguration<'line'>['data'] = {
@@ -267,6 +272,7 @@ export class AppComponent implements OnInit {
   private onDataLoaded(data: RpRecord[]): void {
     this.records = data;
     this.summary = buildSummary(data);
+    this.recordDiffs = buildRecordDiffMap(data);
     this.lineChartData = {
       labels: buildChartLabels(data),
       datasets: [{ ...this.lineChartData.datasets[0], data: data.map((record) => record.rp) }]

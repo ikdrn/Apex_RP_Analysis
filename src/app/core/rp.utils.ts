@@ -82,6 +82,23 @@ export function sortRecordsByDate(records: RpRecord[], direction: SortDirection)
   });
 }
 
+export function buildRecordDiffMap(records: RpRecord[]): Map<number, number | null> {
+  const sorted = sortRecordsByDate(records, 'asc');
+  const diffs = new Map<number, number | null>();
+
+  sorted.forEach((record, index) => {
+    if (index === 0) {
+      diffs.set(record.id, null);
+      return;
+    }
+
+    const previous = sorted[index - 1];
+    diffs.set(record.id, record.rp - previous.rp);
+  });
+
+  return diffs;
+}
+
 export function filterRecords(records: RpRecord[], query: string): RpRecord[] {
   const normalizedQuery = query.trim().toLowerCase();
 
