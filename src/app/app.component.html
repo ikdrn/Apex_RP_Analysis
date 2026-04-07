@@ -201,10 +201,28 @@
 
           <!-- ── Analysis Tab: Hero chart ── -->
           <div *ngIf="!loading && !error && activeTab === 'analysis' && records.length > 0">
-            <p class="mb-3 text-xs text-gray-400 dark:text-gray-500">
+            <div class="mb-3 flex flex-wrap items-center gap-2">
+              <p class="text-xs text-gray-400 dark:text-gray-500">
               RP 推移 · {{ records.length }} レコード
-            </p>
-            <div class="h-[400px]">
+              </p>
+              <div class="ml-auto flex items-center gap-1">
+                <button
+                  class="rounded border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-100"
+                  (click)="zoomOut()"
+                >−</button>
+                <button
+                  class="rounded border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-100"
+                  (click)="zoomIn()"
+                >＋</button>
+                <button
+                  class="rounded border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-100"
+                  [disabled]="!canResetZoom"
+                  (click)="resetZoom()"
+                >リセット</button>
+              </div>
+            </div>
+            <p class="mb-2 text-xs text-gray-400 dark:text-gray-500">マウスホイールでも拡大・縮小できます。</p>
+            <div class="h-[400px]" (wheel)="onChartWheel($event)">
               <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
             </div>
           </div>
