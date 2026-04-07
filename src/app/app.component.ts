@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   Chart,
@@ -13,7 +13,7 @@ import {
   Filler,
   type ChartConfiguration
 } from 'chart.js';
-import { NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { EMPTY, Subject, catchError, switchMap, tap } from 'rxjs';
 import { DesignDocComponent } from './components/design-doc/design-doc.component';
 import { RpDataService } from './core/rp-data.service';
@@ -46,6 +46,7 @@ Chart.register(
 export class AppComponent implements OnInit {
   private readonly dataService = inject(RpDataService);
   private readonly loadTrigger$ = new Subject<{ days: RangeOption; isRefresh: boolean }>();
+  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
   activeTab: AppTab = 'analysis';
   loading = true;
@@ -69,6 +70,8 @@ export class AppComponent implements OnInit {
   dailySortDir: SortDirection = 'desc';
   private summary: RpSummary = buildSummary([]);
   private recordDiffs = new Map<number, number | null>();
+  private zoomBounds: { xMin: number; xMax: number; yMin: number; yMax: number } | null = null;
+  private zoomState: { xMin: number; xMax: number; yMin: number; yMax: number } | null = null;
 
   get latestRp(): number | null { return this.summary.latestRp; }
   get maxRp(): number | null { return this.summary.maxRp; }
@@ -76,6 +79,13 @@ export class AppComponent implements OnInit {
   get rpChange(): number | null { return this.summary.rpChange; }
   get avgRp(): number | null { return this.summary.avgRp; }
   get rpPerDay(): number | null { return this.summary.rpPerDay; }
+  get canResetZoom(): boolean {
+    if (!this.zoomBounds || !this.zoomState) return false;
+    return this.zoomState.xMin !== this.zoomBounds.xMin
+      || this.zoomState.xMax !== this.zoomBounds.xMax
+      || this.zoomState.yMin !== this.zoomBounds.yMin
+      || this.zoomState.yMax !== this.zoomBounds.yMax;
+  }
 
 
   get latestRank(): string {
@@ -228,6 +238,51 @@ export class AppComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
+  onChartWheel(event: WheelEvent): void {
+    event.preventDefault();
+    if (!this.zoomBounds || this.records.length < 2) return;
+    if (event.shiftKey) {
+      this.panChart(0, event.deltaY > 0 ? 0.15 : -0.15);
+      return;
+    }
+    if (event.altKey) {
+      this.panChart(event.deltaY > 0 ? 0.15 : -0.15, 0);
+      return;
+    }
+    const zoomIn = event.deltaY < 0;
+    this.zoomChart(zoomIn ? 0.85 : 1.15);
+  }
+
+  zoomIn(): void {
+    this.zoomChart(0.85);
+  }
+
+  zoomOut(): void {
+    this.zoomChart(1.15);
+  }
+
+  panUp(): void {
+    this.panChart(0, -0.15);
+  }
+
+  panDown(): void {
+    this.panChart(0, 0.15);
+  }
+
+  panLeft(): void {
+    this.panChart(-0.15, 0);
+  }
+
+  panRight(): void {
+    this.panChart(0.15, 0);
+  }
+
+  resetZoom(): void {
+    if (!this.zoomBounds) return;
+    this.zoomState = { ...this.zoomBounds };
+    this.applyZoomOptions();
+  }
+
   private applyChartTheme(): void {
     const dark = this.isDark;
     const gridColor       = dark ? '#374151' : '#f3f4f6';
@@ -278,6 +333,7 @@ export class AppComponent implements OnInit {
       datasets: [{ ...this.lineChartData.datasets[0], data: data.map((record) => record.rp) }]
     };
     this.applyChartTheme();
+    this.initializeZoomBounds(data);
     this.loading = false;
     this.refreshing = false;
   }
@@ -288,5 +344,104 @@ export class AppComponent implements OnInit {
     this.error = `データの取得に失敗しました。${detail ? ` (${detail})` : ' 時間をおいて再試行してください。'}`;
     this.loading = false;
     this.refreshing = false;
+  }
+
+  private initializeZoomBounds(data: RpRecord[]): void {
+    if (data.length === 0) {
+      this.zoomBounds = null;
+      this.zoomState = null;
+      return;
+    }
+
+    const yValues = data.map((record) => record.rp);
+    const yMin = Math.min(...yValues);
+    const yMax = Math.max(...yValues);
+    const yPadding = Math.max(50, Math.round((yMax - yMin) * 0.1));
+    this.zoomBounds = {
+      xMin: 0,
+      xMax: Math.max(1, data.length - 1),
+      yMin: yMin - yPadding,
+      yMax: yMax + yPadding
+    };
+    this.zoomState = { ...this.zoomBounds };
+    this.applyZoomOptions();
+  }
+
+  private zoomChart(zoomFactor: number): void {
+    if (!this.zoomBounds || !this.zoomState) return;
+
+    const { xMin: bXMin, xMax: bXMax, yMin: bYMin, yMax: bYMax } = this.zoomBounds;
+    const current = this.zoomState;
+    const xCenter = (current.xMin + current.xMax) / 2;
+    const yCenter = (current.yMin + current.yMax) / 2;
+    const nextXHalf = Math.max(1, ((current.xMax - current.xMin + 1) * zoomFactor) / 2);
+    const nextYHalf = Math.max(50, ((current.yMax - current.yMin) * zoomFactor) / 2);
+
+    const xMin = Math.max(bXMin, Math.round(xCenter - nextXHalf));
+    const xMax = Math.min(bXMax, Math.round(xCenter + nextXHalf));
+    const yMin = Math.max(bYMin, Math.round(yCenter - nextYHalf));
+    const yMax = Math.min(bYMax, Math.round(yCenter + nextYHalf));
+
+    if (xMax - xMin < 1 || yMax - yMin < 100) return;
+
+    this.zoomState = { xMin, xMax, yMin, yMax };
+    this.applyZoomOptions();
+  }
+
+  private panChart(xRatio: number, yRatio: number): void {
+    if (!this.zoomBounds || !this.zoomState) return;
+
+    const { xMin: bXMin, xMax: bXMax, yMin: bYMin, yMax: bYMax } = this.zoomBounds;
+    const current = this.zoomState;
+    const xSpan = current.xMax - current.xMin;
+    const ySpan = current.yMax - current.yMin;
+    const xShift = Math.round(xSpan * xRatio);
+    const yShift = Math.round(ySpan * yRatio);
+
+    let nextXMin = current.xMin + xShift;
+    let nextXMax = current.xMax + xShift;
+    if (nextXMin < bXMin) {
+      nextXMax += bXMin - nextXMin;
+      nextXMin = bXMin;
+    }
+    if (nextXMax > bXMax) {
+      nextXMin -= nextXMax - bXMax;
+      nextXMax = bXMax;
+    }
+
+    let nextYMin = current.yMin + yShift;
+    let nextYMax = current.yMax + yShift;
+    if (nextYMin < bYMin) {
+      nextYMax += bYMin - nextYMin;
+      nextYMin = bYMin;
+    }
+    if (nextYMax > bYMax) {
+      nextYMin -= nextYMax - bYMax;
+      nextYMax = bYMax;
+    }
+
+    this.zoomState = { xMin: nextXMin, xMax: nextXMax, yMin: nextYMin, yMax: nextYMax };
+    this.applyZoomOptions();
+  }
+
+  private applyZoomOptions(): void {
+    const nextZoom = this.zoomState;
+    const currentScales = (this.lineChartOptions?.scales ?? {}) as NonNullable<ChartConfiguration<'line'>['options']>['scales'];
+    this.lineChartOptions = {
+      ...this.lineChartOptions,
+      scales: {
+        x: {
+          ...currentScales?.['x'],
+          min: nextZoom?.xMin,
+          max: nextZoom?.xMax
+        },
+        y: {
+          ...currentScales?.['y'],
+          min: nextZoom?.yMin,
+          max: nextZoom?.yMax
+        }
+      }
+    };
+    this.chart?.update();
   }
 }
