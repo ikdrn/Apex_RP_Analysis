@@ -208,6 +208,22 @@
               <div class="ml-auto flex items-center gap-1">
                 <button
                   class="rounded border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-100"
+                  (click)="panLeft()"
+                >←</button>
+                <button
+                  class="rounded border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-100"
+                  (click)="panUp()"
+                >↑</button>
+                <button
+                  class="rounded border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-100"
+                  (click)="panDown()"
+                >↓</button>
+                <button
+                  class="rounded border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-100"
+                  (click)="panRight()"
+                >→</button>
+                <button
+                  class="rounded border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-100"
                   (click)="zoomOut()"
                 >−</button>
                 <button
@@ -221,7 +237,7 @@
                 >リセット</button>
               </div>
             </div>
-            <p class="mb-2 text-xs text-gray-400 dark:text-gray-500">マウスホイールでも拡大・縮小できます。</p>
+            <p class="mb-2 text-xs text-gray-400 dark:text-gray-500">ホイールで拡大・縮小、Shift+ホイールで上下移動、Alt+ホイールで左右移動できます。</p>
             <div class="h-[400px]" (wheel)="onChartWheel($event)">
               <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
             </div>

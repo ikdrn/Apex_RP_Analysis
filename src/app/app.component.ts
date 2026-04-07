@@ -241,6 +241,14 @@ export class AppComponent implements OnInit {
   onChartWheel(event: WheelEvent): void {
     event.preventDefault();
     if (!this.zoomBounds || this.records.length < 2) return;
+    if (event.shiftKey) {
+      this.panChart(0, event.deltaY > 0 ? 0.15 : -0.15);
+      return;
+    }
+    if (event.altKey) {
+      this.panChart(event.deltaY > 0 ? 0.15 : -0.15, 0);
+      return;
+    }
     const zoomIn = event.deltaY < 0;
     this.zoomChart(zoomIn ? 0.85 : 1.15);
   }
@@ -251,6 +259,22 @@ export class AppComponent implements OnInit {
 
   zoomOut(): void {
     this.zoomChart(1.15);
+  }
+
+  panUp(): void {
+    this.panChart(0, -0.15);
+  }
+
+  panDown(): void {
+    this.panChart(0, 0.15);
+  }
+
+  panLeft(): void {
+    this.panChart(-0.15, 0);
+  }
+
+  panRight(): void {
+    this.panChart(0.15, 0);
   }
 
   resetZoom(): void {
@@ -361,6 +385,42 @@ export class AppComponent implements OnInit {
     if (xMax - xMin < 1 || yMax - yMin < 100) return;
 
     this.zoomState = { xMin, xMax, yMin, yMax };
+    this.applyZoomOptions();
+  }
+
+  private panChart(xRatio: number, yRatio: number): void {
+    if (!this.zoomBounds || !this.zoomState) return;
+
+    const { xMin: bXMin, xMax: bXMax, yMin: bYMin, yMax: bYMax } = this.zoomBounds;
+    const current = this.zoomState;
+    const xSpan = current.xMax - current.xMin;
+    const ySpan = current.yMax - current.yMin;
+    const xShift = Math.round(xSpan * xRatio);
+    const yShift = Math.round(ySpan * yRatio);
+
+    let nextXMin = current.xMin + xShift;
+    let nextXMax = current.xMax + xShift;
+    if (nextXMin < bXMin) {
+      nextXMax += bXMin - nextXMin;
+      nextXMin = bXMin;
+    }
+    if (nextXMax > bXMax) {
+      nextXMin -= nextXMax - bXMax;
+      nextXMax = bXMax;
+    }
+
+    let nextYMin = current.yMin + yShift;
+    let nextYMax = current.yMax + yShift;
+    if (nextYMin < bYMin) {
+      nextYMax += bYMin - nextYMin;
+      nextYMin = bYMin;
+    }
+    if (nextYMax > bYMax) {
+      nextYMin -= nextYMax - bYMax;
+      nextYMax = bYMax;
+    }
+
+    this.zoomState = { xMin: nextXMin, xMax: nextXMax, yMin: nextYMin, yMax: nextYMax };
     this.applyZoomOptions();
   }
 
