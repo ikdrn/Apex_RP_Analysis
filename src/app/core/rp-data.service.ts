@@ -8,9 +8,9 @@ export class RpDataService {
   private readonly http = inject(HttpClient);
   private readonly apiPath = '/api/get-rp';
 
-  fetchRecords(days: RangeOption): Observable<RpRecord[]> {
+  fetchRecords(range: RangeOption): Observable<RpRecord[]> {
     return this.http.get<RpRecord[]>(this.apiPath, {
-      params: { days: String(days) },
+      params: { days: String(range) },
     });
   }
 }

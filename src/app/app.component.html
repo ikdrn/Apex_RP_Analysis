@@ -54,7 +54,9 @@
               {{ rpChange >= 0 ? '↑' : '↓' }} {{ rpChange >= 0 ? '+' : '' }}{{ rpChange.toLocaleString() }}
             </span>
           </div>
-          <p class="mt-2 text-xs text-zinc-400 dark:text-zinc-500">過去 {{ selectedRange }} 日間</p>
+          <p class="mt-2 text-xs text-zinc-400 dark:text-zinc-500">
+            {{ selectedRange === 'all' ? '全期間' : '過去 ' + selectedRange + ' 日間' }}
+          </p>
         </div>
 
         <div class="grid grid-cols-3 gap-x-10 gap-y-2 sm:flex sm:gap-10">
@@ -99,10 +101,10 @@
     <div *ngIf="activeTab !== 'design'" class="mb-6 flex flex-wrap items-center gap-3">
       <div class="segmented">
         <button
-          *ngFor="let days of rangeOptions"
-          [class.is-active]="selectedRange === days"
-          (click)="onRangeChange(days)"
-        >{{ days }}日</button>
+          *ngFor="let range of rangeOptions"
+          [class.is-active]="selectedRange === range"
+          (click)="onRangeChange(range)"
+        >{{ rangeLabel(range) }}</button>
       </div>
 
       <div class="ml-auto flex items-center gap-2">
@@ -135,6 +137,7 @@
       <button class="tab-btn" [class.is-active]="activeTab === 'analysis'" (click)="activeTab = 'analysis'">グラフ</button>
       <button class="tab-btn" [class.is-active]="activeTab === 'table'" (click)="activeTab = 'table'">データ</button>
       <button class="tab-btn" [class.is-active]="activeTab === 'daily'" (click)="activeTab = 'daily'">日別</button>
+      <button class="tab-btn" [class.is-active]="activeTab === 'weekly'" (click)="activeTab = 'weekly'">週別</button>
       <span class="tab-spacer"></span>
       <button class="tab-btn" [class.is-active]="activeTab === 'design'" (click)="activeTab = 'design'">設計書</button>
     </div>
@@ -194,11 +197,20 @@
                 </button>
               </div>
             </div>
-            <div class="h-[420px]" (wheel)="onChartWheel($event)">
+            <div
+              class="h-[420px] touch-none select-none"
+              [class.cursor-grab]="!dragState"
+              [class.cursor-grabbing]="dragState"
+              (wheel)="onChartWheel($event)"
+              (pointerdown)="onChartPointerDown($event)"
+              (pointermove)="onChartPointerMove($event)"
+              (pointerup)="onChartPointerUp($event)"
+              (pointercancel)="onChartPointerUp($event)"
+            >
               <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
             </div>
             <p class="mt-3 text-[11px] text-zinc-400 dark:text-zinc-500">
-              ホイールで拡大・縮小 · Shift+ホイールで上下 · Alt+ホイールで左右
+              ドラッグで移動 · ホイールで拡大・縮小 · Shift+ホイールで上下 · Alt+ホイールで左右
             </p>
           </div>
         </div>
@@ -289,6 +301,53 @@
                       [ngClass]="day.change >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'"
                     >{{ day.change >= 0 ? '+' : '' }}{{ day.change.toLocaleString() }}</td>
                     <td class="text-right tabular-nums text-zinc-300 dark:text-zinc-600">{{ day.count }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Weekly ── -->
+        <div *ngIf="!loading && !error && activeTab === 'weekly' && records.length > 0">
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              {{ weeklyRecords.length }} 週分 · 日曜はじまり
+            </span>
+            <button class="btn btn-ghost" (click)="toggleWeeklySort()">
+              {{ weeklySortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}
+            </button>
+          </div>
+          <div class="card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>週</th>
+                    <th class="text-right">開始</th>
+                    <th class="text-right">終了</th>
+                    <th class="text-right">高値</th>
+                    <th class="text-right">安値</th>
+                    <th class="text-right">変化</th>
+                    <th class="text-right">件数</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let week of weeklyRecords">
+                    <td class="font-medium">
+                      {{ week.weekStart }}
+                      <span class="text-zinc-300 dark:text-zinc-600"> 〜 </span>
+                      <span class="text-zinc-500 dark:text-zinc-400">{{ week.weekEnd }}</span>
+                    </td>
+                    <td class="text-right tabular-nums text-zinc-500 dark:text-zinc-400">{{ week.firstRp.toLocaleString() }}</td>
+                    <td class="text-right font-semibold tabular-nums">{{ week.lastRp.toLocaleString() }}</td>
+                    <td class="text-right tabular-nums text-emerald-600 dark:text-emerald-400">{{ week.maxRp.toLocaleString() }}</td>
+                    <td class="text-right tabular-nums text-rose-500 dark:text-rose-400">{{ week.minRp.toLocaleString() }}</td>
+                    <td
+                      class="text-right tabular-nums text-[12px] font-semibold"
+                      [ngClass]="week.change >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'"
+                    >{{ week.change >= 0 ? '+' : '' }}{{ week.change.toLocaleString() }}</td>
+                    <td class="text-right tabular-nums text-zinc-300 dark:text-zinc-600">{{ week.count }}</td>
                   </tr>
                 </tbody>
               </table>
