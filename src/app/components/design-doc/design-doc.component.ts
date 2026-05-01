@@ -44,7 +44,7 @@ Apex Legends の公式ツールや Apex Status のようなサードパーティ
         {
           label: '業務要件',
           content: `① RP 自動取得：毎日 21:00〜翌 03:00 の間、15 分ごとに外部 API（Apex Legends Status API）からぺこんぽの RP を取得し Supabase に保存する。
-② データ保持：最新 30 日分のみ保持。それ以前のレコードは Supabase のバッチ処理で自動削除する。
+② データ保持：全期間のレコードを保持する（自動削除は実施しない）。
 ③ 可視化：蓄積データを Web 画面でグラフ（折れ線）・表・統計カードとして表示する。
 ④ CSV 出力：表示中のデータを CSV ファイルとしてダウンロードできる。`
         },
@@ -52,7 +52,6 @@ Apex Legends の公式ツールや Apex Status のようなサードパーティ
           label: 'システム化範囲',
           content: `【対象】
 ・RP 定期取得バッチ（Supabase pg_cron）
-・古レコード削除バッチ（Supabase pg_cron）
 ・データ参照 API（Vercel Serverless Function）
 ・RP 可視化 Web アプリ（Angular SPA / Vercel ホスティング）
 
@@ -116,7 +115,7 @@ Apex Legends の公式ツールや Apex Status のようなサードパーティ
         {
           label: 'データ要件',
           content: `・主テーブル：player_rp（id: UUID, rp: INTEGER, created_at: TIMESTAMPTZ JST）
-・保持期間：最新 30 日（超過分は pg_cron で自動削除）
+・保持期間：制限なし（自動削除は廃止）
 ・取得頻度：15 分ごと（21:00〜03:00 JST）→ 最大 145 レコード/日
 ・30 日最大レコード数：約 4,350 件
 ・データ移行：既存 player_rp テーブルをそのまま使用（移行処理なし）`
@@ -153,7 +152,7 @@ Apex Legends の公式ツールや Apex Status のようなサードパーティ
           content: `【メイン画面】
 ┌─────────────────────────────────────────┐
 │ Apex RP Analysis           [設計書を見る] │
-│ 期間: [7日] [30日]  [最新に更新] [CSV]   │
+│ 期間: [7日] [30日] [全期間]  [更新] [CSV] │
 ├──────┬──────┬──────┬──────┬──────┬──────┤
 │最新RP│最高RP│最低RP│期間変│平均RP│/日  │
 ├─────────────────────────────────────────┤
@@ -216,7 +215,7 @@ Supabase → JSON array → Vercel → JSON 200 OK → Browser`,
         {
           label: '機能一覧',
           content: `FN-01 RP グラフ表示（Chart.js 折れ線グラフ）
-FN-02 表示期間切替（7日 / 30日）
+FN-02 表示期間切替（7日 / 30日 / 全期間）
 FN-03 統計カード（最新 / 最高 / 最低 / 変化量 / 平均 / 1日あたり）
 FN-04 データテーブル表示（連番 id・日付ソート・検索フィルター）
 FN-05 CSV ダウンロード
@@ -226,12 +225,13 @@ FN-08 設計書タブ表示
 FN-09 ダークモード切替（localStorage 永続化）
 FN-10 エラー表示（API 失敗時）
 FN-11 RP 定期取得バッチ（pg_cron / 15 分間隔 / 21:00〜03:00 JST）
-FN-12 古レコード削除バッチ（pg_cron / 30 日超過分を自動削除）`
+FN-12 日別 / 週別集計表示（週は日曜はじまり）
+FN-13 グラフのドラッグ操作によるパン（マウス／タッチ対応）`
         },
         {
           label: '画面レイアウト',
           content: `Header: タイトル「Apex RP Analysis」＋ダークモードトグル＋「設計書を見る」リンク
-Period Selector: 7日 / 30日 ボタン ＋ 更新ボタン ＋ CSV ボタン
+Period Selector: 7日 / 30日 / 全期間 ボタン ＋ 更新ボタン ＋ CSV ボタン
 Stats Cards: 最新RP / 最高RP / 最低RP / 変化量 / 平均RP / 1日あたり変化（6カード）
 Main Tab Area: Analysis / Data Table / Daily / 設計書 タブパネル
 Footer: 「Apex RP Analysis · Powered by Supabase & Vercel」`
@@ -273,8 +273,9 @@ Footer: 「Apex RP Analysis · Powered by Supabase & Vercel」`
         {
           label: 'コード設計（定数・区分値）',
           content: `表示期間区分:
-  7  = 7日間
-  30 = 30日間（デフォルト）
+  7    = 7日間
+  30   = 30日間（デフォルト）
+  all  = 全期間
   ※ API 側で上記以外は 30 にフォールバック
 
 レートリミット:

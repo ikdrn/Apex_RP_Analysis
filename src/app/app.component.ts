@@ -17,8 +17,8 @@ import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { EMPTY, Subject, catchError, switchMap, tap } from 'rxjs';
 import { DesignDocComponent } from './components/design-doc/design-doc.component';
 import { RpDataService } from './core/rp-data.service';
-import { AppTab, DailyRecord, RangeOption, RpRecord, RpSummary, SortDirection } from './core/rp.model';
-import { buildChartLabels, buildDailyRecords, buildRecordDiffMap, buildSummary, sortRecordsByDate } from './core/rp.utils';
+import { AppTab, DailyRecord, RangeOption, RpRecord, RpSummary, SortDirection, WeeklyRecord } from './core/rp.model';
+import { buildChartLabels, buildDailyRecords, buildRecordDiffMap, buildSummary, buildWeeklyRecords, sortRecordsByDate } from './core/rp.utils';
 
 
 type RankThreshold = {
@@ -54,7 +54,11 @@ export class AppComponent implements OnInit {
   error = '';
   records: RpRecord[] = [];
   selectedRange: RangeOption = 30;
-  readonly rangeOptions: RangeOption[] = [7, 30];
+  readonly rangeOptions: RangeOption[] = [7, 30, 'all'];
+
+  rangeLabel(range: RangeOption): string {
+    return range === 'all' ? '全期間' : `${range}日`;
+  }
 
   readonly rankThresholds: RankThreshold[] = [
     { minRp: 16000, rank: 'マスター' },
@@ -68,6 +72,7 @@ export class AppComponent implements OnInit {
   isDark = false;
   tableSortDir: SortDirection = 'desc';
   dailySortDir: SortDirection = 'desc';
+  weeklySortDir: SortDirection = 'desc';
   private summary: RpSummary = buildSummary([]);
   private recordDiffs = new Map<number, number | null>();
   private zoomBounds: { xMin: number; xMax: number; yMin: number; yMax: number } | null = null;
@@ -104,6 +109,10 @@ export class AppComponent implements OnInit {
 
   get dailyRecords(): DailyRecord[] {
     return buildDailyRecords(this.records, this.dailySortDir);
+  }
+
+  get weeklyRecords(): WeeklyRecord[] {
+    return buildWeeklyRecords(this.records, this.weeklySortDir);
   }
 
   getRecordDiff(record: RpRecord): number | null {
@@ -220,6 +229,10 @@ export class AppComponent implements OnInit {
     this.dailySortDir = this.dailySortDir === 'asc' ? 'desc' : 'asc';
   }
 
+  toggleWeeklySort(): void {
+    this.weeklySortDir = this.weeklySortDir === 'asc' ? 'desc' : 'asc';
+  }
+
   downloadCsv(): void {
     if (this.records.length === 0) return;
 
@@ -251,6 +264,88 @@ export class AppComponent implements OnInit {
     }
     const zoomIn = event.deltaY < 0;
     this.zoomChart(zoomIn ? 0.85 : 1.15);
+  }
+
+  dragState: {
+    startX: number;
+    startY: number;
+    startZoom: { xMin: number; xMax: number; yMin: number; yMax: number };
+    chartArea: { left: number; right: number; top: number; bottom: number };
+  } | null = null;
+
+  onChartPointerDown(event: PointerEvent): void {
+    if (!this.zoomBounds || !this.zoomState || this.records.length < 2) return;
+    const chartInstance = this.chart?.chart;
+    const area = chartInstance?.chartArea;
+    if (!area) return;
+
+    this.dragState = {
+      startX: event.clientX,
+      startY: event.clientY,
+      startZoom: { ...this.zoomState },
+      chartArea: { left: area.left, right: area.right, top: area.top, bottom: area.bottom },
+    };
+    (event.target as HTMLElement).setPointerCapture?.(event.pointerId);
+    event.preventDefault();
+  }
+
+  onChartPointerMove(event: PointerEvent): void {
+    if (!this.dragState || !this.zoomBounds) return;
+    event.preventDefault();
+
+    const dx = event.clientX - this.dragState.startX;
+    const dy = event.clientY - this.dragState.startY;
+    const { startZoom, chartArea } = this.dragState;
+    const pixelWidth = Math.max(1, chartArea.right - chartArea.left);
+    const pixelHeight = Math.max(1, chartArea.bottom - chartArea.top);
+    const xSpan = startZoom.xMax - startZoom.xMin;
+    const ySpan = startZoom.yMax - startZoom.yMin;
+
+    // Drag right -> data shifts right (view moves left in data terms).
+    const xShift = -(dx / pixelWidth) * xSpan;
+    const yShift = (dy / pixelHeight) * ySpan;
+
+    this.applyPanFromAbsolute(startZoom, xShift, yShift);
+  }
+
+  onChartPointerUp(event: PointerEvent): void {
+    if (!this.dragState) return;
+    (event.target as HTMLElement).releasePointerCapture?.(event.pointerId);
+    this.dragState = null;
+  }
+
+  private applyPanFromAbsolute(
+    base: { xMin: number; xMax: number; yMin: number; yMax: number },
+    xShift: number,
+    yShift: number,
+  ): void {
+    if (!this.zoomBounds) return;
+    const { xMin: bXMin, xMax: bXMax, yMin: bYMin, yMax: bYMax } = this.zoomBounds;
+
+    let nextXMin = base.xMin + xShift;
+    let nextXMax = base.xMax + xShift;
+    if (nextXMin < bXMin) {
+      nextXMax += bXMin - nextXMin;
+      nextXMin = bXMin;
+    }
+    if (nextXMax > bXMax) {
+      nextXMin -= nextXMax - bXMax;
+      nextXMax = bXMax;
+    }
+
+    let nextYMin = base.yMin + yShift;
+    let nextYMax = base.yMax + yShift;
+    if (nextYMin < bYMin) {
+      nextYMax += bYMin - nextYMin;
+      nextYMin = bYMin;
+    }
+    if (nextYMax > bYMax) {
+      nextYMin -= nextYMax - bYMax;
+      nextYMax = bYMax;
+    }
+
+    this.zoomState = { xMin: nextXMin, xMax: nextXMax, yMin: nextYMin, yMax: nextYMax };
+    this.applyZoomOptions();
   }
 
   zoomIn(): void {

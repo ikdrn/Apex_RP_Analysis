@@ -4,14 +4,25 @@ export type RpRecord = {
   created_at: string;
 };
 
-export type RangeOption = 7 | 30;
+export type RangeOption = 7 | 30 | 'all';
 
 export type SortDirection = 'asc' | 'desc';
 
-export type AppTab = 'analysis' | 'table' | 'daily' | 'design';
+export type AppTab = 'analysis' | 'table' | 'daily' | 'weekly' | 'design';
 
 export type DailyRecord = {
   date: string;
+  firstRp: number;
+  lastRp: number;
+  maxRp: number;
+  minRp: number;
+  change: number;
+  count: number;
+};
+
+export type WeeklyRecord = {
+  weekStart: string;
+  weekEnd: string;
   firstRp: number;
   lastRp: number;
   maxRp: number;

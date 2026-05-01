@@ -6,6 +6,7 @@ const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 60;
 const BUCKET_CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 const SUPPORTED_DAYS = [7, 30];
+const ALL_RANGE = 'all';
 
 const requestBuckets = new Map();
 let lastBucketCleanup = Date.now();
@@ -86,13 +87,20 @@ function validateBasicAuth(req) {
 }
 
 function parseDays(rawDays) {
+  if (rawDays === ALL_RANGE) {
+    return ALL_RANGE;
+  }
   const parsedDays = Number.parseInt(rawDays, 10);
   return SUPPORTED_DAYS.includes(parsedDays) ? parsedDays : 30;
 }
 
 function buildSupabaseEndpoint({ supabaseUrl, days }) {
+  const base = `${supabaseUrl.replace(/\/$/, '')}/rest/v1/player_rp?select=id,rp,created_at&order=created_at.asc`;
+  if (days === ALL_RANGE) {
+    return base;
+  }
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-  return `${supabaseUrl.replace(/\/$/, '')}/rest/v1/player_rp?select=id,rp,created_at&created_at=gte.${since}&order=created_at.asc`;
+  return `${base}&created_at=gte.${since}`;
 }
 
 async function fetchRpRecords({ endpoint, serviceKey }) {
@@ -101,6 +109,9 @@ async function fetchRpRecords({ endpoint, serviceKey }) {
       apikey: serviceKey,
       Authorization: `Bearer ${serviceKey}`,
       'Content-Type': 'application/json',
+      // Override default PostgREST 1000-row cap so the "all" range returns full history.
+      'Range-Unit': 'items',
+      'Range': '0-99999',
     },
   });
 
