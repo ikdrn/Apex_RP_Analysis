@@ -56,6 +56,7 @@ export class AppComponent implements OnInit {
   error = '';
   records: RpRecord[] = [];
   selectedRange: RangeOption = 30;
+  lastUpdatedTime: Date | null = null;
   readonly rangeOptions: RangeOption[] = [7, 30, 'all'];
 
   rangeLabel(range: RangeOption): string {
@@ -137,6 +138,31 @@ export class AppComponent implements OnInit {
 
   getRecordDiff(record: RpRecord): number | null {
     return this.recordDiffs.get(record.id) ?? null;
+  }
+
+  getLastUpdatedText(): string {
+    if (!this.lastUpdatedTime) return '';
+    const now = Date.now();
+    const diff = now - this.lastUpdatedTime.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'いま';
+    if (minutes < 60) return `${minutes}分前`;
+    if (hours < 24) return `${hours}時間前`;
+    return `${days}日前`;
+  }
+
+  getLastUpdatedISO(): string {
+    if (!this.lastUpdatedTime) return '';
+    const date = new Date(this.lastUpdatedTime);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes} JST`;
   }
 
   lineChartData: ChartConfiguration<'line'>['data'] = {
@@ -453,6 +479,7 @@ export class AppComponent implements OnInit {
     this.records = data.filter((record) => record.rp > 0);
     this.summary = buildSummary(this.records);
     this.recordDiffs = buildRecordDiffMap(this.records);
+    this.lastUpdatedTime = this.dataService.getLastUpdatedTime(this.selectedRange);
 
     // Decimate data for rendering to improve performance
     const decimatedRecords = this.decimateData(this.records);

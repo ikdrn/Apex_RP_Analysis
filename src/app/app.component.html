@@ -4,22 +4,31 @@
     <!-- ── Header ── -->
     <header class="mb-10 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-sm">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-700 text-white dark:bg-blue-600">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-4 w-4">
             <path d="M3 17l6-6 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </div>
         <div class="flex flex-col">
           <h1 class="text-[15px] font-semibold tracking-tight">Apex RP Analysis</h1>
-          <span class="text-[11px] text-zinc-400 dark:text-zinc-500">ぺこんぽ · ランク推移</span>
+          <span class="text-[11px] text-gray-500 dark:text-gray-400">ぺこんぽ · ランク推移</span>
         </div>
       </div>
-      <button
-        class="theme-toggle"
-        (click)="toggleDark()"
-        [attr.aria-label]="isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え'"
-        title="{{ isDark ? 'ライトモード' : 'ダークモード' }}"
-      >
+
+      <div class="flex items-center gap-4">
+        <span
+          *ngIf="lastUpdatedTime"
+          class="text-[11px] text-gray-600 dark:text-gray-400"
+          [title]="getLastUpdatedISO()"
+        >
+          更新: {{ getLastUpdatedText() }}
+        </span>
+        <button
+          class="theme-toggle"
+          (click)="toggleDark()"
+          [attr.aria-label]="isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え'"
+          title="{{ isDark ? 'ライトモード' : 'ダークモード' }}"
+        >
         <svg *ngIf="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
         </svg>
@@ -27,7 +36,8 @@
           <circle cx="12" cy="12" r="4" stroke-linecap="round" stroke-linejoin="round"/>
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
         </svg>
-      </button>
+        </button>
+      </div>
     </header>
 
     <!-- ── Hero ── -->
@@ -177,9 +187,9 @@
 
         <!-- ── Analysis ── -->
         <div *ngIf="!loading && !error && activeTab === 'analysis' && records.length > 0">
-          <div class="card p-5 sm:p-6">
+          <div class="rounded-lg border border-gray-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900 sm:p-6">
             <div class="mb-4 flex flex-wrap items-center gap-2">
-              <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              <p class="text-[11px] font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 RP 推移 · {{ records.length }} 件
               </p>
               <div class="ml-auto flex items-center gap-1">
