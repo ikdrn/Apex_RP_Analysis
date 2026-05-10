@@ -3,25 +3,25 @@
 @tailwind utilities;
 
 :root {
-  --bg: #fafafa;
-  --surface: #ffffff;
-  --border: #ececef;
-  --text: #18181b;
-  --text-muted: #71717a;
-  --text-subtle: #a1a1aa;
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
+  --bg: #ffffff;
+  --surface: #f9fafb;
+  --border: #e5e7eb;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --text-subtle: #9ca3af;
+  --accent: #1e40af;
+  --accent-hover: #1e3a8a;
 }
 
 .dark {
-  --bg: #0a0a0b;
-  --surface: #131316;
-  --border: #232328;
-  --text: #fafafa;
-  --text-muted: #a1a1aa;
-  --text-subtle: #52525b;
-  --accent: #818cf8;
-  --accent-hover: #a5b4fc;
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --border: #334155;
+  --text: #f1f5f9;
+  --text-muted: #cbd5e1;
+  --text-subtle: #94a3b8;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
 }
 
 * {
@@ -97,7 +97,7 @@ body {
 }
 
 .dark .segmented button.is-active {
-  background: #232328;
+  background: #0f172a;
   color: var(--text);
   box-shadow: none;
 }
