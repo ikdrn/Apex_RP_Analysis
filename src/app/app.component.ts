@@ -420,15 +420,15 @@ export class AppComponent implements OnInit {
   }
 
   private onDataLoaded(data: RpRecord[]): void {
-    this.records = data;
-    this.summary = buildSummary(data);
-    this.recordDiffs = buildRecordDiffMap(data);
+    this.records = data.filter((record) => record.rp > 0);
+    this.summary = buildSummary(this.records);
+    this.recordDiffs = buildRecordDiffMap(this.records);
     this.lineChartData = {
-      labels: buildChartLabels(data),
-      datasets: [{ ...this.lineChartData.datasets[0], data: data.map((record) => record.rp) }]
+      labels: buildChartLabels(this.records),
+      datasets: [{ ...this.lineChartData.datasets[0], data: this.records.map((record) => record.rp) }]
     };
     this.applyChartTheme();
-    this.initializeZoomBounds(data);
+    this.initializeZoomBounds(this.records);
     this.loading = false;
     this.refreshing = false;
   }
