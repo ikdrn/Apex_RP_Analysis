@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   Chart,
@@ -41,10 +41,12 @@ Chart.register(
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, NgChartsModule, DesignDocComponent],
-  templateUrl: './app.component.html'
+  templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
   private readonly dataService = inject(RpDataService);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly loadTrigger$ = new Subject<{ days: RangeOption; isRefresh: boolean }>();
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
@@ -54,6 +56,7 @@ export class AppComponent implements OnInit {
   error = '';
   records: RpRecord[] = [];
   selectedRange: RangeOption = 30;
+  lastUpdatedTime: Date | null = null;
   readonly rangeOptions: RangeOption[] = [7, 30, 'all'];
 
   rangeLabel(range: RangeOption): string {
@@ -77,6 +80,10 @@ export class AppComponent implements OnInit {
   private recordDiffs = new Map<number, number | null>();
   private zoomBounds: { xMin: number; xMax: number; yMin: number; yMax: number } | null = null;
   private zoomState: { xMin: number; xMax: number; yMin: number; yMax: number } | null = null;
+
+  // Memoization caches for aggregations
+  private dailyRecordsCache: { records: RpRecord[], sortDir: SortDirection, result: DailyRecord[] } | null = null;
+  private weeklyRecordsCache: { records: RpRecord[], sortDir: SortDirection, result: WeeklyRecord[] } | null = null;
 
   get latestRp(): number | null { return this.summary.latestRp; }
   get maxRp(): number | null { return this.summary.maxRp; }
@@ -108,15 +115,54 @@ export class AppComponent implements OnInit {
   }
 
   get dailyRecords(): DailyRecord[] {
-    return buildDailyRecords(this.records, this.dailySortDir);
+    // Return cached result if inputs haven't changed
+    if (this.dailyRecordsCache?.records === this.records && this.dailyRecordsCache?.sortDir === this.dailySortDir) {
+      return this.dailyRecordsCache.result;
+    }
+    // Compute and cache the result
+    const result = buildDailyRecords(this.records, this.dailySortDir);
+    this.dailyRecordsCache = { records: this.records, sortDir: this.dailySortDir, result };
+    return result;
   }
 
   get weeklyRecords(): WeeklyRecord[] {
-    return buildWeeklyRecords(this.records, this.weeklySortDir);
+    // Return cached result if inputs haven't changed
+    if (this.weeklyRecordsCache?.records === this.records && this.weeklyRecordsCache?.sortDir === this.weeklySortDir) {
+      return this.weeklyRecordsCache.result;
+    }
+    // Compute and cache the result
+    const result = buildWeeklyRecords(this.records, this.weeklySortDir);
+    this.weeklyRecordsCache = { records: this.records, sortDir: this.weeklySortDir, result };
+    return result;
   }
 
   getRecordDiff(record: RpRecord): number | null {
     return this.recordDiffs.get(record.id) ?? null;
+  }
+
+  getLastUpdatedText(): string {
+    if (!this.lastUpdatedTime) return '';
+    const now = Date.now();
+    const diff = now - this.lastUpdatedTime.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'いま';
+    if (minutes < 60) return `${minutes}分前`;
+    if (hours < 24) return `${hours}時間前`;
+    return `${days}日前`;
+  }
+
+  getLastUpdatedISO(): string {
+    if (!this.lastUpdatedTime) return '';
+    const date = new Date(this.lastUpdatedTime);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes} JST`;
   }
 
   lineChartData: ChartConfiguration<'line'>['data'] = {
@@ -129,12 +175,12 @@ export class AppComponent implements OnInit {
         backgroundColor: 'rgba(30, 64, 175, 0.08)',
         borderWidth: 2,
         tension: 0.3,
-        fill: true,
+        fill: false,
         pointBackgroundColor: '#1e40af',
         pointBorderColor: '#ffffff',
         pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6
+        pointRadius: 0,
+        pointHoverRadius: 4
       }
     ]
   };
@@ -146,10 +192,10 @@ export class AppComponent implements OnInit {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1f2937',
-        titleColor: '#f9fafb',
-        bodyColor: '#e5e7eb',
-        borderColor: '#374151',
+        backgroundColor: '#1e293b',
+        titleColor: '#f1f5f9',
+        bodyColor: '#cbd5e1',
+        borderColor: '#334155',
         borderWidth: 1,
         padding: 10,
         cornerRadius: 6,
@@ -159,12 +205,12 @@ export class AppComponent implements OnInit {
     scales: {
       x: {
         ticks: { color: '#6b7280', font: { size: 11 }, maxRotation: 45 },
-        grid: { color: '#f3f4f6' },
+        grid: { color: '#e5e7eb' },
         border: { color: '#e5e7eb' }
       },
       y: {
         ticks: { color: '#6b7280', font: { size: 11 }, callback: (value) => value.toLocaleString() },
-        grid: { color: '#f3f4f6' },
+        grid: { color: '#e5e7eb' },
         border: { color: '#e5e7eb' }
       }
     }
@@ -205,6 +251,7 @@ export class AppComponent implements OnInit {
     document.documentElement.classList.toggle('dark', this.isDark);
     localStorage.setItem('dark-mode', String(this.isDark));
     this.applyChartTheme();
+    this.cdr.markForCheck();
   }
 
   showDesignDoc(): void {
@@ -223,14 +270,17 @@ export class AppComponent implements OnInit {
 
   toggleTableSort(): void {
     this.tableSortDir = this.tableSortDir === 'asc' ? 'desc' : 'asc';
+    this.cdr.markForCheck();
   }
 
   toggleDailySort(): void {
     this.dailySortDir = this.dailySortDir === 'asc' ? 'desc' : 'asc';
+    this.cdr.markForCheck();
   }
 
   toggleWeeklySort(): void {
     this.weeklySortDir = this.weeklySortDir === 'asc' ? 'desc' : 'asc';
+    this.cdr.markForCheck();
   }
 
   downloadCsv(): void {
@@ -380,12 +430,12 @@ export class AppComponent implements OnInit {
 
   private applyChartTheme(): void {
     const dark = this.isDark;
-    const gridColor       = dark ? '#374151' : '#f3f4f6';
-    const borderColor     = dark ? '#4b5563' : '#e5e7eb';
-    const tickColor       = dark ? '#d1d5db' : '#6b7280';
-    const lineColor       = dark ? '#60a5fa' : '#1e40af';
-    const fillColor       = dark ? 'rgba(96, 165, 250, 0.15)' : 'rgba(30, 64, 175, 0.08)';
-    const pointBorderColor = dark ? '#111827' : '#ffffff';
+    const gridColor       = dark ? '#475569' : '#e5e7eb';
+    const borderColor     = dark ? '#334155' : '#e5e7eb';
+    const tickColor       = dark ? '#cbd5e1' : '#6b7280';
+    const lineColor       = dark ? '#3b82f6' : '#1e40af';
+    const fillColor       = dark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(30, 64, 175, 0.08)';
+    const pointBorderColor = dark ? '#0f172a' : '#ffffff';
 
     this.lineChartOptions = {
       ...this.lineChartOptions,
@@ -419,18 +469,30 @@ export class AppComponent implements OnInit {
     this.loadTrigger$.next({ days: this.selectedRange, isRefresh });
   }
 
+  private decimateData(records: RpRecord[], maxPoints: number = 500): RpRecord[] {
+    if (records.length <= maxPoints) return records;
+    const decimateFactor = Math.ceil(records.length / maxPoints);
+    return records.filter((_, i) => i % decimateFactor === 0);
+  }
+
   private onDataLoaded(data: RpRecord[]): void {
     this.records = data.filter((record) => record.rp > 0);
     this.summary = buildSummary(this.records);
     this.recordDiffs = buildRecordDiffMap(this.records);
+    this.lastUpdatedTime = this.dataService.getLastUpdatedTime(this.selectedRange);
+
+    // Decimate data for rendering to improve performance
+    const decimatedRecords = this.decimateData(this.records);
+
     this.lineChartData = {
-      labels: buildChartLabels(this.records),
-      datasets: [{ ...this.lineChartData.datasets[0], data: this.records.map((record) => record.rp) }]
+      labels: buildChartLabels(decimatedRecords),
+      datasets: [{ ...this.lineChartData.datasets[0], data: decimatedRecords.map((record) => record.rp) }]
     };
     this.applyChartTheme();
-    this.initializeZoomBounds(this.records);
+    this.initializeZoomBounds(decimatedRecords);
     this.loading = false;
     this.refreshing = false;
+    this.cdr.markForCheck();
   }
 
   private onLoadError(err: unknown): void {
@@ -538,5 +600,6 @@ export class AppComponent implements OnInit {
       }
     };
     this.chart?.update();
+    this.cdr.markForCheck();
   }
 }
