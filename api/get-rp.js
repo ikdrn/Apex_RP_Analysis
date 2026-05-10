@@ -95,7 +95,7 @@ function parseDays(rawDays) {
 }
 
 function buildSupabaseEndpoint({ supabaseUrl, days }) {
-  const base = `${supabaseUrl.replace(/\/$/, '')}/rest/v1/player_rp?select=id,rp,created_at&order=created_at.desc`;
+  const base = `${supabaseUrl.replace(/\/$/, '')}/rest/v1/player_rp?select=id,rp,created_at&order=created_at.asc`;
   if (days === ALL_RANGE) {
     return base;
   }
