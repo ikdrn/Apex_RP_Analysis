@@ -1,0 +1,40 @@
+// ============================================================
+//  Light theme — warm ivory / ink, with vivid red + deep navy.
+//  Deliberately avoids the "tech-product" white + grey + blue
+//  palette. These custom properties are the single source of
+//  truth read by every component via var(--color-*).
+// ============================================================
+
+:root {
+  // Surfaces
+  --color-bg: #fefef8;          // warm ivory
+  --color-surface: #f0ebe5;     // beige panel
+  --color-surface-alt: #e6ddd0; // pressed / hovered panel
+
+  // Ink
+  --color-text: #1a1a1a;        // near-black
+  --color-text-muted: #5c554c;  // warm grey
+  --color-text-subtle: #8a8175; // faint label grey
+
+  // Lines
+  --color-border: #333333;      // hard framing rule
+  --color-border-soft: #cabfae; // internal divider
+
+  // Accents (vivid x deep)
+  --color-accent-1: #d4202f;    // signal red
+  --color-accent-2: #0d47a1;    // deep navy
+
+  // Semantic
+  --color-positive: #1b6b3a;    // gain green
+  --color-negative: #d4202f;    // loss red
+
+  // Chart / texture helpers
+  --color-grid: #cabfae;
+  --color-on-accent: #fefef8;   // text sitting on an accent fill
+  --hatch: rgba(26, 26, 26, 0.05);
+
+  // Design-doc editorial header band (intentionally dark in both
+  // themes so the document reads as its own printed artefact).
+  --doc-band: #1f1f1f;
+  --doc-band-text: #f5f5f0;
+}

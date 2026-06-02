@@ -1,0 +1,148 @@
+// ============================================================
+//  DesignDocComponent — scoped styles.
+//  Reads as a printed specification: dark editorial header
+//  bands, serif headings, hard rules. (Rich-text inside the
+//  cells is styled globally via `.design-doc-html` because it
+//  is injected with [innerHTML].)
+// ============================================================
+
+@use 'variables' as *;
+@use 'utilities' as *;
+
+.doc {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $sp-16;
+
+  @include respond-to($bp-md) {
+    grid-template-columns: 220px 1fr;
+    gap: $sp-24;
+  }
+}
+
+// ── Section navigation ──────────────────────────────────────
+.doc__nav-label {
+  @include eyebrow;
+  display: block;
+  margin-bottom: $sp-10;
+}
+
+.doc__nav {
+  display: flex;
+  flex-direction: row;
+  gap: $sp-6;
+  overflow-x: auto;
+
+  @include respond-to($bp-md) {
+    flex-direction: column;
+    overflow: visible;
+  }
+}
+
+.doc__nav-btn {
+  flex-shrink: 0;
+  padding: $sp-10 $sp-12;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: left;
+  color: var(--color-text-muted);
+  border: $bd-hair solid var(--color-border);
+  transition: background-color $fade ease, color $fade ease, border-color $fade ease;
+  @include focus-ring;
+
+  &:hover:not(.is-active) {
+    border-color: var(--color-text);
+    color: var(--color-text);
+  }
+
+  &.is-active {
+    background: var(--doc-band);
+    color: var(--doc-band-text);
+    border-color: var(--doc-band);
+  }
+}
+
+// ── Section body ────────────────────────────────────────────
+.doc__section {
+  border: $bd-hair solid var(--color-border);
+  background: var(--color-bg);
+}
+
+// Dark editorial header band with a serif title.
+.doc__section-head {
+  padding: $sp-12 $sp-16;
+  background: var(--doc-band);
+}
+
+.doc__section-title {
+  @include serif(700);
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--doc-band-text);
+}
+
+.doc__table {
+  width: 100%;
+}
+
+.doc__row {
+  border-bottom: $bd-hair solid var(--color-border-soft);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.doc__label {
+  width: 132px;
+  min-width: 132px;
+  vertical-align: top;
+  padding: $sp-12 $sp-12;
+  background: var(--color-surface);
+  border-right: $bd-hair solid var(--color-border-soft);
+
+  @include serif(700);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+}
+
+.doc__content {
+  padding: $sp-12 $sp-16;
+  vertical-align: top;
+  color: var(--color-text-muted);
+}
+
+.doc__text {
+  white-space: pre-line;
+  line-height: 1.7;
+  font-size: 12.5px;
+}
+
+.doc__rich {
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.doc__diagram {
+  margin-top: $sp-12;
+  padding: $sp-16;
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: $bd-hair solid var(--color-border-soft);
+
+  .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+// ── Footer ──────────────────────────────────────────────────
+.doc__footer {
+  margin-top: $sp-16;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-subtle);
+}

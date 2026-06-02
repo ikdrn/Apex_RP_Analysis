@@ -3,7 +3,7 @@
 ApexのRP推移を「グラフ」と「データ一覧」で確認できるアプリです。
 
 ## 技術スタック
-- Frontend: Angular + Tailwind CSS + ng2-charts (Chart.js)
+- Frontend: Angular + SCSS (hand-written design system) + ng2-charts (Chart.js)
 - Backend: Vercel Serverless Function (Node.js / CommonJS)
 - Database: Supabase (`player_rp`)
 - Deploy: Vercel

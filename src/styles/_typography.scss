@@ -1,0 +1,53 @@
+// ============================================================
+//  Base typography. Three deliberate registers:
+//    · serif (Georgia / Noto Serif JP) — headings & figures
+//    · sans  (system)                  — body copy
+//    · mono  (IBM Plex Mono)           — numbers & codes
+// ============================================================
+
+@use 'variables' as *;
+@use 'utilities' as *;
+
+body {
+  font-family: $font-sans;
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+// Serif heading family with a stepped, uneven scale.
+h1,
+h2,
+h3,
+h4 {
+  @include serif(700);
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: 30px;
+  font-weight: 800;
+}
+h2 {
+  font-size: 21px;
+}
+h3 {
+  font-size: 17px;
+}
+
+p {
+  line-height: 1.6;
+}
+
+// Numbers, IDs and codes.
+code,
+.is-mono {
+  @include mono(500);
+}
+
+::selection {
+  background: var(--color-accent-1);
+  color: var(--color-on-accent);
+}
