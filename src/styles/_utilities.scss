@@ -1,0 +1,69 @@
+// ============================================================
+//  Reusable mixins (no CSS is emitted from this file).
+//  Consumed by global.scss and every component stylesheet via
+//  `@use 'utilities' as *;`
+// ============================================================
+
+@use 'variables' as *;
+
+// Serif display type for headings / hero figures.
+@mixin serif($weight: 700) {
+  font-family: $font-serif;
+  font-weight: $weight;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+// Monospace for numbers, codes and tabular figures.
+@mixin mono($weight: 500) {
+  font-family: $font-mono;
+  font-weight: $weight;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+// Small upper-case eyebrow label.
+@mixin eyebrow {
+  font-family: $font-sans;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-text-subtle);
+}
+
+// Dashed accent focus ring — accessibility requirement.
+@mixin focus-ring {
+  &:focus-visible {
+    outline: $bd-hard dashed var(--color-accent-1);
+    outline-offset: 2px;
+  }
+}
+
+// Min-width media query helper.
+@mixin respond-to($bp) {
+  @media (min-width: $bp) {
+    @content;
+  }
+}
+
+// Diagonal hatching — a real CSS texture (not a decorative
+// gradient fill). Used sparingly on framed surfaces.
+@mixin hatching($gap: 7px) {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--hatch),
+    var(--hatch) 1px,
+    transparent 1px,
+    transparent $gap
+  );
+}
+
+// Hard-edged bordered control used by buttons / segments.
+@mixin hard-control {
+  border: $bd-hair solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  transition: border-color $fade, color $fade;
+  @include focus-ring;
+}

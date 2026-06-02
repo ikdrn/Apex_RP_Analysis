@@ -8,7 +8,8 @@ import mermaid from 'mermaid';
   selector: 'app-design-doc',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './design-doc.component.html'
+  templateUrl: './design-doc.component.html',
+  styleUrls: ['./design-doc.component.scss']
 })
 export class DesignDocComponent implements OnInit, AfterViewChecked, OnChanges {
   @Input() isDark = false;
@@ -100,7 +101,7 @@ Apex Legends の公式ツールや Apex Status のようなサードパーティ
 【拡張性・保守性】
 ・バッチ処理は Supabase pg_cron で完結（外部 cron サーバー不要）
 ・Angular スタンドアロンコンポーネント構成で依存を最小化
-・ダークモードは Tailwind dark: クラスで一元管理`
+・ダークモードは html.dark クラス + CSS カスタムプロパティで一元管理`
         },
         {
           label: 'インターフェース要件',
@@ -906,7 +907,7 @@ DevTools: Network / Console タブ使用
     <tr><td>CI-03</td><td>ビルド設定</td><td>angular.json / tsconfig.json</td></tr>
     <tr><td>CI-04</td><td>依存関係定義</td><td>package.json / package-lock.json</td></tr>
     <tr><td>CI-05</td><td>Vercel 設定</td><td>vercel.json</td></tr>
-    <tr><td>CI-06</td><td>スタイル設定</td><td>tailwind.config.js / postcss.config.js</td></tr>
+    <tr><td>CI-06</td><td>スタイル設定</td><td>src/styles/（SCSS デザインシステム）</td></tr>
     <tr><td>CI-07</td><td>環境変数定義</td><td>.env.example</td></tr>
     <tr><td>CI-08</td><td>設計書（本コンポーネント）</td><td>design-doc.component.ts</td></tr>
     <tr><td>CI-09</td><td>Supabase スキーマ</td><td>DDL: player_rp テーブル・インデックス</td></tr>
@@ -987,7 +988,7 @@ DevTools: Network / Console タブ使用
   バージョン: 17.3.x
   ビルドモード: production（ng build --configuration production）
   バンドラー: esbuild（Angular 17 デフォルト）
-  CSS: Tailwind CSS 3.4.x + PostCSS
+  CSS: 手書き SCSS デザインシステム（変数・ミックスイン・スコープ付き）
 
 【Supabase（PostgreSQL）】
   拡張機能: pgcrypto（gen_random_uuid 用）、pg_cron、pg_net
@@ -1026,7 +1027,7 @@ DevTools: Network / Console タブ使用
       startOnLoad: false,
       theme: this.isDark ? 'dark' : 'default',
       securityLevel: 'loose',
-      fontFamily: 'Inter, "Noto Sans JP", sans-serif'
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Noto Sans JP", sans-serif'
     });
     this.mermaidInitialized = true;
     this.needsRender = true;

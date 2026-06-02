@@ -1,41 +1,41 @@
-<div class="min-h-screen">
-  <div class="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
+<div class="app">
+  <div class="app__container">
 
-    <!-- ── Header ── -->
-    <header class="mb-10 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-700 text-white dark:bg-blue-600">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-4 w-4">
-            <path d="M3 17l6-6 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- ── Masthead ── -->
+    <header class="masthead">
+      <div class="masthead__brand">
+        <div class="masthead__mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+            <path d="M3 17l6-6 4 4 8-8" stroke-linecap="square" stroke-linejoin="miter" />
           </svg>
         </div>
-        <div class="flex flex-col">
-          <h1 class="text-[15px] font-semibold tracking-tight">Apex RP Analysis</h1>
-          <span class="text-[11px] text-gray-500 dark:text-gray-400">ぺこんぽ · ランク推移</span>
+        <div class="masthead__titles">
+          <h1 class="masthead__title">Apex RP Analysis</h1>
+          <span class="masthead__sub">ぺこんぽ · ランク推移</span>
         </div>
       </div>
 
-      <div class="flex items-center gap-4">
+      <div class="masthead__meta">
         <span
           *ngIf="lastUpdatedTime"
-          class="text-[11px] text-gray-600 dark:text-gray-400"
+          class="masthead__updated"
           [title]="getLastUpdatedISO()"
         >
-          更新: {{ getLastUpdatedText() }}
+          更新 {{ getLastUpdatedText() }}
         </span>
         <button
           class="theme-toggle"
           (click)="toggleDark()"
           [attr.aria-label]="isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え'"
-          title="{{ isDark ? 'ライトモード' : 'ダークモード' }}"
+          [title]="isDark ? 'ライトモード' : 'ダークモード'"
         >
-        <svg *ngIf="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-        </svg>
-        <svg *ngIf="isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
-          <circle cx="12" cy="12" r="4" stroke-linecap="round" stroke-linejoin="round"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
-        </svg>
+          <svg *ngIf="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="square" stroke-linejoin="miter" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+          <svg *ngIf="isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" stroke-linecap="square" stroke-linejoin="miter"/>
+            <path stroke-linecap="square" stroke-linejoin="miter" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
         </button>
       </div>
     </header>
@@ -43,174 +43,156 @@
     <!-- ── Hero ── -->
     <section
       *ngIf="!loading && !error && activeTab !== 'design'"
-      class="mb-10 transition-opacity duration-200"
-      [class.opacity-50]="refreshing"
+      class="hero"
+      [class.is-refreshing]="refreshing"
     >
-      <div class="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
+      <div class="hero__top">
         <div>
-          <div class="mb-2 flex items-center gap-2">
-            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">最新 RP</span>
-            <span class="rank-pill" *ngIf="latestRp !== null">{{ latestRank }}</span>
+          <div class="hero__eyebrow-row">
+            <span class="hero__eyebrow">最新 RP</span>
+            <span class="rank-tag" *ngIf="latestRp !== null">{{ latestRank }}</span>
           </div>
-          <div class="flex items-baseline gap-3">
-            <span class="text-[56px] font-bold leading-none tracking-tight tabular-nums">
+          <div class="hero__figure">
+            <span class="hero__rp">
               {{ latestRp !== null ? latestRp.toLocaleString() : '—' }}
             </span>
             <span
               *ngIf="rpChange !== null"
-              class="text-[15px] font-semibold tabular-nums"
-              [ngClass]="rpChange >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'"
+              class="hero__delta"
+              [class.is-pos]="rpChange >= 0"
+              [class.is-neg]="rpChange < 0"
             >
               {{ rpChange >= 0 ? '↑' : '↓' }} {{ rpChange >= 0 ? '+' : '' }}{{ rpChange.toLocaleString() }}
             </span>
           </div>
-          <p class="mt-2 text-xs text-zinc-400 dark:text-zinc-500">
+          <p class="hero__range">
             {{ selectedRange === 'all' ? '全期間' : '過去 ' + selectedRange + ' 日間' }}
           </p>
         </div>
 
-        <div class="grid grid-cols-3 gap-x-10 gap-y-2 sm:flex sm:gap-10">
-          <div>
-            <p class="text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">最高</p>
-            <p class="mt-1.5 text-[15px] font-semibold tabular-nums">{{ maxRp !== null ? maxRp.toLocaleString() : '—' }}</p>
+        <div class="hero__stats">
+          <div class="stat">
+            <span class="stat__label">最高</span>
+            <span class="stat__value">{{ maxRp !== null ? maxRp.toLocaleString() : '—' }}</span>
           </div>
-          <div>
-            <p class="text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">最低</p>
-            <p class="mt-1.5 text-[15px] font-semibold tabular-nums">{{ minRp !== null ? minRp.toLocaleString() : '—' }}</p>
+          <div class="stat">
+            <span class="stat__label">最低</span>
+            <span class="stat__value">{{ minRp !== null ? minRp.toLocaleString() : '—' }}</span>
           </div>
-          <div>
-            <p class="text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">平均</p>
-            <p class="mt-1.5 text-[15px] font-semibold tabular-nums">{{ avgRp !== null ? avgRp.toLocaleString() : '—' }}</p>
+          <div class="stat">
+            <span class="stat__label">平均</span>
+            <span class="stat__value">{{ avgRp !== null ? avgRp.toLocaleString() : '—' }}</span>
           </div>
-          <div>
-            <p class="text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">日次平均</p>
-            <p
-              class="mt-1.5 text-[15px] font-semibold tabular-nums"
-              [ngClass]="(rpPerDay ?? 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'"
-            >{{ rpPerDay !== null ? ((rpPerDay >= 0 ? '+' : '') + rpPerDay.toFixed(1)) : '—' }}</p>
+          <div class="stat">
+            <span class="stat__label">日次平均</span>
+            <span
+              class="stat__value"
+              [class.is-pos]="(rpPerDay ?? 0) >= 0"
+              [class.is-neg]="(rpPerDay ?? 0) < 0"
+            >{{ rpPerDay !== null ? ((rpPerDay >= 0 ? '+' : '') + rpPerDay.toFixed(1)) : '—' }}</span>
           </div>
         </div>
       </div>
 
       <!-- Rank guide collapsible -->
-      <details class="rank-guide mt-6">
-        <summary>ランク目安を表示</summary>
-        <ul class="mt-3 grid gap-1.5 text-[12.5px] sm:grid-cols-3">
-          <li
-            *ngFor="let threshold of rankThresholds"
-            class="flex items-center justify-between rounded-lg border border-zinc-100 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/40"
-          >
-            <span class="font-medium text-zinc-700 dark:text-zinc-200">{{ threshold.rank }}</span>
-            <span class="tabular-nums text-zinc-400 dark:text-zinc-500">{{ threshold.minRp.toLocaleString() }}+</span>
+      <details class="rank-guide">
+        <summary class="rank-guide__summary">ランク目安を表示</summary>
+        <ul class="rank-guide__list">
+          <li class="rank-guide__item" *ngFor="let threshold of rankThresholds">
+            <span>{{ threshold.rank }}</span>
+            <span class="rank-guide__rp">{{ threshold.minRp.toLocaleString() }}+</span>
           </li>
         </ul>
       </details>
     </section>
 
     <!-- ── Controls (hidden on design doc) ── -->
-    <div *ngIf="activeTab !== 'design'" class="mb-6 flex flex-wrap items-center gap-3">
-      <div class="segmented">
+    <div *ngIf="activeTab !== 'design'" class="controls">
+      <div class="segment">
         <button
           *ngFor="let range of rangeOptions"
+          class="segment__btn"
           [class.is-active]="selectedRange === range"
           (click)="onRangeChange(range)"
         >{{ rangeLabel(range) }}</button>
       </div>
 
-      <div class="ml-auto flex items-center gap-2">
+      <div class="controls__actions">
         <button
-          class="btn btn-ghost"
+          class="btn"
           (click)="downloadCsv()"
           [disabled]="records.length === 0 || loading"
+          aria-label="CSV をダウンロード"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="square" stroke-linejoin="miter" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/>
           </svg>
           CSV
         </button>
         <button
-          class="btn btn-primary"
+          class="btn btn--accent"
           (click)="refresh()"
           [disabled]="loading || refreshing"
+          aria-label="最新データに更新"
         >
-          <span *ngIf="refreshing" class="spinner"></span>
-          <svg *ngIf="!refreshing" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M4 10a8 8 0 0114-3m2 7a8 8 0 01-14 3"/>
-          </svg>
-          {{ refreshing ? '更新中' : '更新' }}
+          {{ refreshing ? '更新中…' : '更新' }}
         </button>
       </div>
     </div>
 
     <!-- ── Tabs ── -->
-    <div class="tab-bar">
-      <button class="tab-btn" [class.is-active]="activeTab === 'analysis'" (click)="activeTab = 'analysis'">グラフ</button>
-      <button class="tab-btn" [class.is-active]="activeTab === 'table'" (click)="activeTab = 'table'">データ</button>
-      <button class="tab-btn" [class.is-active]="activeTab === 'daily'" (click)="activeTab = 'daily'">日別</button>
-      <button class="tab-btn" [class.is-active]="activeTab === 'weekly'" (click)="activeTab = 'weekly'">週別</button>
-      <span class="tab-spacer"></span>
-      <button class="tab-btn" [class.is-active]="activeTab === 'design'" (click)="activeTab = 'design'">設計書</button>
-    </div>
+    <nav class="tabs" aria-label="表示切り替え">
+      <button class="tab" [class.is-active]="activeTab === 'analysis'" (click)="activeTab = 'analysis'">グラフ</button>
+      <button class="tab" [class.is-active]="activeTab === 'table'" (click)="activeTab = 'table'">データ</button>
+      <button class="tab" [class.is-active]="activeTab === 'daily'" (click)="activeTab = 'daily'">日別</button>
+      <button class="tab" [class.is-active]="activeTab === 'weekly'" (click)="activeTab = 'weekly'">週別</button>
+      <span class="tabs__spacer"></span>
+      <button class="tab" [class.is-active]="activeTab === 'design'" (click)="activeTab = 'design'">設計書</button>
+    </nav>
 
     <!-- ── Content ── -->
     <main>
       <ng-container *ngIf="activeTab !== 'design'">
 
         <!-- Loading -->
-        <div *ngIf="loading" class="flex items-center justify-center py-32">
-          <div class="flex flex-col items-center gap-3 text-zinc-400 dark:text-zinc-500">
-            <div class="spinner h-5 w-5" style="border-width:2px"></div>
-            <p class="text-xs">読み込み中</p>
-          </div>
+        <div *ngIf="loading" class="state state--loading">
+          読み込み中…
         </div>
 
         <!-- Error -->
-        <div *ngIf="error" class="rounded-xl border border-rose-200 bg-rose-50 p-5 dark:border-rose-900/40 dark:bg-rose-950/30">
-          <div class="flex items-start gap-3">
-            <svg class="mt-0.5 h-4 w-4 shrink-0 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-            </svg>
-            <div>
-              <p class="text-sm font-medium text-rose-700 dark:text-rose-300">{{ error }}</p>
-              <p class="mt-1 text-xs text-rose-500/80 dark:text-rose-400/70">
-                環境変数（SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）を確認してください。
-              </p>
-            </div>
-          </div>
+        <div *ngIf="error" class="state state--error" role="alert">
+          <p class="state__error-title">{{ error }}</p>
+          <p class="state__error-hint">
+            環境変数（SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）を確認してください。
+          </p>
         </div>
 
         <!-- Empty -->
-        <div *ngIf="!loading && !error && records.length === 0" class="py-24 text-center">
-          <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">この期間のデータはまだありません</p>
-          <p class="mt-2 text-xs text-zinc-400 dark:text-zinc-500">時間をおいて更新ボタンを押してください</p>
+        <div *ngIf="!loading && !error && records.length === 0" class="state state--empty">
+          <svg class="state__art" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M6 50h52" stroke-linecap="square"/>
+            <path d="M6 50V12" stroke-linecap="square"/>
+            <path d="M10 42l14-12 10 8 18-20" stroke-linecap="square" stroke-linejoin="miter"/>
+          </svg>
+          <p class="state__title">この期間のデータはまだありません</p>
+          <p class="state__hint">時間をおいて更新ボタンを押してください</p>
         </div>
 
         <!-- ── Analysis ── -->
         <div *ngIf="!loading && !error && activeTab === 'analysis' && records.length > 0">
-          <div class="rounded-lg border border-gray-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900 sm:p-6">
-            <div class="mb-4 flex flex-wrap items-center gap-2">
-              <p class="text-[11px] font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                RP 推移 · {{ records.length }} 件
-              </p>
-              <div class="ml-auto flex items-center gap-1">
-                <button class="icon-btn" (click)="panLeft()" title="左に移動">←</button>
-                <button class="icon-btn" (click)="panDown()" title="下に移動">↓</button>
-                <button class="icon-btn" (click)="panUp()" title="上に移動">↑</button>
-                <button class="icon-btn" (click)="panRight()" title="右に移動">→</button>
-                <span class="mx-1 h-4 w-px bg-zinc-200 dark:bg-zinc-700"></span>
-                <button class="icon-btn" (click)="zoomOut()" title="縮小">−</button>
-                <button class="icon-btn" (click)="zoomIn()" title="拡大">＋</button>
-                <button class="icon-btn" [disabled]="!canResetZoom" (click)="resetZoom()" title="リセット">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M4 10a8 8 0 0114-3m2 7a8 8 0 01-14 3"/>
-                  </svg>
-                </button>
+          <div class="panel">
+            <div class="panel__head">
+              <span class="panel__label">RP 推移 · {{ records.length }} 件</span>
+              <div class="panel__tools">
+                <button class="tool-btn" (click)="zoomOut()" aria-label="縮小">縮小</button>
+                <button class="tool-btn" (click)="zoomIn()" aria-label="拡大">拡大</button>
+                <span class="panel__divider" aria-hidden="true"></span>
+                <button class="tool-btn" [disabled]="!canResetZoom" (click)="resetZoom()" aria-label="表示をリセット">リセット</button>
               </div>
             </div>
             <div
-              class="h-[420px] touch-none select-none"
-              [class.cursor-grab]="!dragState"
-              [class.cursor-grabbing]="dragState"
+              class="panel__plot"
+              [class.is-dragging]="dragState"
               (wheel)="onChartWheel($event)"
               (pointerdown)="onChartPointerDown($event)"
               (pointermove)="onChartPointerMove($event)"
@@ -219,161 +201,151 @@
             >
               <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
             </div>
-            <p class="mt-3 text-[11px] text-zinc-400 dark:text-zinc-500">
-              ドラッグで移動 · ホイールで拡大・縮小 · Shift+ホイールで上下 · Alt+ホイールで左右
+            <p class="panel__hint">
+              ドラッグで移動 · スクロール可（ホイールで拡大縮小 / Shift+上下 / Alt+左右）
             </p>
           </div>
         </div>
 
         <!-- ── Table ── -->
         <div *ngIf="!loading && !error && activeTab === 'table' && records.length > 0">
-          <div class="mb-3 flex items-center justify-between">
-            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-              {{ sortedRecords.length }} 件
-            </span>
-            <button class="btn btn-ghost" (click)="toggleTableSort()">
+          <div class="table-head">
+            <span class="table-head__count">{{ sortedRecords.length }} 件</span>
+            <button class="btn" (click)="toggleTableSort()">
               {{ tableSortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}
             </button>
           </div>
-          <div class="card overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th class="w-12">No</th>
-                    <th class="text-right">RP</th>
-                    <th>日時</th>
-                    <th class="text-right">差分</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let row of sortedRecords; let i = index">
-                    <td class="font-mono text-[11px] text-zinc-300 dark:text-zinc-600">
-                      {{ tableSortDir === 'asc' ? (i + 1) : (sortedRecords.length - i) }}
-                    </td>
-                    <td class="text-right font-semibold tabular-nums">
-                      {{ row.rp.toLocaleString() }}
-                    </td>
-                    <td class="tabular-nums text-zinc-500 dark:text-zinc-400">
-                      {{ row.created_at | date:'MM/dd HH:mm':'UTC' }}
-                    </td>
-                    <td
-                      class="text-right font-mono text-[12px]"
-                      [ngClass]="getRecordDiff(row) === null
-                        ? 'text-zinc-300 dark:text-zinc-600'
-                        : ((getRecordDiff(row) ?? 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400')"
-                    >
-                      <ng-container *ngIf="getRecordDiff(row) !== null">
-                        {{ (getRecordDiff(row) ?? 0) >= 0 ? '+' : '' }}{{ (getRecordDiff(row) ?? 0).toLocaleString() }}
-                      </ng-container>
-                      <ng-container *ngIf="getRecordDiff(row) === null">—</ng-container>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th class="is-right">RP</th>
+                  <th>日時</th>
+                  <th class="is-right">差分</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of sortedRecords; let i = index">
+                  <td class="col-id">
+                    {{ tableSortDir === 'asc' ? (i + 1) : (sortedRecords.length - i) }}
+                  </td>
+                  <td class="col-num col-num--strong">
+                    {{ row.rp.toLocaleString() }}
+                  </td>
+                  <td class="col-date">
+                    {{ row.created_at | date:'MM/dd HH:mm':'UTC' }}
+                  </td>
+                  <td
+                    class="col-num"
+                    [class.is-pos]="getRecordDiff(row) !== null && (getRecordDiff(row) ?? 0) >= 0"
+                    [class.is-neg]="getRecordDiff(row) !== null && (getRecordDiff(row) ?? 0) < 0"
+                    [class.is-faint]="getRecordDiff(row) === null"
+                  >
+                    <ng-container *ngIf="getRecordDiff(row) !== null">
+                      {{ (getRecordDiff(row) ?? 0) >= 0 ? '+' : '' }}{{ (getRecordDiff(row) ?? 0).toLocaleString() }}
+                    </ng-container>
+                    <ng-container *ngIf="getRecordDiff(row) === null">—</ng-container>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
         <!-- ── Daily ── -->
         <div *ngIf="!loading && !error && activeTab === 'daily' && records.length > 0">
-          <div class="mb-3 flex items-center justify-between">
-            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-              {{ dailyRecords.length }} 日分
-            </span>
-            <button class="btn btn-ghost" (click)="toggleDailySort()">
+          <div class="table-head">
+            <span class="table-head__count">{{ dailyRecords.length }} 日分</span>
+            <button class="btn" (click)="toggleDailySort()">
               {{ dailySortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}
             </button>
           </div>
-          <div class="card overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>日付</th>
-                    <th class="text-right">開始</th>
-                    <th class="text-right">終了</th>
-                    <th class="text-right">高値</th>
-                    <th class="text-right">安値</th>
-                    <th class="text-right">変化</th>
-                    <th class="text-right">件数</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let day of dailyRecords">
-                    <td class="font-medium">{{ day.date }}</td>
-                    <td class="text-right tabular-nums text-zinc-500 dark:text-zinc-400">{{ day.firstRp.toLocaleString() }}</td>
-                    <td class="text-right font-semibold tabular-nums">{{ day.lastRp.toLocaleString() }}</td>
-                    <td class="text-right tabular-nums text-emerald-600 dark:text-emerald-400">{{ day.maxRp.toLocaleString() }}</td>
-                    <td class="text-right tabular-nums text-rose-500 dark:text-rose-400">{{ day.minRp.toLocaleString() }}</td>
-                    <td
-                      class="text-right tabular-nums text-[12px] font-semibold"
-                      [ngClass]="day.change >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'"
-                    >{{ day.change >= 0 ? '+' : '' }}{{ day.change.toLocaleString() }}</td>
-                    <td class="text-right tabular-nums text-zinc-300 dark:text-zinc-600">{{ day.count }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>日付</th>
+                  <th class="is-right">開始</th>
+                  <th class="is-right">終了</th>
+                  <th class="is-right">高値</th>
+                  <th class="is-right">安値</th>
+                  <th class="is-right">変化</th>
+                  <th class="is-right">件数</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let day of dailyRecords">
+                  <td class="col-first">{{ day.date }}</td>
+                  <td class="col-num col-muted">{{ day.firstRp.toLocaleString() }}</td>
+                  <td class="col-num col-num--strong">{{ day.lastRp.toLocaleString() }}</td>
+                  <td class="col-num is-pos">{{ day.maxRp.toLocaleString() }}</td>
+                  <td class="col-num is-neg">{{ day.minRp.toLocaleString() }}</td>
+                  <td
+                    class="col-num"
+                    [class.is-pos]="day.change >= 0"
+                    [class.is-neg]="day.change < 0"
+                  >{{ day.change >= 0 ? '+' : '' }}{{ day.change.toLocaleString() }}</td>
+                  <td class="col-num is-faint">{{ day.count }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
         <!-- ── Weekly ── -->
         <div *ngIf="!loading && !error && activeTab === 'weekly' && records.length > 0">
-          <div class="mb-3 flex items-center justify-between">
-            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-              {{ weeklyRecords.length }} 週分 · 日曜はじまり
-            </span>
-            <button class="btn btn-ghost" (click)="toggleWeeklySort()">
+          <div class="table-head">
+            <span class="table-head__count">{{ weeklyRecords.length }} 週分 · 日曜はじまり</span>
+            <button class="btn" (click)="toggleWeeklySort()">
               {{ weeklySortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}
             </button>
           </div>
-          <div class="card overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>週</th>
-                    <th class="text-right">開始</th>
-                    <th class="text-right">終了</th>
-                    <th class="text-right">高値</th>
-                    <th class="text-right">安値</th>
-                    <th class="text-right">変化</th>
-                    <th class="text-right">件数</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let week of weeklyRecords">
-                    <td class="font-medium">
-                      {{ week.weekStart }}
-                      <span class="text-zinc-300 dark:text-zinc-600"> 〜 </span>
-                      <span class="text-zinc-500 dark:text-zinc-400">{{ week.weekEnd }}</span>
-                    </td>
-                    <td class="text-right tabular-nums text-zinc-500 dark:text-zinc-400">{{ week.firstRp.toLocaleString() }}</td>
-                    <td class="text-right font-semibold tabular-nums">{{ week.lastRp.toLocaleString() }}</td>
-                    <td class="text-right tabular-nums text-emerald-600 dark:text-emerald-400">{{ week.maxRp.toLocaleString() }}</td>
-                    <td class="text-right tabular-nums text-rose-500 dark:text-rose-400">{{ week.minRp.toLocaleString() }}</td>
-                    <td
-                      class="text-right tabular-nums text-[12px] font-semibold"
-                      [ngClass]="week.change >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'"
-                    >{{ week.change >= 0 ? '+' : '' }}{{ week.change.toLocaleString() }}</td>
-                    <td class="text-right tabular-nums text-zinc-300 dark:text-zinc-600">{{ week.count }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>週</th>
+                  <th class="is-right">開始</th>
+                  <th class="is-right">終了</th>
+                  <th class="is-right">高値</th>
+                  <th class="is-right">安値</th>
+                  <th class="is-right">変化</th>
+                  <th class="is-right">件数</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let week of weeklyRecords">
+                  <td class="col-first">
+                    {{ week.weekStart }}
+                    <span class="week-range__sep"> 〜 </span>
+                    <span class="week-range__end">{{ week.weekEnd }}</span>
+                  </td>
+                  <td class="col-num col-muted">{{ week.firstRp.toLocaleString() }}</td>
+                  <td class="col-num col-num--strong">{{ week.lastRp.toLocaleString() }}</td>
+                  <td class="col-num is-pos">{{ week.maxRp.toLocaleString() }}</td>
+                  <td class="col-num is-neg">{{ week.minRp.toLocaleString() }}</td>
+                  <td
+                    class="col-num"
+                    [class.is-pos]="week.change >= 0"
+                    [class.is-neg]="week.change < 0"
+                  >{{ week.change >= 0 ? '+' : '' }}{{ week.change.toLocaleString() }}</td>
+                  <td class="col-num is-faint">{{ week.count }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
       </ng-container>
 
       <!-- Design doc -->
-      <div *ngIf="activeTab === 'design'" class="card p-5 sm:p-7">
+      <div *ngIf="activeTab === 'design'" class="doc-frame">
         <app-design-doc [isDark]="isDark"></app-design-doc>
       </div>
     </main>
 
-    <footer class="mt-16 text-center text-[11px] text-zinc-300 dark:text-zinc-700">
+    <footer class="footer">
       Apex RP Analysis · Supabase × Vercel
     </footer>
   </div>

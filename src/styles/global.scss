@@ -1,0 +1,113 @@
+// ============================================================
+//  Apex RP Analysis — global stylesheet entry
+//  Hand-written SCSS. No Tailwind, no @apply, no utility soup.
+//
+//  Compiled to the single global bundle (see angular.json).
+//  Component-specific styling lives in scoped *.component.scss
+//  files; only truly global concerns belong here:
+//    · design tokens (theme custom properties)
+//    · reset + base typography
+//    · the page shell background texture
+//    · styles for [innerHTML] / Mermaid output, which Angular's
+//      view encapsulation cannot reach.
+// ============================================================
+
+@use 'variables' as *;
+@use 'utilities' as *;
+@use 'theme/light';
+@use 'theme/dark';
+@use 'reset';
+@use 'typography';
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  // The whole-page colour swap on theme toggle — colour only,
+  // nothing moves.
+  transition: background-color $theme-shift ease, color $theme-shift ease;
+}
+
+// Slim, hard-edged scrollbars in keeping with the house style.
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-soft) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border-soft);
+  border-radius: 0;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Design-document rich text.
+//  Rendered via [innerHTML], so these rules MUST be global —
+//  encapsulated component styles never tag injected markup.
+// ─────────────────────────────────────────────────────────────
+.design-doc-html {
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: $sp-10 0;
+    font-size: 12.5px;
+  }
+
+  th,
+  td {
+    padding: $sp-6 $sp-12;
+    border: $bd-hair solid var(--color-border-soft);
+    text-align: left;
+    line-height: 1.5;
+    vertical-align: top;
+  }
+
+  th {
+    @include serif(700);
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  td {
+    color: var(--color-text-muted);
+  }
+
+  td:first-child {
+    @include mono(500);
+    font-size: 12px;
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+
+  p {
+    margin: $sp-6 0;
+    white-space: pre-line;
+    line-height: 1.7;
+  }
+
+  ul {
+    margin: $sp-6 0 $sp-6 $sp-20;
+    list-style: square;
+  }
+
+  li {
+    margin: $sp-3 0;
+  }
+
+  strong {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+}
+
+// Mermaid renders SVG into a div via [innerHTML] / mermaid.run.
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}

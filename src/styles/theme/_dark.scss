@@ -1,0 +1,38 @@
+// ============================================================
+//  Dark theme — near-black ground, warm white ink, vivid red +
+//  light blue. Applied by toggling `.dark` on <html>; the swap
+//  is a single 300ms colour transition (no layout movement).
+// ============================================================
+
+html.dark {
+  // Surfaces
+  --color-bg: #0d0d0d;          // near-black
+  --color-surface: #1a1a1a;     // dark panel
+  --color-surface-alt: #262626; // pressed / hovered panel
+
+  // Ink
+  --color-text: #f5f5f0;        // warm white
+  --color-text-muted: #aaa499;
+  --color-text-subtle: #726c61;
+
+  // Lines
+  --color-border: #444444;
+  --color-border-soft: #2b2b2b;
+
+  // Accents
+  --color-accent-1: #ff4444;    // vivid red
+  --color-accent-2: #5fa8f5;    // light blue
+
+  // Semantic
+  --color-positive: #3fb950;
+  --color-negative: #ff4444;
+
+  // Chart / texture helpers
+  --color-grid: #2c2c2c;
+  --color-on-accent: #0d0d0d;
+  --hatch: rgba(245, 245, 240, 0.05);
+
+  // Design-doc editorial header band.
+  --doc-band: #000000;
+  --doc-band-text: #f5f5f0;
+}

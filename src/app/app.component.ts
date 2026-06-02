@@ -42,6 +42,7 @@ Chart.register(
   standalone: true,
   imports: [CommonModule, NgChartsModule, DesignDocComponent],
   templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
@@ -165,22 +166,30 @@ export class AppComponent implements OnInit {
     return `${year}-${month}-${day} ${hours}:${minutes} JST`;
   }
 
+  // Type families mirror the SCSS design tokens (Chart.js can't
+  // read CSS custom properties, so the palette is restated here).
+  private static readonly CHART_FONT_SERIF = 'Georgia, "Noto Serif JP", serif';
+  private static readonly CHART_FONT_MONO = '"IBM Plex Mono", "Courier New", monospace';
+
   lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
     datasets: [
       {
         label: 'RP',
         data: [],
-        borderColor: '#1e40af',
-        backgroundColor: 'rgba(30, 64, 175, 0.08)',
+        borderColor: '#0d47a1',
+        backgroundColor: 'transparent',
         borderWidth: 2,
-        tension: 0.3,
+        // Sharp, angular line — no bezier smoothing.
+        tension: 0,
         fill: false,
-        pointBackgroundColor: '#1e40af',
-        pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
+        // Hard-edged square points.
+        pointStyle: 'rect',
+        pointBackgroundColor: '#0d47a1',
+        pointBorderColor: '#0d47a1',
+        pointBorderWidth: 0,
         pointRadius: 0,
-        pointHoverRadius: 4
+        pointHoverRadius: 3
       }
     ]
   };
@@ -188,30 +197,43 @@ export class AppComponent implements OnInit {
   lineChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
+    // No entry / update animation — data snaps into place.
+    animation: false,
     interaction: { mode: 'index', intersect: false },
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1e293b',
-        titleColor: '#f1f5f9',
-        bodyColor: '#cbd5e1',
-        borderColor: '#334155',
+        backgroundColor: '#1a1a1a',
+        titleColor: '#fefef8',
+        bodyColor: '#f0ebe5',
+        borderColor: '#d4202f',
         borderWidth: 1,
         padding: 10,
-        cornerRadius: 6,
-        callbacks: { label: (ctx) => ` RP: ${ctx.parsed.y?.toLocaleString() ?? ''}` }
+        cornerRadius: 0,
+        titleFont: { family: AppComponent.CHART_FONT_MONO, size: 11 },
+        bodyFont: { family: AppComponent.CHART_FONT_MONO, size: 12 },
+        callbacks: { label: (ctx) => ` RP ${ctx.parsed.y?.toLocaleString() ?? ''}` }
       }
     },
     scales: {
       x: {
-        ticks: { color: '#6b7280', font: { size: 11 }, maxRotation: 45 },
-        grid: { color: '#e5e7eb' },
-        border: { color: '#e5e7eb' }
+        ticks: {
+          color: '#5c554c',
+          font: { family: AppComponent.CHART_FONT_SERIF, size: 11 },
+          maxRotation: 45
+        },
+        grid: { color: '#cabfae', lineWidth: 1 },
+        border: { color: '#333333', width: 1 }
       },
       y: {
-        ticks: { color: '#6b7280', font: { size: 11 }, callback: (value) => value.toLocaleString() },
-        grid: { color: '#e5e7eb' },
-        border: { color: '#e5e7eb' }
+        ticks: {
+          color: '#5c554c',
+          font: { family: AppComponent.CHART_FONT_MONO, size: 11 },
+          callback: (value) => value.toLocaleString()
+        },
+        // Emphasised, dashed horizontal grid lines.
+        grid: { color: '#cabfae', lineWidth: 1, tickBorderDash: [2, 3] },
+        border: { color: '#333333', width: 1 }
       }
     }
   };
@@ -406,22 +428,6 @@ export class AppComponent implements OnInit {
     this.zoomChart(1.15);
   }
 
-  panUp(): void {
-    this.panChart(0, -0.15);
-  }
-
-  panDown(): void {
-    this.panChart(0, 0.15);
-  }
-
-  panLeft(): void {
-    this.panChart(-0.15, 0);
-  }
-
-  panRight(): void {
-    this.panChart(0.15, 0);
-  }
-
   resetZoom(): void {
     if (!this.zoomBounds) return;
     this.zoomState = { ...this.zoomBounds };
@@ -430,25 +436,29 @@ export class AppComponent implements OnInit {
 
   private applyChartTheme(): void {
     const dark = this.isDark;
-    const gridColor       = dark ? '#475569' : '#e5e7eb';
-    const borderColor     = dark ? '#334155' : '#e5e7eb';
-    const tickColor       = dark ? '#cbd5e1' : '#6b7280';
-    const lineColor       = dark ? '#3b82f6' : '#1e40af';
-    const fillColor       = dark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(30, 64, 175, 0.08)';
-    const pointBorderColor = dark ? '#0f172a' : '#ffffff';
+    const gridColor   = dark ? '#2c2c2c' : '#cabfae';
+    const borderColor = dark ? '#444444' : '#333333';
+    const tickColor   = dark ? '#aaa499' : '#5c554c';
+    const lineColor   = dark ? '#5fa8f5' : '#0d47a1';
+    const serifFont   = AppComponent.CHART_FONT_SERIF;
+    const monoFont    = AppComponent.CHART_FONT_MONO;
 
     this.lineChartOptions = {
       ...this.lineChartOptions,
       scales: {
         x: {
-          ticks: { color: tickColor, font: { size: 11 }, maxRotation: 45 },
-          grid: { color: gridColor },
-          border: { color: borderColor }
+          ticks: { color: tickColor, font: { family: serifFont, size: 11 }, maxRotation: 45 },
+          grid: { color: gridColor, lineWidth: 1 },
+          border: { color: borderColor, width: 1 }
         },
         y: {
-          ticks: { color: tickColor, font: { size: 11 }, callback: (value) => value.toLocaleString() },
-          grid: { color: gridColor },
-          border: { color: borderColor }
+          ticks: {
+            color: tickColor,
+            font: { family: monoFont, size: 11 },
+            callback: (value) => value.toLocaleString()
+          },
+          grid: { color: gridColor, lineWidth: 1, tickBorderDash: [2, 3] },
+          border: { color: borderColor, width: 1 }
         }
       }
     };
@@ -458,9 +468,9 @@ export class AppComponent implements OnInit {
       datasets: [{
         ...this.lineChartData.datasets[0],
         borderColor: lineColor,
-        backgroundColor: fillColor,
+        backgroundColor: 'transparent',
         pointBackgroundColor: lineColor,
-        pointBorderColor
+        pointBorderColor: lineColor
       }]
     };
   }
