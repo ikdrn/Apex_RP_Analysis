@@ -1,46 +1,66 @@
 // ============================================================
-//  Design tokens — SCSS-level constants
+//  Design tokens — compile-time SCSS constants.
 //
-//  Runtime theme COLORS live in theme/_light.scss & _dark.scss
-//  as CSS custom properties so they can flip at runtime.
-//  This file holds compile-time constants: breakpoints, the
-//  (deliberately irregular) spacing scale, border widths and
-//  the font stacks.
+//  "Apex Ledger" design language: a precision esports almanac.
+//  Warm ink + bone neutrals, a single ember accent, steel-teal
+//  for secondary data, tabular monospaced figures.
+//
+//  Runtime COLORS live in theme/_light.scss & _dark.scss as CSS
+//  custom properties so they can flip at runtime. This file holds
+//  breakpoints, the spacing scale, radii, borders, font stacks
+//  and motion.
 // ============================================================
 
 // ── Breakpoints ──────────────────────────────────────────────
-$bp-xs: 320px;   // phone
-$bp-sm: 640px;   // tablet portrait
+$bp-xs: 360px;   // small phone
+$bp-sm: 640px;   // large phone / tablet portrait
 $bp-md: 1024px;  // tablet landscape
 $bp-lg: 1280px;  // desktop
 
 // ── Spacing scale ────────────────────────────────────────────
-// Intentionally NOT a strict 8px grid — uneven steps give the
-// layout a hand-set, slightly off-balance rhythm.
+// A 4px-rooted scale with a couple of editorial in-between steps.
 $sp-3: 3px;
 $sp-6: 6px;
+$sp-8: 8px;
 $sp-10: 10px;
 $sp-12: 12px;
 $sp-16: 16px;
 $sp-20: 20px;
 $sp-24: 24px;
 $sp-28: 28px;
+$sp-32: 32px;
 $sp-36: 36px;
 $sp-44: 44px;
+$sp-56: 56px;
 $sp-64: 64px;
+
+// ── Radii ────────────────────────────────────────────────────
+// Restrained corners. Cards get a soft radius; controls are
+// tighter; the chart frame and pills carry the brand curve.
+$r-xs: 3px;
+$r-sm: 6px;
+$r-md: 10px;
+$r-lg: 16px;
+$r-pill: 999px;
 
 // ── Borders ──────────────────────────────────────────────────
 $bd-hair: 1px;   // hairline rule
-$bd-hard: 2px;   // emphasised / framing border
-$radius: 2px;    // hard-edge house style: never exceed this
+$bd-hard: 2px;   // emphasised framing border
 
 // ── Type stacks ──────────────────────────────────────────────
-$font-serif: Georgia, "Times New Roman", "Noto Serif JP", serif;
-$font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-  "Noto Sans JP", sans-serif;
-$font-mono: "IBM Plex Mono", "Courier New", ui-monospace, monospace;
+// Display / headings / big figures: Archivo — an industrial
+// grotesque with real heft, paired with Noto Sans JP for kana.
+$font-display: "Archivo", "Noto Sans JP", system-ui, sans-serif;
+// Body copy.
+$font-sans: "Archivo", system-ui, -apple-system, "Noto Sans JP", sans-serif;
+// Editorial serif — reserved for the design-document register.
+$font-serif: "Noto Serif JP", Georgia, "Times New Roman", serif;
+// Numbers, codes and tabular figures.
+$font-mono: "IBM Plex Mono", ui-monospace, "Courier New", monospace;
 
-// ── Motion (kept minimal on purpose) ─────────────────────────
-$fade: 200ms;        // opacity-only transitions
-$theme-shift: 300ms; // light <-> dark colour swap
-$press: 50ms;        // button press feedback
+// ── Motion (purposeful, never decorative) ────────────────────
+$ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+$fade: 180ms;        // opacity / colour transitions
+$theme-shift: 320ms; // light <-> dark colour swap
+$press: 60ms;        // tactile button press
+$slide: 240ms;       // tab indicator / reveal

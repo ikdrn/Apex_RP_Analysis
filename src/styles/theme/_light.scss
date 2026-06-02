@@ -1,40 +1,53 @@
 // ============================================================
-//  Light theme — warm ivory / ink, with vivid red + deep navy.
-//  Deliberately avoids the "tech-product" white + grey + blue
-//  palette. These custom properties are the single source of
-//  truth read by every component via var(--color-*).
+//  Light theme — "warm paper".
+//  A bone/ivory ground with ink type, a single ember accent and
+//  a steel-teal secondary. Deliberately avoids the white + grey
+//  + indigo "default app" palette. These custom properties are
+//  the single source of truth, read everywhere via var(--…).
 // ============================================================
 
 :root {
-  // Surfaces
-  --color-bg: #fefef8;          // warm ivory
-  --color-surface: #f0ebe5;     // beige panel
-  --color-surface-alt: #e6ddd0; // pressed / hovered panel
+  color-scheme: light;
 
-  // Ink
-  --color-text: #1a1a1a;        // near-black
-  --color-text-muted: #5c554c;  // warm grey
-  --color-text-subtle: #8a8175; // faint label grey
+  // ── Surfaces ──
+  --color-bg: #f4f0e7;          // warm paper
+  --color-surface: #fbf8f1;     // lifted card
+  --color-surface-alt: #ece6da; // hovered / pressed panel
+  --color-track: #e7e0d2;       // gauge / progress track
 
-  // Lines
-  --color-border: #333333;      // hard framing rule
-  --color-border-soft: #cabfae; // internal divider
+  // ── Ink ──
+  --color-text: #1c1814;        // near-black ink
+  --color-text-muted: #6a6055;  // warm grey
+  --color-text-subtle: #978c7c; // faint label grey
 
-  // Accents (vivid x deep)
-  --color-accent-1: #d4202f;    // signal red
-  --color-accent-2: #0d47a1;    // deep navy
+  // ── Lines ──
+  --color-border: #2a241d;      // hard framing rule (used sparingly)
+  --color-border-soft: #ddd4c4; // hairline divider
 
-  // Semantic
-  --color-positive: #1b6b3a;    // gain green
-  --color-negative: #d4202f;    // loss red
+  // ── Accent (ember) + secondary (steel-teal) ──
+  --color-accent: #df4a14;            // ember — deepened for contrast on paper
+  --color-accent-strong: #c63f10;     // pressed / hovered ember
+  --color-accent-soft: rgba(223, 74, 20, 0.12);
+  --color-accent-line: rgba(223, 74, 20, 0.28);
+  --color-accent-2: #1f7a8c;          // steel-teal secondary
 
-  // Chart / texture helpers
-  --color-grid: #cabfae;
-  --color-on-accent: #fefef8;   // text sitting on an accent fill
-  --hatch: rgba(26, 26, 26, 0.05);
+  // ── Semantic ──
+  --color-positive: #2e7d46;    // gain
+  --color-negative: #c5331f;    // loss
 
-  // Design-doc editorial header band (intentionally dark in both
-  // themes so the document reads as its own printed artefact).
-  --doc-band: #1f1f1f;
-  --doc-band-text: #f5f5f0;
+  // ── On-accent text / chart + texture helpers ──
+  --color-on-accent: #fbf8f1;
+  --color-grid: #dcd3c3;
+  --hatch: rgba(28, 24, 20, 0.045);
+
+  // ── Elevation ──
+  --shadow-card: 0 1px 0 rgba(28, 24, 20, 0.04),
+                 0 18px 38px -28px rgba(28, 24, 20, 0.4);
+  --shadow-pop: 0 22px 48px -24px rgba(28, 24, 20, 0.34);
+  --glow-accent: 0 14px 40px -22px rgba(223, 74, 20, 0.55);
+
+  // ── Design-doc editorial header band (dark in both themes so
+  //    the document reads as its own printed artefact). ──
+  --doc-band: #1c1814;
+  --doc-band-text: #f4f0e7;
 }

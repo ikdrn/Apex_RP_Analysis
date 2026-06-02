@@ -1,13 +1,13 @@
 // ============================================================
-//  Apex RP Analysis — global stylesheet entry
-//  Hand-written SCSS. No Tailwind, no @apply, no utility soup.
+//  Apex RP Analysis — global stylesheet entry.
+//  Hand-written SCSS. No Tailwind, no utility soup.
 //
 //  Compiled to the single global bundle (see angular.json).
 //  Component-specific styling lives in scoped *.component.scss
 //  files; only truly global concerns belong here:
 //    · design tokens (theme custom properties)
 //    · reset + base typography
-//    · the page shell background texture
+//    · the page-shell background
 //    · styles for [innerHTML] / Mermaid output, which Angular's
 //      view encapsulation cannot reach.
 // ============================================================
@@ -25,23 +25,37 @@ body {
 }
 
 body {
-  // The whole-page colour swap on theme toggle — colour only,
-  // nothing moves.
-  transition: background-color $theme-shift ease, color $theme-shift ease;
+  // Whole-page colour swap on theme toggle — colour only, no motion.
+  transition: background-color $theme-shift $ease, color $theme-shift $ease;
+  // A faint top-of-page wash gives the ground some depth without
+  // resorting to a busy decorative gradient.
+  background-image: radial-gradient(
+    120% 70% at 50% -10%,
+    var(--color-accent-soft),
+    transparent 60%
+  );
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-// Slim, hard-edged scrollbars in keeping with the house style.
+// Slim, modern scrollbars in keeping with the house style.
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-soft) transparent;
 }
 *::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
 }
 *::-webkit-scrollbar-thumb {
   background: var(--color-border-soft);
-  border-radius: 0;
+  border-radius: $r-pill;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-subtle);
+  background-clip: padding-box;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -52,25 +66,33 @@ body {
 .design-doc-html {
   table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin: $sp-10 0;
     font-size: 12.5px;
+    border: $bd-hair solid var(--color-border-soft);
+    border-radius: $r-sm;
+    overflow: hidden;
   }
 
   th,
   td {
-    padding: $sp-6 $sp-12;
-    border: $bd-hair solid var(--color-border-soft);
+    padding: $sp-8 $sp-12;
+    border-bottom: $bd-hair solid var(--color-border-soft);
     text-align: left;
-    line-height: 1.5;
+    line-height: 1.55;
     vertical-align: top;
   }
 
+  tr:last-child td {
+    border-bottom: none;
+  }
+
   th {
-    @include serif(700);
-    font-size: 12px;
-    letter-spacing: 0.03em;
-    background: var(--color-surface);
+    @include display(700);
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    background: var(--color-surface-alt);
     color: var(--color-text);
   }
 
@@ -86,13 +108,13 @@ body {
   }
 
   p {
-    margin: $sp-6 0;
+    margin: $sp-8 0;
     white-space: pre-line;
-    line-height: 1.7;
+    line-height: 1.75;
   }
 
   ul {
-    margin: $sp-6 0 $sp-6 $sp-20;
+    margin: $sp-8 0 $sp-8 $sp-20;
     list-style: square;
   }
 

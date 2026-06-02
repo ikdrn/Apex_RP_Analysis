@@ -1,9 +1,9 @@
 // ============================================================
 //  DesignDocComponent — scoped styles.
-//  Reads as a printed specification: dark editorial header
-//  bands, serif headings, hard rules. (Rich-text inside the
-//  cells is styled globally via `.design-doc-html` because it
-//  is injected with [innerHTML].)
+//  Reads as a printed specification: a dark editorial header
+//  band, serif section titles, soft-cornered frames. Rich-text
+//  inside the cells is styled globally via `.design-doc-html`
+//  (it is injected with [innerHTML]).
 // ============================================================
 
 @use 'variables' as *;
@@ -15,8 +15,9 @@
   gap: $sp-16;
 
   @include respond-to($bp-md) {
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 232px 1fr;
     gap: $sp-24;
+    align-items: start;
   }
 }
 
@@ -32,10 +33,13 @@
   flex-direction: row;
   gap: $sp-6;
   overflow-x: auto;
+  padding-bottom: $sp-3;
 
   @include respond-to($bp-md) {
     flex-direction: column;
     overflow: visible;
+    position: sticky;
+    top: $sp-16;
   }
 }
 
@@ -44,16 +48,21 @@
   padding: $sp-10 $sp-12;
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   text-align: left;
+  white-space: nowrap;
   color: var(--color-text-muted);
-  border: $bd-hair solid var(--color-border);
-  transition: background-color $fade ease, color $fade ease, border-color $fade ease;
+  border: $bd-hair solid var(--color-border-soft);
+  border-radius: $r-sm;
+  background: var(--color-surface);
+  transition: background-color $fade $ease, color $fade $ease, border-color $fade $ease;
   @include focus-ring;
 
+  @include respond-to($bp-md) { white-space: normal; }
+
   &:hover:not(.is-active) {
-    border-color: var(--color-text);
-    color: var(--color-text);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
 
   &.is-active {
@@ -65,8 +74,10 @@
 
 // ── Section body ────────────────────────────────────────────
 .doc__section {
-  border: $bd-hair solid var(--color-border);
-  background: var(--color-bg);
+  border: $bd-hair solid var(--color-border-soft);
+  border-radius: $r-md;
+  overflow: hidden;
+  background: var(--color-surface);
 }
 
 // Dark editorial header band with a serif title.
@@ -78,7 +89,7 @@
 .doc__section-title {
   @include serif(700);
   font-size: 16px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: var(--doc-band-text);
 }
 
@@ -89,22 +100,20 @@
 .doc__row {
   border-bottom: $bd-hair solid var(--color-border-soft);
 
-  &:last-child {
-    border-bottom: none;
-  }
+  &:last-child { border-bottom: none; }
 }
 
 .doc__label {
-  width: 132px;
-  min-width: 132px;
+  width: 136px;
+  min-width: 136px;
   vertical-align: top;
-  padding: $sp-12 $sp-12;
-  background: var(--color-surface);
+  padding: $sp-12;
+  background: var(--color-surface-alt);
   border-right: $bd-hair solid var(--color-border-soft);
 
   @include serif(700);
   font-size: 12px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   color: var(--color-text);
 }
 
@@ -116,7 +125,7 @@
 
 .doc__text {
   white-space: pre-line;
-  line-height: 1.7;
+  line-height: 1.75;
   font-size: 12.5px;
 }
 
@@ -129,8 +138,9 @@
   margin-top: $sp-12;
   padding: $sp-16;
   overflow-x: auto;
-  background: var(--color-surface);
+  background: var(--color-bg);
   border: $bd-hair solid var(--color-border-soft);
+  border-radius: $r-sm;
 
   .mermaid {
     display: flex;
@@ -143,6 +153,6 @@
   margin-top: $sp-16;
   text-align: center;
   font-size: 11px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   color: var(--color-text-subtle);
 }
