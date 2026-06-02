@@ -166,10 +166,10 @@ export class AppComponent implements OnInit {
     return `${year}-${month}-${day} ${hours}:${minutes} JST`;
   }
 
-  // Type families mirror the SCSS design tokens (Chart.js can't
-  // read CSS custom properties, so the palette is restated here).
-  private static readonly CHART_FONT_SERIF = 'Georgia, "Noto Serif JP", serif';
-  private static readonly CHART_FONT_MONO = '"IBM Plex Mono", "Courier New", monospace';
+  // Type families + palette mirror the SCSS design tokens (Chart.js
+  // can't read CSS custom properties, so they are restated here).
+  private static readonly CHART_FONT_SANS = 'Archivo, "Noto Sans JP", system-ui, sans-serif';
+  private static readonly CHART_FONT_MONO = '"IBM Plex Mono", ui-monospace, monospace';
 
   lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
@@ -177,19 +177,18 @@ export class AppComponent implements OnInit {
       {
         label: 'RP',
         data: [],
-        borderColor: '#0d47a1',
-        backgroundColor: 'transparent',
+        borderColor: '#df4a14',
+        backgroundColor: 'rgba(223, 74, 20, 0.10)',
         borderWidth: 2,
-        // Sharp, angular line — no bezier smoothing.
-        tension: 0,
-        fill: false,
-        // Hard-edged square points.
-        pointStyle: 'rect',
-        pointBackgroundColor: '#0d47a1',
-        pointBorderColor: '#0d47a1',
+        // Gently eased line with a soft area fill underneath.
+        tension: 0.28,
+        fill: 'origin',
+        pointStyle: 'circle',
+        pointBackgroundColor: '#df4a14',
+        pointBorderColor: '#df4a14',
         pointBorderWidth: 0,
         pointRadius: 0,
-        pointHoverRadius: 3
+        pointHoverRadius: 4
       }
     ]
   };
@@ -203,37 +202,37 @@ export class AppComponent implements OnInit {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1a1a1a',
-        titleColor: '#fefef8',
-        bodyColor: '#f0ebe5',
-        borderColor: '#d4202f',
+        backgroundColor: '#1c1814',
+        titleColor: '#f4f0e7',
+        bodyColor: '#f1ece2',
+        borderColor: '#df4a14',
         borderWidth: 1,
-        padding: 10,
-        cornerRadius: 0,
+        padding: 11,
+        cornerRadius: 8,
+        displayColors: false,
         titleFont: { family: AppComponent.CHART_FONT_MONO, size: 11 },
-        bodyFont: { family: AppComponent.CHART_FONT_MONO, size: 12 },
+        bodyFont: { family: AppComponent.CHART_FONT_MONO, size: 13, weight: 600 },
         callbacks: { label: (ctx) => ` RP ${ctx.parsed.y?.toLocaleString() ?? ''}` }
       }
     },
     scales: {
       x: {
         ticks: {
-          color: '#5c554c',
-          font: { family: AppComponent.CHART_FONT_SERIF, size: 11 },
+          color: '#978c7c',
+          font: { family: AppComponent.CHART_FONT_SANS, size: 11 },
           maxRotation: 45
         },
-        grid: { color: '#cabfae', lineWidth: 1 },
-        border: { color: '#333333', width: 1 }
+        grid: { display: false },
+        border: { color: '#ddd4c4', width: 1 }
       },
       y: {
         ticks: {
-          color: '#5c554c',
+          color: '#978c7c',
           font: { family: AppComponent.CHART_FONT_MONO, size: 11 },
           callback: (value) => value.toLocaleString()
         },
-        // Emphasised, dashed horizontal grid lines.
-        grid: { color: '#cabfae', lineWidth: 1, tickBorderDash: [2, 3] },
-        border: { color: '#333333', width: 1 }
+        grid: { color: '#dcd3c3', lineWidth: 1 },
+        border: { display: false }
       }
     }
   };
@@ -436,20 +435,21 @@ export class AppComponent implements OnInit {
 
   private applyChartTheme(): void {
     const dark = this.isDark;
-    const gridColor   = dark ? '#2c2c2c' : '#cabfae';
-    const borderColor = dark ? '#444444' : '#333333';
-    const tickColor   = dark ? '#aaa499' : '#5c554c';
-    const lineColor   = dark ? '#5fa8f5' : '#0d47a1';
-    const serifFont   = AppComponent.CHART_FONT_SERIF;
+    const gridColor   = dark ? '#2a2620' : '#dcd3c3';
+    const axisColor   = dark ? '#3a352d' : '#ddd4c4';
+    const tickColor   = dark ? '#a89e8e' : '#978c7c';
+    const lineColor   = dark ? '#ff5a1f' : '#df4a14';
+    const fillColor   = dark ? 'rgba(255, 90, 31, 0.16)' : 'rgba(223, 74, 20, 0.10)';
+    const sansFont    = AppComponent.CHART_FONT_SANS;
     const monoFont    = AppComponent.CHART_FONT_MONO;
 
     this.lineChartOptions = {
       ...this.lineChartOptions,
       scales: {
         x: {
-          ticks: { color: tickColor, font: { family: serifFont, size: 11 }, maxRotation: 45 },
-          grid: { color: gridColor, lineWidth: 1 },
-          border: { color: borderColor, width: 1 }
+          ticks: { color: tickColor, font: { family: sansFont, size: 11 }, maxRotation: 45 },
+          grid: { display: false },
+          border: { color: axisColor, width: 1 }
         },
         y: {
           ticks: {
@@ -457,8 +457,8 @@ export class AppComponent implements OnInit {
             font: { family: monoFont, size: 11 },
             callback: (value) => value.toLocaleString()
           },
-          grid: { color: gridColor, lineWidth: 1, tickBorderDash: [2, 3] },
-          border: { color: borderColor, width: 1 }
+          grid: { color: gridColor, lineWidth: 1 },
+          border: { display: false }
         }
       }
     };
@@ -468,7 +468,8 @@ export class AppComponent implements OnInit {
       datasets: [{
         ...this.lineChartData.datasets[0],
         borderColor: lineColor,
-        backgroundColor: 'transparent',
+        backgroundColor: fillColor,
+        fill: 'origin',
         pointBackgroundColor: lineColor,
         pointBorderColor: lineColor
       }]

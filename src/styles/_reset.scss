@@ -31,6 +31,7 @@ button {
   background: none;
   border: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 a {
@@ -48,8 +49,8 @@ table {
   border-spacing: 0;
 }
 
-// Global keyboard focus — a 2px dashed accent rule everywhere.
+// Global keyboard focus — a solid accent ring everywhere.
 :focus-visible {
-  outline: 2px dashed var(--color-accent-1);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }

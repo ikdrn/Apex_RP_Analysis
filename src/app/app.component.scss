@@ -1,252 +1,302 @@
 // ============================================================
 //  AppComponent — scoped styles (Angular view encapsulation).
-//  Hand-written, hard-edged, high-contrast. Borders do the work
-//  that shadows and rounded corners used to.
+//
+//  "Apex Ledger" — a precision esports-statistics instrument.
+//  Soft-cornered cards on warm paper / warm ink, a single ember
+//  accent doing the signalling, tabular monospaced figures, and
+//  a heavy grotesque for the big numbers. Motion is minimal and
+//  purposeful.
 // ============================================================
 
 @use 'variables' as *;
 @use 'utilities' as *;
 
+// ── Shared label register ───────────────────────────────────
+.kicker {
+  @include eyebrow;
+}
+
+// Shared semantic colours (cells, deltas, values).
+.is-pos { color: var(--color-positive); }
+.is-neg { color: var(--color-negative); }
+.is-faint { color: var(--color-text-subtle); }
+
 // ── Page shell ──────────────────────────────────────────────
-.app {
+.page {
   min-height: 100vh;
 }
 
-.app__container {
-  max-width: 1080px;
-  // Asymmetric, off-grid padding on purpose.
+.shell {
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 36px 22px 64px;
+  padding: 26px 18px 72px;
 
   @include respond-to($bp-sm) {
-    padding: 44px 36px 80px;
+    padding: 40px 32px 88px;
   }
 }
 
-// ── Masthead ────────────────────────────────────────────────
-.masthead {
+// ── Topbar ──────────────────────────────────────────────────
+.topbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: $sp-16;
-  padding-bottom: $sp-20;
-  margin-bottom: $sp-36;
-  border-bottom: $bd-hard solid var(--color-border);
+  margin-bottom: $sp-28;
 }
 
-.masthead__brand {
+.brand {
   display: flex;
   align-items: center;
   gap: $sp-12;
+  min-width: 0;
 }
 
-.masthead__mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  color: var(--color-accent-1);
-  border: $bd-hard solid var(--color-accent-1);
+.brand__mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-radius: $r-md;
+  box-shadow: var(--glow-accent);
 
-  svg {
-    width: 22px;
-    height: 22px;
-  }
+  svg { width: 26px; height: 26px; }
 }
 
-.masthead__titles {
+.brand__text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
+  min-width: 0;
 }
 
-.masthead__title {
-  @include serif(800);
-  font-size: 20px;
-  line-height: 1.1;
+.brand__title {
+  @include display(800);
+  font-size: 18px;
+  line-height: 1.05;
 
-  @include respond-to($bp-sm) {
-    font-size: 23px;
-  }
+  @include respond-to($bp-sm) { font-size: 21px; }
 }
 
-.masthead__sub {
+.brand__sub {
   font-size: 11.5px;
   color: var(--color-text-muted);
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.masthead__meta {
+.topbar__meta {
   display: flex;
   align-items: center;
-  gap: $sp-16;
-  padding-top: 3px;
+  gap: $sp-10;
 }
 
-.masthead__updated {
-  @include mono(500);
-  font-size: 11px;
-  color: var(--color-text-muted);
+// Live "updated" pill.
+.updated {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-8;
+  padding: 6px 12px;
+  border: $bd-hair solid var(--color-border-soft);
+  border-radius: $r-pill;
+  background: var(--color-surface);
   white-space: nowrap;
+
+  @media (max-width: #{$bp-xs - 1px}) {
+    .updated__label { display: none; }
+  }
 }
 
-// ── Theme toggle ────────────────────────────────────────────
-.theme-toggle {
+.updated__dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-positive);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1px solid var(--color-positive);
+    animation: ping 2.6s $ease infinite;
+  }
+}
+
+@keyframes ping {
+  0%        { transform: scale(0.5); opacity: 0.7; }
+  80%, 100% { transform: scale(1.7); opacity: 0; }
+}
+
+.updated__label {
+  @include eyebrow;
+  font-size: 9.5px;
+}
+
+.updated__time {
+  @include mono(500);
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+}
+
+// Square icon button (theme toggle).
+.icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
   color: var(--color-text-muted);
-  @include hard-control;
+  @include control($r-md);
 
   &:hover {
-    border-color: var(--color-text);
-    color: var(--color-text);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
 
-  svg {
-    width: 16px;
-    height: 16px;
-  }
+  svg { width: 17px; height: 17px; }
 }
 
-// ── Hero ────────────────────────────────────────────────────
-.hero {
+// ── Scoreboard ──────────────────────────────────────────────
+.scoreboard {
   position: relative;
-  margin-bottom: $sp-36;
-  padding: $sp-24 $sp-20 $sp-28;
-  border: $bd-hair solid var(--color-border);
-  // Real CSS texture, not a decorative gradient fill.
-  @include hatching(8px);
-  transition: opacity $fade ease;
+  overflow: hidden;
+  margin-bottom: $sp-24;
+  padding: $sp-24 $sp-24 $sp-20 $sp-28;
+  @include card($r-lg);
+  transition: opacity $fade $ease;
 
-  &.is-refreshing {
-    opacity: 0.45;
+  // Ember spine on the leading edge.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--color-accent);
   }
+
+  &.is-refreshing { opacity: 0.5; }
 }
 
-.hero__top {
+.scoreboard__main {
   display: flex;
   flex-direction: column;
-  gap: $sp-28;
+  gap: $sp-24;
 
   @include respond-to($bp-sm) {
     flex-direction: row;
     align-items: flex-end;
     justify-content: space-between;
+    gap: $sp-32;
   }
 }
 
-.hero__eyebrow-row {
+.score__head {
   display: flex;
   align-items: center;
   gap: $sp-10;
-  margin-bottom: $sp-12;
+  margin-bottom: $sp-10;
 }
 
-.hero__eyebrow {
-  @include eyebrow;
+.rank-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-family: $font-display;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border: $bd-hair solid var(--color-accent-line);
+  border-radius: $r-pill;
 }
 
-.hero__figure {
+.score__figure {
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
   gap: $sp-16;
 }
 
-.hero__rp {
-  @include serif(800);
-  font-size: 56px;
-  line-height: 0.95;
+.score__value {
+  @include display(900);
+  font-size: clamp(46px, 12vw, 76px);
+  line-height: 0.9;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
-
-  @include respond-to($bp-sm) {
-    font-size: 72px;
-  }
+  letter-spacing: -0.03em;
 }
 
-.hero__delta {
+.score__delta {
   @include mono(600);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 15px;
 
-  &.is-pos {
-    color: var(--color-positive);
-  }
-  &.is-neg {
-    color: var(--color-negative);
-  }
+  &.is-pos { color: var(--color-positive); }
+  &.is-neg { color: var(--color-negative); }
 }
 
-.hero__range {
+.score__delta-arrow { font-size: 10px; }
+
+.score__range {
   margin-top: $sp-12;
   font-size: 12px;
   color: var(--color-text-muted);
   letter-spacing: 0.02em;
 }
 
-// Stat strip — uneven gaps, mono figures.
-.hero__stats {
+// Stat rail — mono figures, hairline-separated on wide screens.
+.rail {
   display: grid;
-  grid-template-columns: repeat(2, auto);
-  gap: $sp-16 $sp-36;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $sp-16 $sp-24;
 
   @include respond-to($bp-sm) {
     display: flex;
     gap: 0;
+    flex-shrink: 0;
   }
 }
 
-.stat {
+.rail__stat {
   @include respond-to($bp-sm) {
-    padding: 0 $sp-20;
+    padding: 2px $sp-20;
     border-left: $bd-hair solid var(--color-border-soft);
+    text-align: right;
 
-    &:first-child {
-      padding-left: 0;
-      border-left: none;
-    }
-    &:last-child {
-      padding-right: 0;
-    }
+    &:last-child { padding-right: 0; }
   }
 }
 
-.stat__label {
+.rail__label {
   @include eyebrow;
   display: block;
   margin-bottom: $sp-6;
 }
 
-.stat__value {
+.rail__value {
   @include mono(600);
-  font-size: 16px;
+  font-size: 17px;
+  color: var(--color-text);
 
-  &.is-pos {
-    color: var(--color-positive);
-  }
-  &.is-neg {
-    color: var(--color-negative);
-  }
-}
-
-// ── Rank tag (red text + border, never a filled badge) ──────
-.rank-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--color-accent-1);
-  border: $bd-hair solid var(--color-accent-1);
+  &.is-pos { color: var(--color-positive); }
+  &.is-neg { color: var(--color-negative); }
 }
 
 // ── Rank guide (collapsible) ────────────────────────────────
 .rank-guide {
   margin-top: $sp-20;
+  padding-top: $sp-16;
+  border-top: $bd-hair solid var(--color-border-soft);
 }
 
 .rank-guide__summary {
@@ -256,36 +306,33 @@
   list-style: none;
   cursor: pointer;
   font-size: 12px;
-  letter-spacing: 0.03em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--color-text-muted);
   user-select: none;
+  @include focus-ring;
 
-  &::-webkit-details-marker {
-    display: none;
-  }
+  &::-webkit-details-marker { display: none; }
   &::before {
-    content: "▸";
-    font-size: 9px;
+    content: "›";
+    font-size: 14px;
+    line-height: 1;
+    transition: transform $fade $ease;
   }
-  &:hover {
-    color: var(--color-text);
-  }
+  &:hover { color: var(--color-accent); }
 }
 
 .rank-guide[open] .rank-guide__summary::before {
-  content: "▾";
+  transform: rotate(90deg);
 }
 
 .rank-guide__list {
   display: grid;
-  gap: $bd-hair;
-  margin-top: $sp-12;
-  background: var(--color-border-soft);
-  border: $bd-hair solid var(--color-border-soft);
+  gap: $sp-8;
+  margin-top: $sp-16;
 
-  @include respond-to($bp-sm) {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  @include respond-to($bp-xs) { grid-template-columns: repeat(2, 1fr); }
+  @include respond-to($bp-sm) { grid-template-columns: repeat(3, 1fr); }
 }
 
 .rank-guide__item {
@@ -294,12 +341,13 @@
   justify-content: space-between;
   gap: $sp-12;
   padding: $sp-10 $sp-12;
-  background: var(--color-bg);
+  background: var(--color-surface-alt);
+  border-radius: $r-sm;
+}
 
-  span:first-child {
-    font-weight: 600;
-    color: var(--color-text);
-  }
+.rank-guide__name {
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 .rank-guide__rp {
@@ -308,8 +356,8 @@
   color: var(--color-text-muted);
 }
 
-// ── Controls row (period segment + actions) ─────────────────
-.controls {
+// ── Toolbar (period segment + actions) ──────────────────────
+.toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -317,68 +365,271 @@
   margin-bottom: $sp-24;
 }
 
-.controls__actions {
+.toolbar__actions {
   display: flex;
   align-items: center;
   gap: $sp-10;
   margin-left: auto;
 }
 
-// Segmented period switch — bordered cells, active = navy fill.
+// Segmented period switch — a track with a filled active cell.
 .segment {
   display: inline-flex;
-  border: $bd-hair solid var(--color-border);
+  padding: 3px;
+  gap: 2px;
+  background: var(--color-surface-alt);
+  border: $bd-hair solid var(--color-border-soft);
+  border-radius: $r-md;
 }
 
 .segment__btn {
   padding: 7px 16px;
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   color: var(--color-text-muted);
-  border-right: $bd-hair solid var(--color-border);
-  transition: background-color $fade ease, color $fade ease;
+  border-radius: $r-sm;
+  transition: background-color $fade $ease, color $fade $ease, box-shadow $fade $ease;
   @include focus-ring;
 
-  &:last-child {
-    border-right: none;
-  }
-  &:hover:not(.is-active) {
-    background: var(--color-surface);
-    color: var(--color-text);
-  }
+  &:hover:not(.is-active) { color: var(--color-text); }
+
   &.is-active {
-    background: var(--color-accent-2);
     color: var(--color-on-accent);
+    background: var(--color-accent);
+    box-shadow: 0 6px 16px -8px var(--color-accent);
   }
 }
 
-// ── Buttons — border only, hover changes the line colour ────
+// ── Buttons ─────────────────────────────────────────────────
 .btn {
   display: inline-flex;
   align-items: center;
   gap: $sp-6;
-  padding: 7px 14px;
+  padding: 8px 15px;
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
   white-space: nowrap;
-  @include hard-control;
+  @include control($r-md);
 
-  svg {
-    width: 13px;
-    height: 13px;
-  }
+  svg { width: 14px; height: 14px; }
 
   &:hover:not(:disabled) {
-    border-color: var(--color-text);
-    color: var(--color-text);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
   &:active:not(:disabled) {
     transform: scale(0.97);
-    transition: transform $press ease;
+    transition: transform $press $ease;
+  }
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.btn--accent {
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: var(--glow-accent);
+
+  &:hover:not(:disabled) {
+    color: var(--color-on-accent);
+    background: var(--color-accent-strong);
+    border-color: var(--color-accent-strong);
+  }
+}
+
+.btn__spin {
+  &.is-spinning { animation: spin 0.9s linear infinite; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Tabs — underline indicator ──────────────────────────────
+.tabbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-3;
+  margin-bottom: $sp-24;
+  border-bottom: $bd-hair solid var(--color-border-soft);
+}
+
+.tabbar__tab {
+  position: relative;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-text-muted);
+  border-radius: $r-sm $r-sm 0 0;
+  transition: color $fade $ease, background-color $fade $ease;
+  @include focus-ring;
+
+  // Sliding accent underline.
+  &::after {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: -1px;
+    height: 2px;
+    background: var(--color-accent);
+    border-radius: $r-pill;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform $slide $ease;
+  }
+
+  &:hover:not(.is-active) {
+    color: var(--color-text);
+    background: var(--color-surface);
+  }
+
+  &.is-active {
+    color: var(--color-text);
+    &::after { transform: scaleX(1); }
+  }
+}
+
+.tabbar__tab--doc {
+  color: var(--color-text-subtle);
+}
+
+.tabbar__spacer { flex: 1; }
+
+// ── State blocks (loading / error / empty) ──────────────────
+.state {
+  padding: $sp-64 $sp-20;
+  text-align: center;
+}
+
+// Loading — an indeterminate scan bar, not a spinner.
+.scanbar {
+  position: relative;
+  width: min(260px, 64%);
+  height: 3px;
+  margin: 0 auto $sp-20;
+  overflow: hidden;
+  background: var(--color-track);
+  border-radius: $r-pill;
+
+  span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 38%;
+    background: var(--color-accent);
+    border-radius: $r-pill;
+    animation: scan 1.15s $ease infinite;
+  }
+}
+
+@keyframes scan {
+  0%   { transform: translateX(-110%); }
+  100% { transform: translateX(360%); }
+}
+
+.state__loading-text {
+  @include mono(500);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.state__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.state__hint {
+  margin-top: $sp-10;
+  font-size: 12.5px;
+  color: var(--color-text-subtle);
+}
+
+.state__art {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto $sp-20;
+  color: var(--color-border-soft);
+}
+
+// Error — ember-framed card.
+.state--error {
+  padding: $sp-20 $sp-24;
+  text-align: left;
+  background: var(--color-accent-soft);
+  border: $bd-hair solid var(--color-accent-line);
+  border-radius: $r-md;
+}
+
+.state__error-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.state__error-hint {
+  margin-top: $sp-6;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+
+// ── Chart card ──────────────────────────────────────────────
+.chart-card {
+  @include card($r-lg);
+  overflow: hidden;
+  transition: opacity $fade $ease;
+}
+
+.chart-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-10;
+  padding: $sp-12 $sp-16;
+  border-bottom: $bd-hair solid var(--color-border-soft);
+}
+
+.chart-card__count {
+  @include mono(600);
+  color: var(--color-text);
+}
+
+.chart-card__tools {
+  display: flex;
+  align-items: center;
+  gap: $sp-6;
+  margin-left: auto;
+}
+
+.tool-divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 $sp-3;
+  background: var(--color-border-soft);
+}
+
+.tool-btn {
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  @include control($r-sm);
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
   &:disabled {
     opacity: 0.4;
@@ -386,195 +637,61 @@
   }
 }
 
-.btn--accent {
-  color: var(--color-accent-1);
-  border-color: var(--color-accent-1);
-
-  &:hover:not(:disabled) {
-    border-color: var(--color-accent-1);
-    color: var(--color-on-accent);
-    background: var(--color-accent-1);
-  }
-}
-
-// ── Tabs — every tab is boxed; active tab is filled ─────────
-// Adjacent borders are collapsed with negative margins on .tab
-// (a flex `gap` can't be negative).
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: $sp-28;
-  border-bottom: $bd-hard solid var(--color-border);
-}
-
-.tab {
-  padding: 9px 16px;
-  margin-right: -1px;
-  margin-bottom: -2px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--color-text-muted);
-  border: $bd-hair solid var(--color-border);
-  border-bottom: $bd-hard solid var(--color-border);
-  transition: background-color $fade ease, color $fade ease;
-  @include focus-ring;
-
-  &:hover:not(.is-active) {
-    background: var(--color-surface);
-    color: var(--color-text);
-  }
-  &.is-active {
-    color: var(--color-text);
-    background: var(--color-bg);
-    border-bottom-color: var(--color-bg);
-  }
-}
-
-.tabs__spacer {
-  flex: 1;
-}
-
-// ── State blocks (loading / empty / error) ──────────────────
-.state {
-  padding: $sp-64 $sp-20;
-  text-align: center;
-}
-
-.state--loading {
-  @include mono(500);
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-}
-
-.state__title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
-
-.state__hint {
-  margin-top: $sp-10;
-  font-size: 12px;
-  color: var(--color-text-subtle);
-}
-
-.state__art {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto $sp-20;
-  color: var(--color-border);
-}
-
-// Error — red frame + red text, no fill.
-.state--error {
-  padding: $sp-20 $sp-24;
-  text-align: left;
-  border: $bd-hard solid var(--color-accent-1);
-}
-
-.state__error-title {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--color-accent-1);
-}
-
-.state__error-hint {
-  margin-top: $sp-6;
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-// ── Chart panel ─────────────────────────────────────────────
-.panel {
-  border: $bd-hair solid var(--color-border);
-  background: var(--color-bg);
-  transition: opacity $fade ease;
-}
-
-.panel__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: $sp-10;
-  padding: $sp-12 $sp-16;
-  border-bottom: $bd-hair solid var(--color-border);
-}
-
-.panel__label {
-  @include eyebrow;
-  font-size: 11px;
-}
-
-.panel__tools {
-  display: flex;
-  align-items: center;
-  gap: $sp-6;
-  margin-left: auto;
-}
-
-.panel__divider {
-  width: 1px;
-  height: 16px;
-  margin: 0 $sp-3;
-  background: var(--color-border-soft);
-}
-
-// Zoom controls as text, not icon glyphs (拡大 / 縮小 / リセット).
-.tool-btn {
-  padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--color-text-muted);
-  @include hard-control;
-
-  &:hover:not(:disabled) {
-    border-color: var(--color-text);
-    color: var(--color-text);
-  }
-  &:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-}
-
-.panel__plot {
-  height: 420px;
-  padding: $sp-12 $sp-16 $sp-16;
-  @include hatching(9px);
+.chart-card__plot {
+  height: 340px;
+  padding: $sp-16 $sp-16 $sp-12;
   touch-action: none;
   user-select: none;
   cursor: grab;
 
-  &.is-dragging {
-    cursor: grabbing;
-  }
+  @include respond-to($bp-sm) { height: 440px; }
+
+  &.is-dragging { cursor: grabbing; }
 }
 
-.panel__hint {
+.chart-card__hint {
   padding: $sp-10 $sp-16 $sp-12;
   font-size: 11px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   color: var(--color-text-subtle);
   border-top: $bd-hair solid var(--color-border-soft);
 }
 
-// ── Table section ───────────────────────────────────────────
-.table-head {
+// ── Table card ──────────────────────────────────────────────
+.table-card {
+  @include card($r-lg);
+  overflow: hidden;
+}
+
+.table-card__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: $sp-12;
+  gap: $sp-12;
+  padding: $sp-12 $sp-16;
+  border-bottom: $bd-hair solid var(--color-border-soft);
 }
 
-.table-head__count {
-  @include eyebrow;
+.table-card__count {
+  @include mono(600);
+  color: var(--color-text);
+}
+
+.sort-btn {
+  padding: 6px 13px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+  @include control($r-sm);
+
+  &:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
 }
 
 .table-wrap {
-  border: $bd-hair solid var(--color-border);
   overflow-x: auto;
 }
 
@@ -582,58 +699,46 @@
   width: 100%;
   font-size: 13px;
 
-  // Header — serif, framed top & bottom, no fill.
   thead th {
-    @include serif(700);
-    font-size: 12px;
-    letter-spacing: 0.04em;
+    @include eyebrow;
+    font-size: 10px;
     text-align: left;
-    padding: $sp-12 $sp-16;
-    color: var(--color-text);
-    border-top: $bd-hard solid var(--color-border);
-    border-bottom: $bd-hard solid var(--color-border);
+    padding: $sp-10 $sp-16;
+    color: var(--color-text-subtle);
+    background: var(--color-surface-alt);
+    border-bottom: $bd-hair solid var(--color-border-soft);
     white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 
-    &.is-right {
-      text-align: right;
-    }
+    &.is-right { text-align: right; }
   }
 
-  // Body rows — left/right framing, irregular cell padding, and
-  // a hover that thickens the left edge in accent red. No `color`
-  // is set here so the inline .is-pos / .is-neg / .col-* helpers
-  // win without a specificity fight (text inherits --color-text).
+  // No `color` on the base cell, so .is-pos / .is-neg / .col-*
+  // helpers win without a specificity fight.
   tbody td {
-    padding: 15px 16px;
+    padding: 13px 16px;
     border-bottom: $bd-hair solid var(--color-border-soft);
     vertical-align: middle;
   }
 
-  // Uneven left padding lives here (qualified) to beat the base
-  // cell padding without resorting to !important.
   tbody td.col-first,
   tbody td.col-id {
     padding-left: $sp-20;
   }
 
   tbody tr {
-    border-left: 3px solid transparent;
-    transition: background-color $fade ease, border-color $fade ease;
+    position: relative;
+    transition: background-color $fade $ease;
 
-    &:hover {
-      background: var(--color-surface);
-      border-left-color: var(--color-accent-1);
-    }
-    &:last-child td {
-      border-bottom: none;
-    }
+    &:hover { background: var(--color-surface-alt); }
+    &:last-child td { border-bottom: none; }
   }
 }
 
-// Column helpers — deliberately uneven horizontal rhythm.
-.col-first {
-  font-weight: 600;
-}
+// Column helpers.
+.col-first { font-weight: 600; }
 .col-num {
   text-align: right;
   @include mono(500);
@@ -651,45 +756,55 @@
   @include mono(500);
   color: var(--color-text-muted);
 }
-.col-muted {
-  color: var(--color-text-muted);
-}
+.col-muted { color: var(--color-text-muted); }
 
-.is-pos {
-  color: var(--color-positive);
-}
-.is-neg {
-  color: var(--color-negative);
-}
-.is-faint {
-  color: var(--color-text-subtle);
-}
-
-.week-range__sep {
-  color: var(--color-text-subtle);
-}
-.week-range__end {
-  color: var(--color-text-muted);
-}
+.week-range__sep { color: var(--color-text-subtle); }
+.week-range__end { color: var(--color-text-muted); }
 
 // ── Design-doc host frame ───────────────────────────────────
 .doc-frame {
-  padding: $sp-24 $sp-20;
-  border: $bd-hair solid var(--color-border);
-  background: var(--color-surface);
+  padding: $sp-20 $sp-16;
+  @include card($r-lg);
 
   @include respond-to($bp-sm) {
-    padding: $sp-28 $sp-28;
+    padding: $sp-28;
   }
 }
 
 // ── Footer ──────────────────────────────────────────────────
 .footer {
-  margin-top: $sp-64;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-10;
+  margin-top: $sp-56;
   padding-top: $sp-20;
   border-top: $bd-hair solid var(--color-border-soft);
   text-align: center;
-  font-size: 11px;
-  letter-spacing: 0.05em;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
   color: var(--color-text-subtle);
+}
+
+.footer__mark {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  font-family: $font-mono;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--color-accent);
+  border: $bd-hair solid var(--color-accent-line);
+  border-radius: $r-sm;
+}
+
+// ── Reduced motion ──────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .updated__dot::after,
+  .btn__spin.is-spinning,
+  .scanbar span {
+    animation: none;
+  }
 }
