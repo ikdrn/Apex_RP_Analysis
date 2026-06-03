@@ -254,20 +254,6 @@
   letter-spacing: 0.02em;
 }
 
-// Period metadata from the API envelope — total count + data span.
-.score__meta {
-  margin-top: $sp-6;
-  display: flex;
-  flex-wrap: wrap;
-  gap: $sp-6 $sp-12;
-  font-size: 11px;
-  color: var(--color-text-muted);
-}
-
-.score__meta-count { @include mono(600); }
-
-.score__meta-span { @include mono(500); }
-
 // Stat rail — mono figures, hairline-separated on wide screens.
 .rail {
   display: grid;
