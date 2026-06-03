@@ -12,6 +12,6 @@
 3. Gitには含めず、PR本文やチケットに添付する。
 
 ## 代表コマンド
-- `go vet ./... && go test ./...`
+- `node --check api/get-rp.js`
 - `npm run build`
-- `API_BASE=<preview-url> node docs/evidence/api-smoke-test.js`
+- `node docs/evidence/api-smoke-test.js`
