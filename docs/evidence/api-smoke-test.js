@@ -1,51 +1,40 @@
-const handler = require('../../api/get-rp.js');
+// HTTP smoke test for the Go (Echo) /api/rp endpoint.
+//
+// Run against a local `vercel dev` server or a deployed preview:
+//   API_BASE=https://your-preview.vercel.app node docs/evidence/api-smoke-test.js
+//
+// Requires Node 18+ (global fetch).
+const BASE = process.env.API_BASE || 'http://localhost:3000';
 
-function createRes() {
-  return {
-    headers: {},
-    statusCode: 200,
-    body: undefined,
-    setHeader(key, value) {
-      this.headers[key] = value;
-    },
-    status(code) {
-      this.statusCode = code;
-      return this;
-    },
-    json(data) {
-      this.body = data;
-      return this;
-    },
-    end() {
-      return this;
-    }
-  };
+async function check(days) {
+  const url = `${BASE}/api/rp?days=${days}`;
+  const res = await fetch(url);
+  const body = await res.json();
+  console.log(`GET ${url}`);
+  console.log(`  status: ${res.status}`);
+  console.log(`  total: ${body.total}, displayed: ${body.displayed}, cached: ${body.cached}`);
+  console.log(`  period: ${body.period?.start} -> ${body.period?.end}`);
+
+  const ok = res.status === 200 && Array.isArray(body.data) && typeof body.total === 'number';
+  if (!ok) {
+    throw new Error(`unexpected response for days=${days}: ${JSON.stringify(body).slice(0, 200)}`);
+  }
+  return body;
 }
 
 async function run() {
-  process.env.SUPABASE_URL = 'https://example.supabase.co';
-  process.env.SUPABASE_SERVICE_ROLE_KEY = 'dummy';
+  const all = await check('all');
+  const d30 = await check('30');
 
-  global.fetch = async () => ({
-    ok: true,
-    status: 200,
-    text: async () => JSON.stringify([{ id: 1, rp: 1000, created_at: '2026-01-01T00:00:00Z' }])
-  });
+  // The all-period window must contain at least as many rows as 30 days.
+  if (all.total < d30.total) {
+    throw new Error(`all total (${all.total}) < 30d total (${d30.total})`);
+  }
 
-  const getReq = { method: 'GET', headers: {}, query: { days: '7' }, socket: { remoteAddress: '127.0.0.1' } };
-  const getRes = createRes();
-  await handler(getReq, getRes);
-  console.log('GET status:', getRes.statusCode);
-  console.log('GET count:', Array.isArray(getRes.body) ? getRes.body.length : 'not-array');
-
-  const postReq = { method: 'POST', headers: {}, query: {}, socket: { remoteAddress: '127.0.0.1' } };
-  const postRes = createRes();
-  await handler(postReq, postRes);
-  console.log('POST status:', postRes.statusCode);
-  console.log('POST error:', postRes.body?.error);
+  console.log('\nOK: /api/rp smoke test passed.');
 }
 
 run().catch((e) => {
-  console.error(e);
+  console.error('FAIL:', e.message);
   process.exit(1);
 });
