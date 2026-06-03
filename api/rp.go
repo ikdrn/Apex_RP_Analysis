@@ -1,15 +1,16 @@
 // Package handler is the Vercel Go serverless entrypoint for the RP API.
 //
 // Vercel routes every /api/* request to this single function (see vercel.json).
-// All business logic lives in the apex-rp-analysis/internal/rp package so that
-// Vercel does not mistake helper files in api/ for additional functions.
+// All business logic lives in the apex-rp-analysis/rp package. (It must NOT be
+// under internal/: Vercel builds this entrypoint outside the module tree, so an
+// internal/ import is rejected by Go's package-visibility rule.)
 package handler
 
 import (
 	"net/http"
 	"sync"
 
-	"apex-rp-analysis/internal/rp"
+	"apex-rp-analysis/rp"
 )
 
 var (
