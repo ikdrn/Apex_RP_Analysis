@@ -35,22 +35,23 @@ $sp-56: 56px;
 $sp-64: 64px;
 
 // ── Radii ────────────────────────────────────────────────────
-// Restrained corners. Cards get a soft radius; controls are
-// tighter; the chart frame and pills carry the brand curve.
-$r-xs: 3px;
-$r-sm: 6px;
-$r-md: 10px;
-$r-lg: 16px;
-$r-pill: 999px;
+// Hard edges everywhere — no rounded corners. Kept as named
+// tokens (all zero) so existing call-sites need no rewrite.
+$r-xs: 0;
+$r-sm: 0;
+$r-md: 0;
+$r-lg: 0;
+$r-pill: 0;
 
 // ── Borders ──────────────────────────────────────────────────
-$bd-hair: 1px;   // hairline rule
-$bd-hard: 2px;   // emphasised framing border
+$bd-hair: 1px;   // hairline rule (internal dividers)
+$bd-hard: 2px;   // hard framing border (card / control frames)
+$bd-thick: 3px;  // heavy industrial rule
 
 // ── Type stacks ──────────────────────────────────────────────
-// Display / headings / big figures: Archivo — an industrial
-// grotesque with real heft, paired with Noto Sans JP for kana.
-$font-display: "Archivo", "Noto Sans JP", system-ui, sans-serif;
+// Display / headings / big figures: Roboto Slab — an industrial
+// slab serif with real heft, paired with Noto Serif JP for kana.
+$font-display: "Roboto Slab", "Noto Serif JP", Georgia, serif;
 // Body copy.
 $font-sans: "Archivo", system-ui, -apple-system, "Noto Sans JP", sans-serif;
 // Editorial serif — reserved for the design-document register.

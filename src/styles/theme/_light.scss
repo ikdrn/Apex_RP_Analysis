@@ -40,11 +40,10 @@
   --color-grid: #dcd3c3;
   --hatch: rgba(28, 24, 20, 0.045);
 
-  // ── Elevation ──
-  --shadow-card: 0 1px 0 rgba(28, 24, 20, 0.04),
-                 0 18px 38px -28px rgba(28, 24, 20, 0.4);
-  --shadow-pop: 0 22px 48px -24px rgba(28, 24, 20, 0.34);
-  --glow-accent: 0 14px 40px -22px rgba(223, 74, 20, 0.55);
+  // ── Elevation — flat. Hard borders carry structure, not shadow. ──
+  --shadow-card: none;
+  --shadow-pop: 5px 5px 0 var(--color-border);
+  --glow-accent: none;
 
   // ── Design-doc editorial header band (dark in both themes so
   //    the document reads as its own printed artefact). ──
