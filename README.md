@@ -4,7 +4,7 @@ ApexのRP推移を「グラフ」と「データ一覧」で確認できるア�
 
 ## 技術スタック
 - Frontend: Angular + SCSS (hand-written design system) + ng2-charts (Chart.js)
-- Backend: Vercel Serverless Function (Node.js / CommonJS)
+- Backend: Vercel Serverless Function (Go 1.21+ / Echo v4)
 - Database: Supabase (`player_rp`)
 - Deploy: Vercel
 
@@ -16,6 +16,10 @@ ApexのRP推移を「グラフ」と「データ一覧」で確認できるア�
 - **CSVダウンロード**: 表示中期間のデータを保存
 - **0件時のメッセージ表示** / **エラー時の説明表示**
 
+## API
+- エンドポイント: `GET /api/rp?days=7|30|90|all`（更新時は `skip_cache=true`）
+- レスポンス: `{ data, total, displayed, period, cached, cached_at, timestamp }`
+
 ## APIの運用機能
 - CORS対応（`ALLOWED_ORIGIN` で制限可能）
 - レート制限（1IPあたり 1分間 60リクエスト）
@@ -23,7 +27,7 @@ ApexのRP推移を「グラフ」と「データ一覧」で確認できるア�
 - （任意）Basic認証（`BASIC_AUTH_USER` / `BASIC_AUTH_PASS`）
 
 ## セットアップ
-1. Node.js 20+ をインストール
+1. Node.js 20+ と Go 1.21+ をインストール
 2. 依存関係をインストール
    ```bash
    npm install

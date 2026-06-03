@@ -17,7 +17,7 @@ import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { EMPTY, Subject, catchError, switchMap, tap } from 'rxjs';
 import { DesignDocComponent } from './components/design-doc/design-doc.component';
 import { RpDataService } from './core/rp-data.service';
-import { AppTab, DailyRecord, RangeOption, RpRecord, RpSummary, SortDirection, WeeklyRecord } from './core/rp.model';
+import { AppTab, DailyRecord, RangeOption, RpFetchResponse, RpRecord, RpSummary, SortDirection, WeeklyRecord } from './core/rp.model';
 import { buildChartLabels, buildDailyRecords, buildRecordDiffMap, buildSummary, buildWeeklyRecords, sortRecordsByDate } from './core/rp.utils';
 
 
@@ -58,7 +58,11 @@ export class AppComponent implements OnInit {
   records: RpRecord[] = [];
   selectedRange: RangeOption = 30;
   lastUpdatedTime: Date | null = null;
-  readonly rangeOptions: RangeOption[] = [7, 30, 'all'];
+  totalRecords = 0;
+  periodStart: string | null = null;
+  periodEnd: string | null = null;
+  serverCached = false;
+  readonly rangeOptions: RangeOption[] = [7, 30, 90, 'all'];
 
   rangeLabel(range: RangeOption): string {
     return range === 'all' ? '全期間' : `${range}日`;
@@ -245,8 +249,8 @@ export class AppComponent implements OnInit {
           this.loading = !isRefresh;
           this.refreshing = isRefresh;
         }),
-        switchMap(({ days }) =>
-          this.dataService.fetchRecords(days).pipe(
+        switchMap(({ days, isRefresh }) =>
+          this.dataService.fetchRecords(days, isRefresh).pipe(
             catchError((err: unknown) => {
               this.onLoadError(err);
               return EMPTY;
@@ -255,7 +259,7 @@ export class AppComponent implements OnInit {
         ),
         takeUntilDestroyed()
       )
-      .subscribe((data) => this.onDataLoaded(data));
+      .subscribe((response) => this.onDataLoaded(response));
   }
 
   ngOnInit(): void {
@@ -317,7 +321,8 @@ export class AppComponent implements OnInit {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `apex-rp-${this.selectedRange}days.csv`;
+    const label = this.selectedRange === 'all' ? 'all' : `${this.selectedRange}days`;
+    anchor.download = `apex-rp-${label}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
   }
@@ -486,14 +491,23 @@ export class AppComponent implements OnInit {
     return records.filter((_, i) => i % decimateFactor === 0);
   }
 
-  private onDataLoaded(data: RpRecord[]): void {
-    this.records = data.filter((record) => record.rp > 0);
+  private onDataLoaded(response: RpFetchResponse): void {
+    // The server already filters rp > 0; keep a defensive filter for safety.
+    this.records = response.data.filter((record) => record.rp > 0);
+    this.totalRecords = response.total;
+    this.periodStart = response.period?.start ?? null;
+    this.periodEnd = response.period?.end ?? null;
+    this.serverCached = response.cached;
     this.summary = buildSummary(this.records);
     this.recordDiffs = buildRecordDiffMap(this.records);
-    this.lastUpdatedTime = this.dataService.getLastUpdatedTime(this.selectedRange);
+    this.lastUpdatedTime = response.timestamp
+      ? new Date(response.timestamp)
+      : this.dataService.getLastUpdatedTime(this.selectedRange);
 
-    // Decimate data for rendering to improve performance
-    const decimatedRecords = this.decimateData(this.records);
+    // Decimate for chart rendering — but keep full fidelity for the all-period view.
+    const decimatedRecords = this.selectedRange === 'all'
+      ? this.records
+      : this.decimateData(this.records);
 
     this.lineChartData = {
       labels: buildChartLabels(decimatedRecords),
