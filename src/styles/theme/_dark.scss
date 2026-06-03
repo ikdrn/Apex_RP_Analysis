@@ -21,8 +21,8 @@ html.dark {
   --color-text-subtle: #6e665a;
 
   // ── Lines ──
-  --color-border: #3a352d;
-  --color-border-soft: #2a2620;
+  --color-border: #4d473c;      // hard framing rule (visible on ink)
+  --color-border-soft: #2a2620; // hairline divider
 
   // ── Accent (ember) + secondary (teal) ──
   --color-accent: #ff5a1f;            // ember — vivid on ink
@@ -40,12 +40,10 @@ html.dark {
   --color-grid: #2a2620;
   --hatch: rgba(241, 236, 226, 0.04);
 
-  // ── Elevation (shadows recede; borders + a faint ember glow
-  //    carry depth instead) ──
-  --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.3),
-                 0 22px 44px -26px rgba(0, 0, 0, 0.7);
-  --shadow-pop: 0 26px 52px -22px rgba(0, 0, 0, 0.78);
-  --glow-accent: 0 16px 46px -22px rgba(255, 90, 31, 0.5);
+  // ── Elevation — flat. Hard borders carry structure, not shadow. ──
+  --shadow-card: none;
+  --shadow-pop: 5px 5px 0 var(--color-border);
+  --glow-accent: none;
 
   // ── Design-doc editorial header band. ──
   --doc-band: #0b0a09;

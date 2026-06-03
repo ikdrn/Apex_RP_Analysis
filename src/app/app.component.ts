@@ -180,8 +180,8 @@ export class AppComponent implements OnInit {
         borderColor: '#df4a14',
         backgroundColor: 'rgba(223, 74, 20, 0.10)',
         borderWidth: 2,
-        // Gently eased line with a soft area fill underneath.
-        tension: 0.28,
+        // Hard angular segments (no smoothing) with a flat area fill.
+        tension: 0,
         fill: 'origin',
         pointStyle: 'circle',
         pointBackgroundColor: '#df4a14',
