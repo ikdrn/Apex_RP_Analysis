@@ -1,9 +1,6 @@
-// ============================================================
-//  Base typography — three deliberate registers:
-//    · display (Archivo)        — headings, big figures, labels
-//    · mono    (IBM Plex Mono)  — numbers, codes, tabular data
-//    · serif   (Noto Serif JP)  — the design-document register
-// ============================================================
+// Base typography. Two registers only:
+//   · sans (Archivo + Noto Sans JP) — text, headings, labels
+//   · mono (IBM Plex Mono)          — numbers and tabular figures
 
 @use 'variables' as *;
 @use 'utilities' as *;
@@ -11,43 +8,30 @@
 body {
   font-family: $font-sans;
   font-size: 15px;
-  font-weight: 420;
+  font-weight: 400;
   line-height: 1.6;
-  letter-spacing: 0;
   color: var(--color-text);
   background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-// Display headings — slab serif with a stepped scale.
 h1,
 h2,
 h3,
 h4 {
-  font-family: $font-display;
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: 0;
+  @include display(700);
   color: var(--color-text);
 }
 
-h1 {
-  font-size: 30px;
-  font-weight: 900;
-}
-h2 {
-  font-size: 21px;
-}
-h3 {
-  font-size: 17px;
-}
+h1 { font-size: 26px; }
+h2 { font-size: 19px; }
+h3 { font-size: 16px; }
 
 p {
   line-height: 1.6;
 }
 
-// Numbers, IDs and codes.
 code,
 .is-mono {
   @include mono(500);

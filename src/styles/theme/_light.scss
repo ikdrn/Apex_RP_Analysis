@@ -1,52 +1,36 @@
-// ============================================================
-//  Light theme — "warm paper".
-//  A bone/ivory ground with ink type, a single ember accent and
-//  a steel-teal secondary. Deliberately avoids the white + grey
-//  + indigo "default app" palette. These custom properties are
-//  the single source of truth, read everywhere via var(--…).
-// ============================================================
+// Light theme colours. These custom properties are the single source
+// of truth for colour and are read everywhere via var(--…).
 
 :root {
   color-scheme: light;
 
-  // ── Surfaces ──
-  --color-bg: #f4f0e7;          // warm paper
-  --color-surface: #fbf8f1;     // lifted card
-  --color-surface-alt: #ece6da; // hovered / pressed panel
-  --color-track: #e7e0d2;       // gauge / progress track
+  // Surfaces
+  --color-bg: #fbfbfa;          // page background
+  --color-surface: #ffffff;     // cards / panels
+  --color-surface-alt: #f4f5f6; // hover / zebra rows
+  --color-track: #eceef0;       // progress / divider fills
 
-  // ── Ink ──
-  --color-text: #1c1814;        // near-black ink
-  --color-text-muted: #6a6055;  // warm grey
-  --color-text-subtle: #978c7c; // faint label grey
+  // Text
+  --color-text: #18181b;        // primary
+  --color-text-muted: #5d6470;  // secondary
+  --color-text-subtle: #8a909b; // labels / captions
 
-  // ── Lines ──
-  --color-border: #2a241d;      // hard framing rule (used sparingly)
-  --color-border-soft: #ddd4c4; // hairline divider
+  // Lines
+  --color-border: #e5e7eb;      // hairline borders
 
-  // ── Accent (ember) + secondary (steel-teal) ──
-  --color-accent: #df4a14;            // ember — deepened for contrast on paper
-  --color-accent-strong: #c63f10;     // pressed / hovered ember
-  --color-accent-soft: rgba(223, 74, 20, 0.12);
-  --color-accent-line: rgba(223, 74, 20, 0.28);
-  --color-accent-2: #1f7a8c;          // steel-teal secondary
+  // Accent (single) — calm blue. Swap these four lines to re-skin.
+  --color-accent: #2f6feb;
+  --color-accent-strong: #245fd0;
+  --color-accent-soft: rgba(47, 111, 235, 0.10);
+  --color-on-accent: #ffffff;
 
-  // ── Semantic ──
-  --color-positive: #2e7d46;    // gain
-  --color-negative: #c5331f;    // loss
+  // Semantic — gains / losses
+  --color-positive: #15924f;
+  --color-negative: #d23f3f;
 
-  // ── On-accent text / chart + texture helpers ──
-  --color-on-accent: #fbf8f1;
-  --color-grid: #dcd3c3;
-  --hatch: rgba(28, 24, 20, 0.045);
+  // Chart helpers
+  --color-grid: #eef0f2;
 
-  // ── Elevation — flat. Hard borders carry structure, not shadow. ──
-  --shadow-card: none;
-  --shadow-pop: 5px 5px 0 var(--color-border);
-  --glow-accent: none;
-
-  // ── Design-doc editorial header band (dark in both themes so
-  //    the document reads as its own printed artefact). ──
-  --doc-band: #1c1814;
-  --doc-band-text: #f4f0e7;
+  // Elevation — a single soft shadow for raised cards.
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.06);
 }

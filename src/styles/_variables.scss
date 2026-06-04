@@ -1,15 +1,9 @@
-// ============================================================
-//  Design tokens — compile-time SCSS constants.
+// Design tokens — compile-time SCSS constants.
 //
-//  "Apex Ledger" design language: a precision esports almanac.
-//  Warm ink + bone neutrals, a single ember accent, steel-teal
-//  for secondary data, tabular monospaced figures.
-//
-//  Runtime COLORS live in theme/_light.scss & _dark.scss as CSS
-//  custom properties so they can flip at runtime. This file holds
-//  breakpoints, the spacing scale, radii, borders, font stacks
-//  and motion.
-// ============================================================
+// Runtime colours live in theme/_light.scss & _dark.scss as CSS custom
+// properties so they can switch with the light/dark toggle. This file
+// holds the values that don't change between themes: breakpoints, the
+// spacing scale, radii, border widths, font stacks and motion timings.
 
 // ── Breakpoints ──────────────────────────────────────────────
 $bp-xs: 360px;   // small phone
@@ -17,8 +11,7 @@ $bp-sm: 640px;   // large phone / tablet portrait
 $bp-md: 1024px;  // tablet landscape
 $bp-lg: 1280px;  // desktop
 
-// ── Spacing scale ────────────────────────────────────────────
-// A 4px-rooted scale with a couple of editorial in-between steps.
+// ── Spacing scale (4px base) ─────────────────────────────────
 $sp-3: 3px;
 $sp-6: 6px;
 $sp-8: 8px;
@@ -35,33 +28,23 @@ $sp-56: 56px;
 $sp-64: 64px;
 
 // ── Radii ────────────────────────────────────────────────────
-// Hard edges everywhere — no rounded corners. Kept as named
-// tokens (all zero) so existing call-sites need no rewrite.
-$r-xs: 0;
-$r-sm: 0;
-$r-md: 0;
-$r-lg: 0;
-$r-pill: 0;
+$r-sm: 6px;
+$r-md: 8px;
+$r-lg: 12px;
+$r-pill: 999px;
 
-// ── Borders ──────────────────────────────────────────────────
-$bd-hair: 1px;   // hairline rule (internal dividers)
-$bd-hard: 2px;   // hard framing border (card / control frames)
-$bd-thick: 3px;  // heavy industrial rule
+// ── Border widths ────────────────────────────────────────────
+$bd-hair: 1px;   // hairline rule — the default everywhere
+$bd-thick: 2px;  // emphasis (active tab underline, focus ring)
 
 // ── Type stacks ──────────────────────────────────────────────
-// Display / headings / big figures: Roboto Slab — an industrial
-// slab serif with real heft, paired with Noto Serif JP for kana.
-$font-display: "Roboto Slab", "Noto Serif JP", Georgia, serif;
-// Body copy.
+// One sans for everything, with Noto Sans JP for Japanese coverage.
 $font-sans: "Archivo", system-ui, -apple-system, "Noto Sans JP", sans-serif;
-// Editorial serif — reserved for the design-document register.
-$font-serif: "Noto Serif JP", Georgia, "Times New Roman", serif;
-// Numbers, codes and tabular figures.
-$font-mono: "IBM Plex Mono", ui-monospace, "Courier New", monospace;
+// Monospace for figures so columns of numbers line up.
+$font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Courier New", monospace;
 
-// ── Motion (purposeful, never decorative) ────────────────────
+// ── Motion ───────────────────────────────────────────────────
 $ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-$fade: 180ms;        // opacity / colour transitions
-$theme-shift: 320ms; // light <-> dark colour swap
-$press: 60ms;        // tactile button press
-$slide: 240ms;       // tab indicator / reveal
+$fade: 160ms;        // opacity / colour transitions
+$theme-shift: 220ms; // light <-> dark swap
+$press: 60ms;        // button press

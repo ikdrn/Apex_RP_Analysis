@@ -1,51 +1,36 @@
-// ============================================================
-//  Dark theme — "warm ink".
-//  A warm near-black ground (never slate, never pure black) with
-//  bone type, a vivid ember accent and a cool teal secondary.
-//  Applied by toggling `.dark` on <html>; the swap is a single
-//  colour transition with no layout movement.
-// ============================================================
+// Dark theme colours. Applied by toggling `.dark` on <html>; only the
+// colour values change, the layout stays put.
 
 html.dark {
   color-scheme: dark;
 
-  // ── Surfaces ──
-  --color-bg: #131210;          // warm near-black
-  --color-surface: #1b1916;     // raised card
-  --color-surface-alt: #25221e; // hovered / pressed panel
-  --color-track: #24211c;       // gauge / progress track
+  // Surfaces
+  --color-bg: #0f1115;          // page background
+  --color-surface: #171a21;     // cards / panels
+  --color-surface-alt: #1f232c; // hover / zebra rows
+  --color-track: #262b34;       // progress / divider fills
 
-  // ── Ink ──
-  --color-text: #f1ece2;        // warm bone
-  --color-text-muted: #a89e8e;
-  --color-text-subtle: #6e665a;
+  // Text
+  --color-text: #e8eaed;        // primary
+  --color-text-muted: #9aa1ad;  // secondary
+  --color-text-subtle: #6b7280; // labels / captions
 
-  // ── Lines ──
-  --color-border: #4d473c;      // hard framing rule (visible on ink)
-  --color-border-soft: #2a2620; // hairline divider
+  // Lines
+  --color-border: #272b34;      // hairline borders
 
-  // ── Accent (ember) + secondary (teal) ──
-  --color-accent: #ff5a1f;            // ember — vivid on ink
-  --color-accent-strong: #ff7847;
-  --color-accent-soft: rgba(255, 90, 31, 0.16);
-  --color-accent-line: rgba(255, 90, 31, 0.34);
-  --color-accent-2: #4fd1c5;          // teal secondary
+  // Accent (single) — slightly brighter for dark surfaces.
+  --color-accent: #6ea8ff;
+  --color-accent-strong: #8bbaff;
+  --color-accent-soft: rgba(110, 168, 255, 0.14);
+  --color-on-accent: #0f1115;
 
-  // ── Semantic ──
-  --color-positive: #58c97e;
-  --color-negative: #ff5a4d;
+  // Semantic — gains / losses
+  --color-positive: #4ade80;
+  --color-negative: #f87171;
 
-  // ── On-accent text / chart + texture helpers ──
-  --color-on-accent: #131210;
-  --color-grid: #2a2620;
-  --hatch: rgba(241, 236, 226, 0.04);
+  // Chart helpers
+  --color-grid: #20242c;
 
-  // ── Elevation — flat. Hard borders carry structure, not shadow. ──
-  --shadow-card: none;
-  --shadow-pop: 5px 5px 0 var(--color-border);
-  --glow-accent: none;
-
-  // ── Design-doc editorial header band. ──
-  --doc-band: #0b0a09;
-  --doc-band-text: #f1ece2;
+  // Elevation
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
