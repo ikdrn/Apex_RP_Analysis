@@ -1,50 +1,36 @@
-// ============================================================
-//  Reusable mixins (emits no CSS on its own).
-//  Consumed via `@use 'utilities' as *;` in global.scss and
-//  every component stylesheet.
-// ============================================================
+// Reusable mixins (emits no CSS on its own). Consumed via
+// `@use 'utilities' as *;` in global.scss and component stylesheets.
 
 @use 'variables' as *;
 
 // ── Type registers ───────────────────────────────────────────
 
-// Heavy display slab serif — headings & big figures.
-@mixin display($weight: 800) {
-  font-family: $font-display;
+// Headings and big figures — the sans at a heavier weight.
+@mixin display($weight: 700) {
+  font-family: $font-sans;
   font-weight: $weight;
-  letter-spacing: 0;
-  line-height: 1.08;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
 // Monospace tabular figures — numbers, codes, data cells.
 @mixin mono($weight: 500) {
   font-family: $font-mono;
   font-weight: $weight;
-  letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
 }
 
-// Editorial serif — the design-document register only.
-@mixin serif($weight: 700) {
-  font-family: $font-serif;
-  font-weight: $weight;
-  letter-spacing: 0.01em;
-  line-height: 1.3;
-}
-
-// Small upper-case kicker / eyebrow label — technical mono register.
+// Small caption / eyebrow label.
 @mixin eyebrow {
-  font-family: $font-mono;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
   color: var(--color-text-subtle);
 }
 
 // ── Layout helpers ───────────────────────────────────────────
 
-// Min-width media query helper.
 @mixin respond-to($bp) {
   @media (min-width: $bp) {
     @content;
@@ -53,18 +39,18 @@
 
 // ── Surfaces & controls ──────────────────────────────────────
 
-// A framed card surface — hard 2px border, flat (no soft shadow).
-@mixin card($radius: 0) {
+// A card surface — hairline border, soft radius, gentle elevation.
+@mixin card {
   background: var(--color-surface);
-  border: $bd-hard solid var(--color-border);
-  border-radius: 0;
+  border: $bd-hair solid var(--color-border);
+  border-radius: $r-lg;
   box-shadow: var(--shadow-card);
 }
 
-// Base for bordered interactive controls (buttons, pills, toggles).
-@mixin control($radius: 0) {
-  border: $bd-hard solid var(--color-border);
-  border-radius: 0;
+// Base for bordered interactive controls (buttons, segments, toggles).
+@mixin control {
+  border: $bd-hair solid var(--color-border);
+  border-radius: $r-md;
   background: var(--color-surface);
   color: var(--color-text-muted);
   transition: border-color $fade $ease, color $fade $ease,
@@ -72,24 +58,10 @@
   @include focus-ring;
 }
 
-// Accessibility: a clear keyboard focus ring in the brand accent.
+// A clear keyboard focus ring in the accent colour.
 @mixin focus-ring {
   &:focus-visible {
-    outline: $bd-hard solid var(--color-accent);
+    outline: $bd-thick solid var(--color-accent);
     outline-offset: 2px;
   }
-}
-
-// ── Texture ──────────────────────────────────────────────────
-
-// Diagonal hatching — a real CSS texture, used sparingly on
-// framed plot surfaces.
-@mixin hatching($gap: 7px) {
-  background-image: repeating-linear-gradient(
-    45deg,
-    var(--hatch),
-    var(--hatch) 1px,
-    transparent 1px,
-    transparent $gap
-  );
 }

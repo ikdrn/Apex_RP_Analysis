@@ -8,7 +8,7 @@ export type RangeOption = 7 | 30 | 'all';
 
 export type SortDirection = 'asc' | 'desc';
 
-export type AppTab = 'analysis' | 'table' | 'daily' | 'weekly' | 'design';
+export type AppTab = 'analysis' | 'table' | 'daily' | 'weekly';
 
 export type DailyRecord = {
   date: string;

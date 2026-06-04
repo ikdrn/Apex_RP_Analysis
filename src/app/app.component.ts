@@ -15,7 +15,6 @@ import {
 } from 'chart.js';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { EMPTY, Subject, catchError, switchMap, tap } from 'rxjs';
-import { DesignDocComponent } from './components/design-doc/design-doc.component';
 import { RpDataService } from './core/rp-data.service';
 import { AppTab, DailyRecord, RangeOption, RpRecord, RpSummary, SortDirection, WeeklyRecord } from './core/rp.model';
 import { buildChartLabels, buildDailyRecords, buildRecordDiffMap, buildSummary, buildWeeklyRecords, sortRecordsByDate } from './core/rp.utils';
@@ -40,7 +39,7 @@ Chart.register(
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, NgChartsModule, DesignDocComponent],
+  imports: [CommonModule, NgChartsModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -166,8 +165,9 @@ export class AppComponent implements OnInit {
     return `${year}-${month}-${day} ${hours}:${minutes} JST`;
   }
 
-  // Type families + palette mirror the SCSS design tokens (Chart.js
-  // can't read CSS custom properties, so they are restated here).
+  // Chart.js can't read CSS custom properties, so the font stacks are
+  // restated here. Colours are pulled from the theme variables at
+  // runtime in applyChartTheme() so the chart tracks the active theme.
   private static readonly CHART_FONT_SANS = 'Archivo, "Noto Sans JP", system-ui, sans-serif';
   private static readonly CHART_FONT_MONO = '"IBM Plex Mono", ui-monospace, monospace';
 
@@ -177,15 +177,15 @@ export class AppComponent implements OnInit {
       {
         label: 'RP',
         data: [],
-        borderColor: '#df4a14',
-        backgroundColor: 'rgba(223, 74, 20, 0.10)',
+        borderColor: '#2f6feb',
+        backgroundColor: 'rgba(47, 111, 235, 0.10)',
         borderWidth: 2,
-        // Hard angular segments (no smoothing) with a flat area fill.
+        // Straight segments (no smoothing) with a flat area fill.
         tension: 0,
         fill: 'origin',
         pointStyle: 'circle',
-        pointBackgroundColor: '#df4a14',
-        pointBorderColor: '#df4a14',
+        pointBackgroundColor: '#2f6feb',
+        pointBorderColor: '#2f6feb',
         pointBorderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 4
@@ -202,10 +202,10 @@ export class AppComponent implements OnInit {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1c1814',
-        titleColor: '#f4f0e7',
-        bodyColor: '#f1ece2',
-        borderColor: '#df4a14',
+        backgroundColor: '#ffffff',
+        titleColor: '#18181b',
+        bodyColor: '#18181b',
+        borderColor: '#e5e7eb',
         borderWidth: 1,
         padding: 11,
         cornerRadius: 8,
@@ -218,20 +218,20 @@ export class AppComponent implements OnInit {
     scales: {
       x: {
         ticks: {
-          color: '#978c7c',
+          color: '#8a909b',
           font: { family: AppComponent.CHART_FONT_SANS, size: 11 },
           maxRotation: 45
         },
         grid: { display: false },
-        border: { color: '#ddd4c4', width: 1 }
+        border: { color: '#e5e7eb', width: 1 }
       },
       y: {
         ticks: {
-          color: '#978c7c',
+          color: '#8a909b',
           font: { family: AppComponent.CHART_FONT_MONO, size: 11 },
           callback: (value) => value.toLocaleString()
         },
-        grid: { color: '#dcd3c3', lineWidth: 1 },
+        grid: { color: '#eef0f2', lineWidth: 1 },
         border: { display: false }
       }
     }
@@ -273,10 +273,6 @@ export class AppComponent implements OnInit {
     localStorage.setItem('dark-mode', String(this.isDark));
     this.applyChartTheme();
     this.cdr.markForCheck();
-  }
-
-  showDesignDoc(): void {
-    this.activeTab = 'design';
   }
 
   onRangeChange(days: RangeOption): void {
@@ -433,31 +429,54 @@ export class AppComponent implements OnInit {
     this.applyZoomOptions();
   }
 
+  // Reads a CSS custom property from the document root so the chart
+  // colours always match the active (light / dark) theme.
+  private cssVar(name: string): string {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
   private applyChartTheme(): void {
-    const dark = this.isDark;
-    const gridColor   = dark ? '#2a2620' : '#dcd3c3';
-    const axisColor   = dark ? '#3a352d' : '#ddd4c4';
-    const tickColor   = dark ? '#a89e8e' : '#978c7c';
-    const lineColor   = dark ? '#ff5a1f' : '#df4a14';
-    const fillColor   = dark ? 'rgba(255, 90, 31, 0.16)' : 'rgba(223, 74, 20, 0.10)';
-    const sansFont    = AppComponent.CHART_FONT_SANS;
-    const monoFont    = AppComponent.CHART_FONT_MONO;
+    const accent  = this.cssVar('--color-accent');
+    const fill    = this.cssVar('--color-accent-soft');
+    const grid    = this.cssVar('--color-grid');
+    const line    = this.cssVar('--color-border');
+    const tick    = this.cssVar('--color-text-subtle');
+    const surface = this.cssVar('--color-surface');
+    const text    = this.cssVar('--color-text');
+    const sansFont = AppComponent.CHART_FONT_SANS;
+    const monoFont = AppComponent.CHART_FONT_MONO;
 
     this.lineChartOptions = {
       ...this.lineChartOptions,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: surface,
+          titleColor: text,
+          bodyColor: text,
+          borderColor: line,
+          borderWidth: 1,
+          padding: 11,
+          cornerRadius: 8,
+          displayColors: false,
+          titleFont: { family: monoFont, size: 11 },
+          bodyFont: { family: monoFont, size: 13, weight: 600 },
+          callbacks: { label: (ctx) => ` RP ${ctx.parsed.y?.toLocaleString() ?? ''}` }
+        }
+      },
       scales: {
         x: {
-          ticks: { color: tickColor, font: { family: sansFont, size: 11 }, maxRotation: 45 },
+          ticks: { color: tick, font: { family: sansFont, size: 11 }, maxRotation: 45 },
           grid: { display: false },
-          border: { color: axisColor, width: 1 }
+          border: { color: line, width: 1 }
         },
         y: {
           ticks: {
-            color: tickColor,
+            color: tick,
             font: { family: monoFont, size: 11 },
             callback: (value) => value.toLocaleString()
           },
-          grid: { color: gridColor, lineWidth: 1 },
+          grid: { color: grid, lineWidth: 1 },
           border: { display: false }
         }
       }
@@ -467,11 +486,11 @@ export class AppComponent implements OnInit {
       ...this.lineChartData,
       datasets: [{
         ...this.lineChartData.datasets[0],
-        borderColor: lineColor,
-        backgroundColor: fillColor,
+        borderColor: accent,
+        backgroundColor: fill,
         fill: 'origin',
-        pointBackgroundColor: lineColor,
-        pointBorderColor: lineColor
+        pointBackgroundColor: accent,
+        pointBorderColor: accent
       }]
     };
   }

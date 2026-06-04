@@ -1,14 +1,13 @@
-<div class="page">
-  <div class="shell">
+<div class="app">
+  <div class="container">
 
-    <!-- ───────────────── Topbar ───────────────── -->
-    <header class="topbar">
+    <!-- Header -->
+    <header class="header">
       <div class="brand">
         <span class="brand__mark" aria-hidden="true">
-          <svg viewBox="0 0 32 32" fill="none">
-            <path d="M5 25 L13 9 L19 19 L23 12 L27 25" stroke="currentColor"
-              stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" />
-            <path d="M5 25 H27" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" opacity="0.45" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 18 L9 11 L13 14 L20 6" />
           </svg>
         </span>
         <span class="brand__text">
@@ -17,12 +16,8 @@
         </span>
       </div>
 
-      <div class="topbar__meta">
-        <span
-          *ngIf="lastUpdatedTime"
-          class="updated"
-          [title]="getLastUpdatedISO()"
-        >
+      <div class="header__actions">
+        <span *ngIf="lastUpdatedTime" class="updated" [title]="getLastUpdatedISO()">
           <span class="updated__dot" aria-hidden="true"></span>
           <span class="updated__label">更新</span>
           <span class="updated__time">{{ getLastUpdatedText() }}</span>
@@ -33,10 +28,10 @@
           [attr.aria-label]="isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え'"
           [title]="isDark ? 'ライトモード' : 'ダークモード'"
         >
-          <svg *ngIf="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+          <svg *ngIf="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
           </svg>
-          <svg *ngIf="isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+          <svg *ngIf="isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <circle cx="12" cy="12" r="4" stroke-linecap="round" stroke-linejoin="round"/>
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
           </svg>
@@ -44,62 +39,57 @@
       </div>
     </header>
 
-    <!-- ───────────────── Scoreboard ───────────────── -->
+    <!-- Stats -->
     <section
-      *ngIf="!loading && !error && activeTab !== 'design'"
-      class="scoreboard"
+      *ngIf="!loading && !error && records.length > 0"
+      class="stats-section"
       [class.is-refreshing]="refreshing"
     >
-      <div class="scoreboard__main">
-        <div class="score">
-          <div class="score__head">
-            <span class="kicker">最新 RP</span>
+      <div class="stats">
+        <div class="stat stat--hero">
+          <div class="stat__head">
+            <span class="stat__label">最新 RP</span>
             <span class="rank-chip" *ngIf="latestRp !== null">{{ latestRank }}</span>
           </div>
-          <div class="score__figure">
-            <span class="score__value">
-              {{ latestRp !== null ? latestRp.toLocaleString() : '—' }}
-            </span>
+          <div class="stat__figure">
+            <span class="stat__value">{{ latestRp !== null ? latestRp.toLocaleString() : '—' }}</span>
             <span
               *ngIf="rpChange !== null"
-              class="score__delta"
+              class="stat__delta"
               [class.is-pos]="rpChange >= 0"
               [class.is-neg]="rpChange < 0"
             >
-              <span class="score__delta-arrow" aria-hidden="true">{{ rpChange >= 0 ? '▲' : '▼' }}</span>
+              <span aria-hidden="true">{{ rpChange >= 0 ? '▲' : '▼' }}</span>
               {{ rpChange >= 0 ? '+' : '' }}{{ rpChange.toLocaleString() }}
             </span>
           </div>
-          <p class="score__range">
+          <p class="stat__caption">
             {{ selectedRange === 'all' ? '全期間' : '過去 ' + selectedRange + ' 日間' }}
           </p>
         </div>
 
-        <div class="rail">
-          <div class="rail__stat">
-            <span class="rail__label">最高</span>
-            <span class="rail__value">{{ maxRp !== null ? maxRp.toLocaleString() : '—' }}</span>
-          </div>
-          <div class="rail__stat">
-            <span class="rail__label">最低</span>
-            <span class="rail__value">{{ minRp !== null ? minRp.toLocaleString() : '—' }}</span>
-          </div>
-          <div class="rail__stat">
-            <span class="rail__label">平均</span>
-            <span class="rail__value">{{ avgRp !== null ? avgRp.toLocaleString() : '—' }}</span>
-          </div>
-          <div class="rail__stat">
-            <span class="rail__label">日次平均</span>
-            <span
-              class="rail__value"
-              [class.is-pos]="(rpPerDay ?? 0) >= 0"
-              [class.is-neg]="(rpPerDay ?? 0) < 0"
-            >{{ rpPerDay !== null ? ((rpPerDay >= 0 ? '+' : '') + rpPerDay.toFixed(1)) : '—' }}</span>
-          </div>
+        <div class="stat">
+          <span class="stat__label">最高</span>
+          <span class="stat__num">{{ maxRp !== null ? maxRp.toLocaleString() : '—' }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">最低</span>
+          <span class="stat__num">{{ minRp !== null ? minRp.toLocaleString() : '—' }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">平均</span>
+          <span class="stat__num">{{ avgRp !== null ? avgRp.toLocaleString() : '—' }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">日次平均</span>
+          <span
+            class="stat__num"
+            [class.is-pos]="(rpPerDay ?? 0) >= 0"
+            [class.is-neg]="(rpPerDay ?? 0) < 0"
+          >{{ rpPerDay !== null ? ((rpPerDay >= 0 ? '+' : '') + rpPerDay.toFixed(1)) : '—' }}</span>
         </div>
       </div>
 
-      <!-- Rank guide collapsible -->
       <details class="rank-guide">
         <summary class="rank-guide__summary">ランク目安を表示</summary>
         <ul class="rank-guide__list">
@@ -111,8 +101,8 @@
       </details>
     </section>
 
-    <!-- ───────────────── Toolbar (period + actions) ───────────────── -->
-    <div *ngIf="activeTab !== 'design'" class="toolbar">
+    <!-- Controls -->
+    <div class="controls">
       <div class="segment" role="group" aria-label="表示期間">
         <button
           *ngFor="let range of rangeOptions"
@@ -122,7 +112,7 @@
         >{{ rangeLabel(range) }}</button>
       </div>
 
-      <div class="toolbar__actions">
+      <div class="controls__actions">
         <button
           class="btn"
           (click)="downloadCsv()"
@@ -148,220 +138,192 @@
       </div>
     </div>
 
-    <!-- ───────────────── Tabs ───────────────── -->
-    <nav class="tabbar" aria-label="表示切り替え">
-      <button class="tabbar__tab" [class.is-active]="activeTab === 'analysis'" (click)="activeTab = 'analysis'">グラフ</button>
-      <button class="tabbar__tab" [class.is-active]="activeTab === 'table'" (click)="activeTab = 'table'">データ</button>
-      <button class="tabbar__tab" [class.is-active]="activeTab === 'daily'" (click)="activeTab = 'daily'">日別</button>
-      <button class="tabbar__tab" [class.is-active]="activeTab === 'weekly'" (click)="activeTab = 'weekly'">週別</button>
-      <span class="tabbar__spacer"></span>
-      <button class="tabbar__tab tabbar__tab--doc" [class.is-active]="activeTab === 'design'" (click)="activeTab = 'design'">設計書</button>
+    <!-- Tabs -->
+    <nav class="tabs" aria-label="表示切り替え">
+      <button class="tabs__tab" [class.is-active]="activeTab === 'analysis'" (click)="activeTab = 'analysis'">グラフ</button>
+      <button class="tabs__tab" [class.is-active]="activeTab === 'table'" (click)="activeTab = 'table'">データ</button>
+      <button class="tabs__tab" [class.is-active]="activeTab === 'daily'" (click)="activeTab = 'daily'">日別</button>
+      <button class="tabs__tab" [class.is-active]="activeTab === 'weekly'" (click)="activeTab = 'weekly'">週別</button>
     </nav>
 
-    <!-- ───────────────── Content ───────────────── -->
+    <!-- Content -->
     <main>
-      <ng-container *ngIf="activeTab !== 'design'">
+      <!-- Loading -->
+      <div *ngIf="loading" class="state">
+        <span class="spinner" aria-hidden="true"></span>
+        <p class="state__text">読み込み中…</p>
+      </div>
 
-        <!-- Loading -->
-        <div *ngIf="loading" class="state state--loading">
-          <div class="scanbar" aria-hidden="true"><span></span></div>
-          <p class="state__loading-text">読み込み中…</p>
-        </div>
+      <!-- Error -->
+      <div *ngIf="error" class="state state--error" role="alert">
+        <p class="state__title">{{ error }}</p>
+        <p class="state__hint">
+          環境変数（SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）を確認してください。
+        </p>
+      </div>
 
-        <!-- Error -->
-        <div *ngIf="error" class="state state--error" role="alert">
-          <p class="state__error-title">{{ error }}</p>
-          <p class="state__error-hint">
-            環境変数（SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）を確認してください。
-          </p>
-        </div>
+      <!-- Empty -->
+      <div *ngIf="!loading && !error && records.length === 0" class="state">
+        <svg class="state__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M6 40h36" stroke-linecap="round"/>
+          <path d="M8 32l10-9 7 6 13-15" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="state__title">この期間のデータはまだありません</p>
+        <p class="state__hint">時間をおいて更新ボタンを押してください</p>
+      </div>
 
-        <!-- Empty -->
-        <div *ngIf="!loading && !error && records.length === 0" class="state state--empty">
-          <svg class="state__art" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M6 50h52" stroke-linecap="round"/>
-            <path d="M6 50V12" stroke-linecap="round"/>
-            <path d="M10 42l14-12 10 8 18-20" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <p class="state__title">この期間のデータはまだありません</p>
-          <p class="state__hint">時間をおいて更新ボタンを押してください</p>
-        </div>
-
-        <!-- ── Analysis ── -->
-        <div *ngIf="!loading && !error && activeTab === 'analysis' && records.length > 0">
-          <div class="chart-card">
-            <div class="chart-card__head">
-              <span class="kicker">RP 推移 · <span class="chart-card__count">{{ records.length }}</span> 件</span>
-              <div class="chart-card__tools">
-                <button class="tool-btn" (click)="zoomOut()" aria-label="縮小">縮小</button>
-                <button class="tool-btn" (click)="zoomIn()" aria-label="拡大">拡大</button>
-                <span class="tool-divider" aria-hidden="true"></span>
-                <button class="tool-btn" [disabled]="!canResetZoom" (click)="resetZoom()" aria-label="表示をリセット">リセット</button>
-              </div>
-            </div>
-            <div
-              class="chart-card__plot"
-              [class.is-dragging]="dragState"
-              (wheel)="onChartWheel($event)"
-              (pointerdown)="onChartPointerDown($event)"
-              (pointermove)="onChartPointerMove($event)"
-              (pointerup)="onChartPointerUp($event)"
-              (pointercancel)="onChartPointerUp($event)"
-            >
-              <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
-            </div>
-            <p class="chart-card__hint">
-              ドラッグで移動 · ホイールで拡大縮小 / Shift+上下 / Alt+左右
-            </p>
+      <!-- Analysis -->
+      <div *ngIf="!loading && !error && activeTab === 'analysis' && records.length > 0" class="card">
+        <div class="card__head">
+          <span class="card__title">RP 推移 <span class="card__count">{{ records.length }} 件</span></span>
+          <div class="card__tools">
+            <button class="tool-btn" (click)="zoomOut()" aria-label="縮小">縮小</button>
+            <button class="tool-btn" (click)="zoomIn()" aria-label="拡大">拡大</button>
+            <button class="tool-btn" [disabled]="!canResetZoom" (click)="resetZoom()" aria-label="表示をリセット">リセット</button>
           </div>
         </div>
-
-        <!-- ── Table ── -->
-        <div *ngIf="!loading && !error && activeTab === 'table' && records.length > 0">
-          <div class="table-card">
-            <div class="table-card__head">
-              <span class="kicker"><span class="table-card__count">{{ sortedRecords.length }}</span> 件</span>
-              <button class="sort-btn" (click)="toggleTableSort()">
-                {{ tableSortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}
-              </button>
-            </div>
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>No</th>
-                    <th class="is-right">RP</th>
-                    <th>日時</th>
-                    <th class="is-right">差分</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let row of sortedRecords; let i = index">
-                    <td class="col-id">
-                      {{ tableSortDir === 'asc' ? (i + 1) : (sortedRecords.length - i) }}
-                    </td>
-                    <td class="col-num col-num--strong">
-                      {{ row.rp.toLocaleString() }}
-                    </td>
-                    <td class="col-date">
-                      {{ row.created_at | date:'MM/dd HH:mm':'UTC' }}
-                    </td>
-                    <td
-                      class="col-num"
-                      [class.is-pos]="getRecordDiff(row) !== null && (getRecordDiff(row) ?? 0) >= 0"
-                      [class.is-neg]="getRecordDiff(row) !== null && (getRecordDiff(row) ?? 0) < 0"
-                      [class.is-faint]="getRecordDiff(row) === null"
-                    >
-                      <ng-container *ngIf="getRecordDiff(row) !== null">
-                        {{ (getRecordDiff(row) ?? 0) >= 0 ? '+' : '' }}{{ (getRecordDiff(row) ?? 0).toLocaleString() }}
-                      </ng-container>
-                      <ng-container *ngIf="getRecordDiff(row) === null">—</ng-container>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <div
+          class="chart-plot"
+          [class.is-dragging]="dragState"
+          (wheel)="onChartWheel($event)"
+          (pointerdown)="onChartPointerDown($event)"
+          (pointermove)="onChartPointerMove($event)"
+          (pointerup)="onChartPointerUp($event)"
+          (pointercancel)="onChartPointerUp($event)"
+        >
+          <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
         </div>
+        <p class="chart-hint">
+          ドラッグで移動 · ホイールで拡大縮小 / Shift+上下 / Alt+左右
+        </p>
+      </div>
 
-        <!-- ── Daily ── -->
-        <div *ngIf="!loading && !error && activeTab === 'daily' && records.length > 0">
-          <div class="table-card">
-            <div class="table-card__head">
-              <span class="kicker"><span class="table-card__count">{{ dailyRecords.length }}</span> 日分</span>
-              <button class="sort-btn" (click)="toggleDailySort()">
-                {{ dailySortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}
-              </button>
-            </div>
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>日付</th>
-                    <th class="is-right">開始</th>
-                    <th class="is-right">終了</th>
-                    <th class="is-right">高値</th>
-                    <th class="is-right">安値</th>
-                    <th class="is-right">変化</th>
-                    <th class="is-right">件数</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let day of dailyRecords">
-                    <td class="col-first">{{ day.date }}</td>
-                    <td class="col-num col-muted">{{ day.firstRp.toLocaleString() }}</td>
-                    <td class="col-num col-num--strong">{{ day.lastRp.toLocaleString() }}</td>
-                    <td class="col-num is-pos">{{ day.maxRp.toLocaleString() }}</td>
-                    <td class="col-num is-neg">{{ day.minRp.toLocaleString() }}</td>
-                    <td
-                      class="col-num"
-                      [class.is-pos]="day.change >= 0"
-                      [class.is-neg]="day.change < 0"
-                    >{{ day.change >= 0 ? '+' : '' }}{{ day.change.toLocaleString() }}</td>
-                    <td class="col-num is-faint">{{ day.count }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+      <!-- Table -->
+      <div *ngIf="!loading && !error && activeTab === 'table' && records.length > 0" class="card">
+        <div class="card__head">
+          <span class="card__title">データ <span class="card__count">{{ sortedRecords.length }} 件</span></span>
+          <button class="sort-btn" (click)="toggleTableSort()">
+            {{ tableSortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}
+          </button>
         </div>
-
-        <!-- ── Weekly ── -->
-        <div *ngIf="!loading && !error && activeTab === 'weekly' && records.length > 0">
-          <div class="table-card">
-            <div class="table-card__head">
-              <span class="kicker"><span class="table-card__count">{{ weeklyRecords.length }}</span> 週分 · 日曜はじまり</span>
-              <button class="sort-btn" (click)="toggleWeeklySort()">
-                {{ weeklySortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}
-              </button>
-            </div>
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>週</th>
-                    <th class="is-right">開始</th>
-                    <th class="is-right">終了</th>
-                    <th class="is-right">高値</th>
-                    <th class="is-right">安値</th>
-                    <th class="is-right">変化</th>
-                    <th class="is-right">件数</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let week of weeklyRecords">
-                    <td class="col-first">
-                      {{ week.weekStart }}
-                      <span class="week-range__sep"> 〜 </span>
-                      <span class="week-range__end">{{ week.weekEnd }}</span>
-                    </td>
-                    <td class="col-num col-muted">{{ week.firstRp.toLocaleString() }}</td>
-                    <td class="col-num col-num--strong">{{ week.lastRp.toLocaleString() }}</td>
-                    <td class="col-num is-pos">{{ week.maxRp.toLocaleString() }}</td>
-                    <td class="col-num is-neg">{{ week.minRp.toLocaleString() }}</td>
-                    <td
-                      class="col-num"
-                      [class.is-pos]="week.change >= 0"
-                      [class.is-neg]="week.change < 0"
-                    >{{ week.change >= 0 ? '+' : '' }}{{ week.change.toLocaleString() }}</td>
-                    <td class="col-num is-faint">{{ week.count }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th class="is-right">RP</th>
+                <th>日時</th>
+                <th class="is-right">差分</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of sortedRecords; let i = index">
+                <td class="col-id">{{ tableSortDir === 'asc' ? (i + 1) : (sortedRecords.length - i) }}</td>
+                <td class="col-num col-num--strong">{{ row.rp.toLocaleString() }}</td>
+                <td class="col-date">{{ row.created_at | date:'MM/dd HH:mm':'UTC' }}</td>
+                <td
+                  class="col-num"
+                  [class.is-pos]="getRecordDiff(row) !== null && (getRecordDiff(row) ?? 0) >= 0"
+                  [class.is-neg]="getRecordDiff(row) !== null && (getRecordDiff(row) ?? 0) < 0"
+                  [class.is-faint]="getRecordDiff(row) === null"
+                >
+                  <ng-container *ngIf="getRecordDiff(row) !== null">
+                    {{ (getRecordDiff(row) ?? 0) >= 0 ? '+' : '' }}{{ (getRecordDiff(row) ?? 0).toLocaleString() }}
+                  </ng-container>
+                  <ng-container *ngIf="getRecordDiff(row) === null">—</ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
 
-      </ng-container>
+      <!-- Daily -->
+      <div *ngIf="!loading && !error && activeTab === 'daily' && records.length > 0" class="card">
+        <div class="card__head">
+          <span class="card__title">日別 <span class="card__count">{{ dailyRecords.length }} 日分</span></span>
+          <button class="sort-btn" (click)="toggleDailySort()">
+            {{ dailySortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>日付</th>
+                <th class="is-right">開始</th>
+                <th class="is-right">終了</th>
+                <th class="is-right">高値</th>
+                <th class="is-right">安値</th>
+                <th class="is-right">変化</th>
+                <th class="is-right">件数</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let day of dailyRecords">
+                <td class="col-first">{{ day.date }}</td>
+                <td class="col-num col-muted">{{ day.firstRp.toLocaleString() }}</td>
+                <td class="col-num col-num--strong">{{ day.lastRp.toLocaleString() }}</td>
+                <td class="col-num is-pos">{{ day.maxRp.toLocaleString() }}</td>
+                <td class="col-num is-neg">{{ day.minRp.toLocaleString() }}</td>
+                <td
+                  class="col-num"
+                  [class.is-pos]="day.change >= 0"
+                  [class.is-neg]="day.change < 0"
+                >{{ day.change >= 0 ? '+' : '' }}{{ day.change.toLocaleString() }}</td>
+                <td class="col-num is-faint">{{ day.count }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-      <!-- Design doc -->
-      <div *ngIf="activeTab === 'design'" class="doc-frame">
-        <app-design-doc [isDark]="isDark"></app-design-doc>
+      <!-- Weekly -->
+      <div *ngIf="!loading && !error && activeTab === 'weekly' && records.length > 0" class="card">
+        <div class="card__head">
+          <span class="card__title">週別 <span class="card__count">{{ weeklyRecords.length }} 週分 · 日曜はじまり</span></span>
+          <button class="sort-btn" (click)="toggleWeeklySort()">
+            {{ weeklySortDir === 'asc' ? '↑ 昇順' : '↓ 降順' }}
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>週</th>
+                <th class="is-right">開始</th>
+                <th class="is-right">終了</th>
+                <th class="is-right">高値</th>
+                <th class="is-right">安値</th>
+                <th class="is-right">変化</th>
+                <th class="is-right">件数</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let week of weeklyRecords">
+                <td class="col-first">
+                  {{ week.weekStart }}
+                  <span class="week-range__sep"> 〜 </span>
+                  <span class="week-range__end">{{ week.weekEnd }}</span>
+                </td>
+                <td class="col-num col-muted">{{ week.firstRp.toLocaleString() }}</td>
+                <td class="col-num col-num--strong">{{ week.lastRp.toLocaleString() }}</td>
+                <td class="col-num is-pos">{{ week.maxRp.toLocaleString() }}</td>
+                <td class="col-num is-neg">{{ week.minRp.toLocaleString() }}</td>
+                <td
+                  class="col-num"
+                  [class.is-pos]="week.change >= 0"
+                  [class.is-neg]="week.change < 0"
+                >{{ week.change >= 0 ? '+' : '' }}{{ week.change.toLocaleString() }}</td>
+                <td class="col-num is-faint">{{ week.count }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
 
     <footer class="footer">
-      <span class="footer__mark">RP</span>
       Apex RP Analysis · Supabase × Vercel
     </footer>
   </div>

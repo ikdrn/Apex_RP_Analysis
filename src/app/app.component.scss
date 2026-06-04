@@ -1,48 +1,30 @@
-// ============================================================
-//  AppComponent — scoped styles (Angular view encapsulation).
-//
-//  "Apex Ledger" — a precision esports-statistics instrument.
-//  Soft-cornered cards on warm paper / warm ink, a single ember
-//  accent doing the signalling, tabular monospaced figures, and
-//  a heavy grotesque for the big numbers. Motion is minimal and
-//  purposeful.
-// ============================================================
-
 @use 'variables' as *;
 @use 'utilities' as *;
 
-// ── Shared label register ───────────────────────────────────
-.kicker {
-  @include eyebrow;
-}
-
-// Shared semantic colours (cells, deltas, values).
-.is-pos { color: var(--color-positive); }
-.is-neg { color: var(--color-negative); }
-.is-faint { color: var(--color-text-subtle); }
-
-// ── Page shell ──────────────────────────────────────────────
-.page {
+// ── Shell ────────────────────────────────────────────────────
+.app {
   min-height: 100vh;
 }
 
-.shell {
-  max-width: 1100px;
+.container {
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 26px 18px 72px;
+  padding: $sp-20 $sp-16 $sp-44;
 
   @include respond-to($bp-sm) {
-    padding: 40px 32px 88px;
+    padding: $sp-28 $sp-24 $sp-56;
   }
 }
 
-// ── Topbar ──────────────────────────────────────────────────
-.topbar {
+// ── Header ───────────────────────────────────────────────────
+.header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: $sp-16;
-  margin-bottom: $sp-28;
+  padding-bottom: $sp-16;
+  margin-bottom: $sp-24;
+  border-bottom: $bd-hair solid var(--color-border);
 }
 
 .brand {
@@ -55,708 +37,490 @@
 .brand__mark {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
   flex-shrink: 0;
-  color: var(--color-on-accent);
-  background: var(--color-accent);
+  width: 34px;
+  height: 34px;
+  border-radius: $r-md;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
 
-  svg { width: 26px; height: 26px; }
+  svg { width: 20px; height: 20px; }
 }
 
 .brand__text {
   display: flex;
   flex-direction: column;
-  gap: 1px;
   min-width: 0;
 }
 
 .brand__title {
-  @include display(800);
-  font-size: 18px;
-  line-height: 1.05;
-
-  @include respond-to($bp-sm) { font-size: 21px; }
+  @include display(700);
+  font-size: 17px;
 }
 
 .brand__sub {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--color-text-muted);
-  letter-spacing: 0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.topbar__meta {
+.header__actions {
   display: flex;
   align-items: center;
   gap: $sp-10;
 }
 
-// Live "updated" pill.
 .updated {
   display: inline-flex;
   align-items: center;
-  gap: $sp-8;
-  padding: 6px 12px;
-  border: $bd-hair solid var(--color-border-soft);
-  border-radius: $r-pill;
-  background: var(--color-surface);
-  white-space: nowrap;
-
-  @media (max-width: #{$bp-xs - 1px}) {
-    .updated__label { display: none; }
-  }
+  gap: $sp-6;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
 }
 
 .updated__dot {
   width: 7px;
   height: 7px;
+  border-radius: $r-pill;
   background: var(--color-positive);
-}
-
-.updated__label {
-  @include eyebrow;
-  font-size: 9.5px;
 }
 
 .updated__time {
   @include mono(500);
-  font-size: 11.5px;
-  color: var(--color-text-muted);
+  font-size: 12px;
 }
 
-// Square icon button (theme toggle).
+@media (max-width: 359px) {
+  .updated__label { display: none; }
+}
+
 .icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  @include control;
+  display: grid;
+  place-items: center;
   width: 38px;
   height: 38px;
-  flex-shrink: 0;
   color: var(--color-text-muted);
-  @include control($r-md);
+
+  svg { width: 18px; height: 18px; }
 
   &:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    color: var(--color-text);
+    border-color: var(--color-text-subtle);
   }
-
-  svg { width: 17px; height: 17px; }
 }
 
-// ── Scoreboard ──────────────────────────────────────────────
-.scoreboard {
-  position: relative;
-  overflow: hidden;
+// ── Stats ────────────────────────────────────────────────────
+.stats-section {
   margin-bottom: $sp-24;
-  padding: $sp-24 $sp-24 $sp-20 $sp-28;
-  @include card($r-lg);
   transition: opacity $fade $ease;
 
-  // Ember spine on the leading edge.
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 4px;
-    background: var(--color-accent);
-  }
-
-  &.is-refreshing { opacity: 0.5; }
+  &.is-refreshing { opacity: 0.55; }
 }
 
-.scoreboard__main {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-24;
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $sp-12;
 
   @include respond-to($bp-sm) {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: $sp-32;
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
-.score__head {
+.stat {
+  @include card;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-6;
+  padding: $sp-16;
+}
+
+.stat--hero {
+  grid-column: 1 / -1;
+  gap: $sp-10;
+  padding: $sp-20;
+}
+
+.stat__head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: $sp-10;
-  margin-bottom: $sp-10;
+}
+
+.stat__label {
+  @include eyebrow;
 }
 
 .rank-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  font-family: $font-display;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
-  border: $bd-hair solid var(--color-accent-line);
+  @include mono(600);
+  font-size: 11.5px;
+  padding: 3px 9px;
   border-radius: $r-pill;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
 }
 
-.score__figure {
+.stat__figure {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: $sp-16;
+  gap: $sp-12;
 }
 
-.score__value {
-  @include display(900);
-  font-size: clamp(46px, 12vw, 76px);
-  line-height: 0.92;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
+.stat__value {
+  @include mono(600);
+  font-size: clamp(38px, 11vw, 52px);
+  line-height: 1;
+  color: var(--color-text);
 }
 
-.score__delta {
+.stat__delta {
   @include mono(600);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: $sp-3;
   font-size: 15px;
 
-  &.is-pos { color: var(--color-positive); }
-  &.is-neg { color: var(--color-negative); }
+  span { font-size: 11px; }
 }
 
-.score__delta-arrow { font-size: 10px; }
-
-.score__range {
-  margin-top: $sp-12;
-  font-size: 12px;
+.stat__caption {
+  font-size: 12.5px;
   color: var(--color-text-muted);
-  letter-spacing: 0.02em;
 }
 
-// Stat rail — mono figures, hairline-separated on wide screens.
-.rail {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $sp-16 $sp-24;
-
-  @include respond-to($bp-sm) {
-    display: flex;
-    gap: 0;
-    flex-shrink: 0;
-  }
-}
-
-.rail__stat {
-  @include respond-to($bp-sm) {
-    padding: 2px $sp-20;
-    border-left: $bd-hair solid var(--color-border-soft);
-    text-align: right;
-
-    &:last-child { padding-right: 0; }
-  }
-}
-
-.rail__label {
-  @include eyebrow;
-  display: block;
-  margin-bottom: $sp-6;
-}
-
-.rail__value {
+.stat__num {
   @include mono(600);
-  font-size: 17px;
+  font-size: 20px;
   color: var(--color-text);
-
-  &.is-pos { color: var(--color-positive); }
-  &.is-neg { color: var(--color-negative); }
 }
 
-// ── Rank guide (collapsible) ────────────────────────────────
+// ── Rank guide ───────────────────────────────────────────────
 .rank-guide {
-  margin-top: $sp-20;
-  padding-top: $sp-16;
-  border-top: $bd-hair solid var(--color-border-soft);
+  margin-top: $sp-12;
 }
 
 .rank-guide__summary {
   display: inline-flex;
   align-items: center;
   gap: $sp-6;
-  list-style: none;
-  cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.02em;
   color: var(--color-text-muted);
-  user-select: none;
-  @include focus-ring;
+  cursor: pointer;
+  list-style: none;
 
   &::-webkit-details-marker { display: none; }
   &::before {
-    content: "›";
-    font-size: 14px;
-    line-height: 1;
-    transition: transform $fade $ease;
+    content: '+';
+    @include mono(600);
+    color: var(--color-accent);
   }
-  &:hover { color: var(--color-accent); }
+
+  &:hover { color: var(--color-text); }
 }
 
-.rank-guide[open] .rank-guide__summary::before {
-  transform: rotate(90deg);
-}
+.rank-guide[open] .rank-guide__summary::before { content: '−'; }
 
 .rank-guide__list {
   display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: $sp-8;
-  margin-top: $sp-16;
+  margin-top: $sp-12;
 
-  @include respond-to($bp-xs) { grid-template-columns: repeat(2, 1fr); }
-  @include respond-to($bp-sm) { grid-template-columns: repeat(3, 1fr); }
+  @include respond-to($bp-xs) { grid-template-columns: repeat(3, 1fr); }
+  @include respond-to($bp-sm) { grid-template-columns: repeat(5, 1fr); }
 }
 
 .rank-guide__item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: $sp-12;
-  padding: $sp-10 $sp-12;
-  background: var(--color-surface-alt);
+  gap: $sp-8;
+  padding: $sp-8 $sp-12;
+  border: $bd-hair solid var(--color-border);
   border-radius: $r-sm;
+  background: var(--color-surface);
+  font-size: 12.5px;
 }
 
-.rank-guide__name {
-  font-weight: 600;
-  color: var(--color-text);
-}
+.rank-guide__name { color: var(--color-text); font-weight: 600; }
+.rank-guide__rp { @include mono(500); color: var(--color-text-muted); }
 
-.rank-guide__rp {
-  @include mono(500);
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-// ── Toolbar (period segment + actions) ──────────────────────
-.toolbar {
+// ── Controls ─────────────────────────────────────────────────
+.controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: $sp-12;
-  margin-bottom: $sp-24;
+  margin-bottom: $sp-20;
 }
 
-.toolbar__actions {
-  display: flex;
-  align-items: center;
-  gap: $sp-10;
-  margin-left: auto;
-}
-
-// Segmented period switch — a track with a filled active cell.
 .segment {
   display: inline-flex;
+  gap: $sp-3;
   padding: 3px;
-  gap: 2px;
+  border: $bd-hair solid var(--color-border);
+  border-radius: $r-md;
   background: var(--color-surface-alt);
-  border: $bd-hard solid var(--color-border);
-  border-radius: 0;
 }
 
 .segment__btn {
-  padding: 7px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: var(--color-text-muted);
+  padding: 7px 15px;
   border-radius: $r-sm;
-  transition: background-color $fade $ease, color $fade $ease, box-shadow $fade $ease;
-  @include focus-ring;
-
-  &:hover:not(.is-active) { color: var(--color-text); }
-
-  &.is-active {
-    color: var(--color-on-accent);
-    background: var(--color-accent);
-  }
-}
-
-// ── Buttons ─────────────────────────────────────────────────
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: $sp-6;
-  padding: 8px 15px;
-  font-size: 11.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  @include control($r-md);
-
-  svg { width: 14px; height: 14px; }
-
-  &:hover:not(:disabled) {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-  }
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-}
-
-.btn--accent {
-  color: var(--color-on-accent);
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-
-  &:hover:not(:disabled) {
-    color: var(--color-on-accent);
-    background: var(--color-accent-strong);
-    border-color: var(--color-accent-strong);
-  }
-}
-
-// Refresh button no longer spins — immediate text feedback only.
-
-// ── Tabs — underline indicator ──────────────────────────────
-.tabbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: $sp-3;
-  margin-bottom: $sp-24;
-  border-bottom: $bd-hair solid var(--color-border-soft);
-}
-
-.tabbar__tab {
-  position: relative;
-  padding: 11px 14px;
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.01em;
   color: var(--color-text-muted);
-  border-radius: $r-sm $r-sm 0 0;
   transition: color $fade $ease, background-color $fade $ease;
   @include focus-ring;
 
-  // Hard accent underline — appears instantly, no slide.
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -1px;
-    height: 3px;
-    background: var(--color-accent);
-    opacity: 0;
+  &:hover { color: var(--color-text); }
+
+  &.is-active {
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-card);
+  }
+}
+
+.controls__actions {
+  display: flex;
+  gap: $sp-8;
+}
+
+.btn {
+  @include control;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-6;
+  padding: 8px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+
+  svg { width: 16px; height: 16px; }
+
+  &:hover:not(:disabled) {
+    color: var(--color-text);
+    border-color: var(--color-text-subtle);
   }
 
-  &:hover:not(.is-active) {
-    color: var(--color-text);
-    background: var(--color-surface);
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.btn--accent {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+
+  &:hover:not(:disabled) {
+    background: var(--color-accent-strong);
+    border-color: var(--color-accent-strong);
+    color: var(--color-on-accent);
   }
+}
+
+.btn__spin.is-spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+// ── Tabs ─────────────────────────────────────────────────────
+.tabs {
+  display: flex;
+  gap: $sp-20;
+  margin-bottom: $sp-20;
+  border-bottom: $bd-hair solid var(--color-border);
+}
+
+.tabs__tab {
+  padding: $sp-10 0;
+  margin-bottom: -1px;
+  border-bottom: $bd-thick solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: color $fade $ease, border-color $fade $ease;
+  @include focus-ring;
+
+  &:hover { color: var(--color-text); }
 
   &.is-active {
     color: var(--color-text);
-    &::after { opacity: 1; }
+    border-bottom-color: var(--color-accent);
   }
 }
 
-.tabbar__tab--doc {
-  color: var(--color-text-subtle);
-}
-
-.tabbar__spacer { flex: 1; }
-
-// ── State blocks (loading / error / empty) ──────────────────
+// ── States ───────────────────────────────────────────────────
 .state {
-  padding: $sp-64 $sp-20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-12;
+  min-height: 260px;
+  padding: $sp-32;
   text-align: center;
-}
-
-// Loading — a static hatched plate, no motion.
-.scanbar {
-  width: min(220px, 60%);
-  height: 8px;
-  margin: 0 auto $sp-20;
-  border: $bd-hard solid var(--color-border);
-  background: var(--color-track);
-  @include hatching(6px);
-
-  span { display: none; }
-}
-
-.state__loading-text {
-  @include mono(500);
-  font-size: 12.5px;
-  letter-spacing: 0.08em;
   color: var(--color-text-muted);
 }
 
-.state__title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--color-text-muted);
+.state__icon { width: 44px; height: 44px; color: var(--color-text-subtle); }
+.state__text { font-size: 14px; }
+.state__title { font-size: 15px; font-weight: 600; color: var(--color-text); }
+.state__hint { font-size: 13px; color: var(--color-text-subtle); }
+
+.state--error .state__title { color: var(--color-negative); }
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: $r-pill;
+  animation: spin 0.8s linear infinite;
 }
 
-.state__hint {
-  margin-top: $sp-10;
-  font-size: 12.5px;
-  color: var(--color-text-subtle);
-}
-
-.state__art {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto $sp-20;
-  color: var(--color-border-soft);
-}
-
-// Error — ember-framed plate.
-.state--error {
-  padding: $sp-20 $sp-24;
-  text-align: left;
-  background: var(--color-accent-soft);
-  border: $bd-hard solid var(--color-accent);
-  border-radius: 0;
-}
-
-.state__error-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-accent);
-}
-
-.state__error-hint {
-  margin-top: $sp-6;
-  font-size: 12.5px;
-  color: var(--color-text-muted);
-}
-
-// ── Chart card ──────────────────────────────────────────────
-.chart-card {
-  @include card($r-lg);
-  overflow: hidden;
-  transition: opacity $fade $ease;
-}
-
-.chart-card__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: $sp-10;
-  padding: $sp-12 $sp-16;
-  border-bottom: $bd-hair solid var(--color-border-soft);
-}
-
-.chart-card__count {
-  @include mono(600);
-  color: var(--color-text);
-}
-
-.chart-card__tools {
-  display: flex;
-  align-items: center;
-  gap: $sp-6;
-  margin-left: auto;
-}
-
-.tool-divider {
-  width: 1px;
-  height: 16px;
-  margin: 0 $sp-3;
-  background: var(--color-border-soft);
-}
-
-.tool-btn {
-  padding: 5px 11px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: var(--color-text-muted);
-  @include control($r-sm);
-
-  &:hover:not(:disabled) {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-  }
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
-
-.chart-card__plot {
-  height: 340px;
-  padding: $sp-16 $sp-16 $sp-12;
-  touch-action: none;
-  user-select: none;
-  cursor: grab;
-
-  @include respond-to($bp-sm) { height: 440px; }
-
-  &.is-dragging { cursor: grabbing; }
-}
-
-.chart-card__hint {
-  padding: $sp-10 $sp-16 $sp-12;
-  font-size: 11px;
-  letter-spacing: 0.01em;
-  color: var(--color-text-subtle);
-  border-top: $bd-hair solid var(--color-border-soft);
-}
-
-// ── Table card ──────────────────────────────────────────────
-.table-card {
-  @include card($r-lg);
+// ── Card (chart + tables) ────────────────────────────────────
+.card {
+  @include card;
   overflow: hidden;
 }
 
-.table-card__head {
+.card__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: $sp-12;
   padding: $sp-12 $sp-16;
-  border-bottom: $bd-hair solid var(--color-border-soft);
+  border-bottom: $bd-hair solid var(--color-border);
 }
 
-.table-card__count {
-  @include mono(600);
-  color: var(--color-text);
+.card__title {
+  @include display(700);
+  font-size: 15px;
 }
 
-.sort-btn {
-  padding: 6px 13px;
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+.card__count {
+  margin-left: $sp-6;
+  font-family: $font-sans;
+  font-weight: 500;
+  font-size: 12.5px;
   color: var(--color-text-muted);
-  @include control($r-sm);
-
-  &:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-  }
 }
 
+.card__tools {
+  display: flex;
+  gap: $sp-6;
+}
+
+.tool-btn,
+.sort-btn {
+  @include control;
+  padding: 5px 11px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+
+  &:hover:not(:disabled) {
+    color: var(--color-text);
+    border-color: var(--color-text-subtle);
+  }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── Chart ────────────────────────────────────────────────────
+.chart-plot {
+  position: relative;
+  height: 360px;
+  padding: $sp-16;
+  touch-action: none;
+  cursor: grab;
+
+  @include respond-to($bp-sm) { height: 460px; }
+
+  &.is-dragging { cursor: grabbing; }
+
+  canvas { width: 100% !important; height: 100% !important; }
+}
+
+.chart-hint {
+  padding: $sp-10 $sp-16;
+  border-top: $bd-hair solid var(--color-border);
+  font-size: 12px;
+  color: var(--color-text-subtle);
+}
+
+// ── Tables ───────────────────────────────────────────────────
 .table-wrap {
   overflow-x: auto;
 }
 
 .data-table {
   width: 100%;
-  font-size: 13px;
+  border-collapse: collapse;
+  font-size: 13.5px;
 
   thead th {
-    @include eyebrow;
-    font-size: 10px;
-    text-align: left;
-    padding: $sp-10 $sp-16;
-    color: var(--color-text-subtle);
-    background: var(--color-surface-alt);
-    border-bottom: $bd-hair solid var(--color-border-soft);
-    white-space: nowrap;
     position: sticky;
     top: 0;
-    z-index: 1;
-
-    &.is-right { text-align: right; }
+    padding: $sp-10 $sp-16;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-subtle);
+    background: var(--color-surface-alt);
+    border-bottom: $bd-hair solid var(--color-border);
+    white-space: nowrap;
   }
 
-  // No `color` on the base cell, so .is-pos / .is-neg / .col-*
-  // helpers win without a specificity fight.
-  tbody td {
-    padding: 13px 16px;
-    border-bottom: $bd-hair solid var(--color-border-soft);
-    vertical-align: middle;
+  td {
+    padding: $sp-10 $sp-16;
+    border-bottom: $bd-hair solid var(--color-border);
+    color: var(--color-text);
+    white-space: nowrap;
   }
 
-  tbody td.col-first,
-  tbody td.col-id {
-    padding-left: $sp-20;
-  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--color-surface-alt); }
 
-  tbody tr {
-    position: relative;
-    transition: background-color $fade $ease;
-
-    &:hover { background: var(--color-surface-alt); }
-    &:last-child td { border-bottom: none; }
-  }
+  .is-right { text-align: right; }
 }
 
-// Column helpers.
+.col-num { @include mono(500); }
+.col-num--strong { @include mono(600); color: var(--color-text); }
+.col-id { @include mono(500); color: var(--color-text-subtle); }
+.col-date { @include mono(500); color: var(--color-text-muted); }
 .col-first { font-weight: 600; }
-.col-num {
-  text-align: right;
-  @include mono(500);
-}
-.col-num--strong {
-  font-weight: 700;
-  font-size: 13.5px;
-}
-.col-id {
-  @include mono(500);
-  font-size: 11px;
-  color: var(--color-text-subtle);
-}
-.col-date {
-  @include mono(500);
-  color: var(--color-text-muted);
-}
 .col-muted { color: var(--color-text-muted); }
 
 .week-range__sep { color: var(--color-text-subtle); }
 .week-range__end { color: var(--color-text-muted); }
 
-// ── Design-doc host frame ───────────────────────────────────
-.doc-frame {
-  padding: $sp-20 $sp-16;
-  @include card($r-lg);
-
-  @include respond-to($bp-sm) {
-    padding: $sp-28;
-  }
-}
-
-// ── Footer ──────────────────────────────────────────────────
+// ── Footer ───────────────────────────────────────────────────
 .footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $sp-10;
-  margin-top: $sp-56;
+  margin-top: $sp-32;
   padding-top: $sp-20;
-  border-top: $bd-hair solid var(--color-border-soft);
+  border-top: $bd-hair solid var(--color-border);
   text-align: center;
-  font-size: 11.5px;
-  letter-spacing: 0.04em;
+  font-size: 12.5px;
   color: var(--color-text-subtle);
 }
 
-.footer__mark {
-  display: inline-grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  font-family: $font-mono;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: var(--color-accent);
-  border: $bd-hair solid var(--color-accent-line);
-  border-radius: $r-sm;
+// ── Shared semantics ─────────────────────────────────────────
+.is-pos { color: var(--color-positive); }
+.is-neg { color: var(--color-negative); }
+.is-faint { color: var(--color-text-subtle); }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-// ── Reduced motion ──────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
-  .updated__dot::after,
   .btn__spin.is-spinning,
-  .scanbar span {
-    animation: none;
-  }
+  .spinner { animation: none; }
 }
