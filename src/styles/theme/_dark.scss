@@ -1,36 +1,44 @@
-// Dark theme colours. Applied by toggling `.dark` on <html>; only the
-// colour values change, the layout stays put.
+// Dark theme — the default. A tactical-HUD palette: near-black
+// surfaces, Apex red-orange accent, teal for gains. Light mode is the
+// override (theme/_light.scss, applied by toggling `.light` on <html>).
 
-html.dark {
+:root {
   color-scheme: dark;
 
   // Surfaces
-  --color-bg: #0f1115;          // page background
-  --color-surface: #171a21;     // cards / panels
-  --color-surface-alt: #1f232c; // hover / zebra rows
-  --color-track: #262b34;       // progress / divider fills
+  --color-bg: #0a0c10;          // page background
+  --color-surface: #11141b;     // cards / panels
+  --color-surface-alt: #181c25; // hover / header fills
+  --color-track: #20252f;       // progress / divider fills
+
+  // Page texture (dot grid + top glow painted on <body>)
+  --color-bg-dot: rgba(141, 153, 174, 0.08);
+  --color-bg-glow: rgba(255, 77, 36, 0.05);
 
   // Text
-  --color-text: #e8eaed;        // primary
-  --color-text-muted: #9aa1ad;  // secondary
-  --color-text-subtle: #6b7280; // labels / captions
+  --color-text: #e9edf3;        // primary
+  --color-text-muted: #98a2b3;  // secondary
+  --color-text-subtle: #5f6b7e; // labels / captions
 
   // Lines
-  --color-border: #272b34;      // hairline borders
+  --color-border: #232936;      // hairline borders
 
-  // Accent (single) — slightly brighter for dark surfaces.
-  --color-accent: #6ea8ff;
-  --color-accent-strong: #8bbaff;
-  --color-accent-soft: rgba(110, 168, 255, 0.14);
-  --color-on-accent: #0f1115;
+  // Accent (single) — Apex red-orange. Swap these four to re-skin.
+  --color-accent: #ff4d24;
+  --color-accent-strong: #ff6e4c;
+  --color-accent-soft: rgba(255, 77, 36, 0.13);
+  --color-on-accent: #0a0c10;
 
   // Semantic — gains / losses
-  --color-positive: #4ade80;
-  --color-negative: #f87171;
+  --color-positive: #27e0a6;
+  --color-negative: #ff5468;
+
+  // Tables
+  --color-zebra: rgba(255, 255, 255, 0.02);
 
   // Chart helpers
-  --color-grid: #20242c;
+  --color-grid: #1a1f29;
 
   // Elevation
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.45);
 }

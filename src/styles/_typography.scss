@@ -1,15 +1,16 @@
-// Base typography. Two registers only:
-//   · sans (Archivo + Noto Sans JP) — text, headings, labels
-//   · mono (IBM Plex Mono)          — numbers and tabular figures
+// Base typography. Three registers:
+//   · display (Chakra Petch)        — headings, figures, control labels
+//   · sans (Noto Sans JP)           — body copy
+//   · mono (JetBrains Mono)         — numbers and tabular figures
 
 @use 'variables' as *;
 @use 'utilities' as *;
 
 body {
   font-family: $font-sans;
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--color-text);
   background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
@@ -24,12 +25,12 @@ h4 {
   color: var(--color-text);
 }
 
-h1 { font-size: 26px; }
-h2 { font-size: 19px; }
-h3 { font-size: 16px; }
+h1 { font-size: 24px; }
+h2 { font-size: 18px; }
+h3 { font-size: 15px; }
 
 p {
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 code,

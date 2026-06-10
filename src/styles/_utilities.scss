@@ -5,11 +5,11 @@
 
 // ── Type registers ───────────────────────────────────────────
 
-// Headings and big figures — the sans at a heavier weight.
+// Display face — headings, big figures, control labels.
 @mixin display($weight: 700) {
-  font-family: $font-sans;
+  font-family: $font-display;
   font-weight: $weight;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
   line-height: 1.15;
 }
 
@@ -22,9 +22,10 @@
 
 // Small caption / eyebrow label.
 @mixin eyebrow {
+  font-family: $font-display;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-text-subtle);
 }
@@ -39,12 +40,48 @@
 
 // ── Surfaces & controls ──────────────────────────────────────
 
-// A card surface — hairline border, soft radius, gentle elevation.
+// A panel surface — hairline border, tight radius, faint elevation.
 @mixin card {
   background: var(--color-surface);
   border: $bd-hair solid var(--color-border);
   border-radius: $r-lg;
   box-shadow: var(--shadow-card);
+}
+
+// HUD corner brackets — L-marks pinned to the top-left and
+// bottom-right corners. Claims ::before / ::after of the host.
+@mixin hud-corners($size: 10px, $color: var(--color-accent)) {
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: $size;
+    height: $size;
+    pointer-events: none;
+  }
+
+  &::before {
+    top: -$bd-hair;
+    left: -$bd-hair;
+    border-top: $bd-thick solid $color;
+    border-left: $bd-thick solid $color;
+  }
+
+  &::after {
+    right: -$bd-hair;
+    bottom: -$bd-hair;
+    border-right: $bd-thick solid $color;
+    border-bottom: $bd-thick solid $color;
+  }
+}
+
+// Slice the top-right corner off a filled element. Only for elements
+// without a visible border — the clip would cut the border away along
+// the diagonal.
+@mixin clip-corner($cut: $cut-md) {
+  clip-path: polygon(0 0, calc(100% - #{$cut}) 0, 100% #{$cut}, 100% 100%, 0 100%);
 }
 
 // Base for bordered interactive controls (buttons, segments, toggles).

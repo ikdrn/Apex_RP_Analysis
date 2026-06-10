@@ -1,36 +1,43 @@
-// Light theme colours. These custom properties are the single source
-// of truth for colour and are read everywhere via var(--…).
+// Light theme — "day ops" variant, applied by toggling `.light` on
+// <html>. Only the colour values change; the layout stays put.
 
-:root {
+html.light {
   color-scheme: light;
 
   // Surfaces
-  --color-bg: #fbfbfa;          // page background
+  --color-bg: #f2f3f5;          // page background
   --color-surface: #ffffff;     // cards / panels
-  --color-surface-alt: #f4f5f6; // hover / zebra rows
-  --color-track: #eceef0;       // progress / divider fills
+  --color-surface-alt: #e9ebef; // hover / header fills
+  --color-track: #dfe2e8;       // progress / divider fills
+
+  // Page texture (dot grid + top glow painted on <body>)
+  --color-bg-dot: rgba(20, 26, 38, 0.07);
+  --color-bg-glow: rgba(217, 58, 20, 0.05);
 
   // Text
-  --color-text: #18181b;        // primary
-  --color-text-muted: #5d6470;  // secondary
-  --color-text-subtle: #8a909b; // labels / captions
+  --color-text: #14181f;        // primary
+  --color-text-muted: #4f5866;  // secondary
+  --color-text-subtle: #828b99; // labels / captions
 
   // Lines
-  --color-border: #e5e7eb;      // hairline borders
+  --color-border: #d6dae1;      // hairline borders
 
-  // Accent (single) — calm blue. Swap these four lines to re-skin.
-  --color-accent: #2f6feb;
-  --color-accent-strong: #245fd0;
-  --color-accent-soft: rgba(47, 111, 235, 0.10);
+  // Accent (single) — deeper red-orange for light surfaces.
+  --color-accent: #d93a14;
+  --color-accent-strong: #b92f0e;
+  --color-accent-soft: rgba(217, 58, 20, 0.10);
   --color-on-accent: #ffffff;
 
   // Semantic — gains / losses
-  --color-positive: #15924f;
-  --color-negative: #d23f3f;
+  --color-positive: #008f63;
+  --color-negative: #d92b42;
+
+  // Tables
+  --color-zebra: rgba(16, 24, 40, 0.025);
 
   // Chart helpers
-  --color-grid: #eef0f2;
+  --color-grid: #e3e6eb;
 
-  // Elevation — a single soft shadow for raised cards.
-  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.06);
+  // Elevation
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.06);
 }
