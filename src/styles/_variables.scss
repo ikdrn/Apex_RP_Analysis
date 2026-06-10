@@ -1,9 +1,10 @@
 // Design tokens — compile-time SCSS constants.
 //
-// Runtime colours live in theme/_light.scss & _dark.scss as CSS custom
-// properties so they can switch with the light/dark toggle. This file
-// holds the values that don't change between themes: breakpoints, the
-// spacing scale, radii, border widths, font stacks and motion timings.
+// Runtime colours live in theme/_dark.scss (the default) and
+// theme/_light.scss as CSS custom properties so they can switch with
+// the theme toggle. This file holds the values that don't change
+// between themes: breakpoints, the spacing scale, radii, border
+// widths, corner cuts, font stacks and motion timings.
 
 // ── Breakpoints ──────────────────────────────────────────────
 $bp-xs: 360px;   // small phone
@@ -27,24 +28,31 @@ $sp-44: 44px;
 $sp-56: 56px;
 $sp-64: 64px;
 
-// ── Radii ────────────────────────────────────────────────────
-$r-sm: 6px;
-$r-md: 8px;
-$r-lg: 12px;
+// ── Radii — kept tight for the angular HUD look ──────────────
+$r-sm: 2px;
+$r-md: 3px;
+$r-lg: 4px;
 $r-pill: 999px;
 
 // ── Border widths ────────────────────────────────────────────
 $bd-hair: 1px;   // hairline rule — the default everywhere
-$bd-thick: 2px;  // emphasis (active tab underline, focus ring)
+$bd-thick: 2px;  // emphasis (active tab underline, HUD brackets)
+
+// ── Corner cuts (clip-path) ──────────────────────────────────
+$cut-sm: 8px;
+$cut-md: 10px;
+$cut-lg: 14px;
 
 // ── Type stacks ──────────────────────────────────────────────
-// One sans for everything, with Noto Sans JP for Japanese coverage.
-$font-sans: "Archivo", system-ui, -apple-system, "Noto Sans JP", sans-serif;
+// Squared techno display face — headings, figures, control labels.
+$font-display: "Chakra Petch", "Noto Sans JP", system-ui, sans-serif;
+// Body copy — Japanese-first sans.
+$font-sans: "Noto Sans JP", system-ui, -apple-system, sans-serif;
 // Monospace for figures so columns of numbers line up.
-$font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Courier New", monospace;
+$font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 
 // ── Motion ───────────────────────────────────────────────────
 $ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-$fade: 160ms;        // opacity / colour transitions
-$theme-shift: 220ms; // light <-> dark swap
+$fade: 150ms;        // opacity / colour transitions
+$theme-shift: 220ms; // dark <-> light swap
 $press: 60ms;        // button press

@@ -6,6 +6,19 @@
   min-height: 100vh;
 }
 
+// Accent scan line pinned to the very top of the viewport.
+.app::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 10;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-accent) 26%, transparent 72%);
+}
+
 .container {
   max-width: 1080px;
   margin: 0 auto;
@@ -38,11 +51,11 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: $r-md;
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
+  width: 36px;
+  height: 36px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  @include clip-corner($cut-sm);
 
   svg { width: 20px; height: 20px; }
 }
@@ -50,17 +63,21 @@
 .brand__text {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 
 .brand__title {
   @include display(700);
-  font-size: 17px;
+  font-size: 16px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 .brand__sub {
-  font-size: 12.5px;
-  color: var(--color-text-muted);
+  @include mono(500);
+  font-size: 11px;
+  color: var(--color-text-subtle);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -76,7 +93,7 @@
   display: inline-flex;
   align-items: center;
   gap: $sp-6;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--color-text-muted);
 }
 
@@ -85,11 +102,13 @@
   height: 7px;
   border-radius: $r-pill;
   background: var(--color-positive);
+  box-shadow: 0 0 6px var(--color-positive);
+  animation: pulse 2.2s ease-in-out infinite;
 }
 
 .updated__time {
   @include mono(500);
-  font-size: 12px;
+  font-size: 11.5px;
 }
 
 @media (max-width: 359px) {
@@ -107,8 +126,8 @@
   svg { width: 18px; height: 18px; }
 
   &:hover {
-    color: var(--color-text);
-    border-color: var(--color-text-subtle);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
   }
 }
 
@@ -139,9 +158,13 @@
 }
 
 .stat--hero {
+  @include hud-corners(12px);
   grid-column: 1 / -1;
   gap: $sp-10;
   padding: $sp-20;
+  background:
+    linear-gradient(135deg, var(--color-accent-soft), transparent 52%),
+    var(--color-surface);
 }
 
 .stat__head {
@@ -156,12 +179,13 @@
 }
 
 .rank-chip {
-  @include mono(600);
-  font-size: 11.5px;
-  padding: 3px 9px;
-  border-radius: $r-pill;
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
+  @include display(600);
+  @include clip-corner($cut-sm);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .stat__figure {
@@ -172,10 +196,11 @@
 }
 
 .stat__value {
-  @include mono(600);
-  font-size: clamp(38px, 11vw, 52px);
+  @include display(700);
+  font-size: clamp(40px, 11vw, 56px);
   line-height: 1;
   color: var(--color-text);
+  font-variant-numeric: tabular-nums;
 }
 
 .stat__delta {
@@ -189,13 +214,14 @@
 }
 
 .stat__caption {
-  font-size: 12.5px;
-  color: var(--color-text-muted);
+  @include mono(500);
+  font-size: 11.5px;
+  color: var(--color-text-subtle);
 }
 
 .stat__num {
   @include mono(600);
-  font-size: 20px;
+  font-size: 19px;
   color: var(--color-text);
 }
 
@@ -243,6 +269,7 @@
   gap: $sp-8;
   padding: $sp-8 $sp-12;
   border: $bd-hair solid var(--color-border);
+  border-left: $bd-thick solid var(--color-accent);
   border-radius: $r-sm;
   background: var(--color-surface);
   font-size: 12.5px;
@@ -271,10 +298,11 @@
 }
 
 .segment__btn {
+  @include display(600);
   padding: 7px 15px;
   border-radius: $r-sm;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: 0.05em;
   color: var(--color-text-muted);
   transition: color $fade $ease, background-color $fade $ease;
   @include focus-ring;
@@ -282,9 +310,9 @@
   &:hover { color: var(--color-text); }
 
   &.is-active {
-    background: var(--color-surface);
-    color: var(--color-text);
-    box-shadow: var(--shadow-card);
+    @include clip-corner(6px);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
   }
 }
 
@@ -295,25 +323,30 @@
 
 .btn {
   @include control;
+  @include display(600);
   display: inline-flex;
   align-items: center;
   gap: $sp-6;
   padding: 8px 14px;
-  font-size: 13.5px;
-  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   color: var(--color-text-muted);
 
-  svg { width: 16px; height: 16px; }
+  svg { width: 15px; height: 15px; }
 
   &:hover:not(:disabled) {
     color: var(--color-text);
     border-color: var(--color-text-subtle);
   }
 
+  &:active:not(:disabled) { transform: translateY(1px); }
+
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .btn--accent {
+  @include clip-corner($cut-sm);
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: var(--color-on-accent);
@@ -332,26 +365,28 @@
 // ── Tabs ─────────────────────────────────────────────────────
 .tabs {
   display: flex;
-  gap: $sp-20;
+  gap: $sp-8;
   margin-bottom: $sp-20;
   border-bottom: $bd-hair solid var(--color-border);
 }
 
 .tabs__tab {
-  padding: $sp-10 0;
+  @include display(600);
+  padding: $sp-10 $sp-12;
   margin-bottom: -1px;
   border-bottom: $bd-thick solid transparent;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.08em;
   color: var(--color-text-muted);
-  transition: color $fade $ease, border-color $fade $ease;
+  transition: color $fade $ease, border-color $fade $ease, background-color $fade $ease;
   @include focus-ring;
 
   &:hover { color: var(--color-text); }
 
   &.is-active {
-    color: var(--color-text);
+    color: var(--color-accent);
     border-bottom-color: var(--color-accent);
+    background: linear-gradient(to top, var(--color-accent-soft), transparent 75%);
   }
 }
 
@@ -366,6 +401,11 @@
   padding: $sp-32;
   text-align: center;
   color: var(--color-text-muted);
+}
+
+.state--error {
+  @include card;
+  @include hud-corners(10px, var(--color-negative));
 }
 
 .state__icon { width: 44px; height: 44px; color: var(--color-text-subtle); }
@@ -387,7 +427,7 @@
 // ── Card (chart + tables) ────────────────────────────────────
 .card {
   @include card;
-  overflow: hidden;
+  @include hud-corners(10px);
 }
 
 .card__head {
@@ -401,14 +441,22 @@
 
 .card__title {
   @include display(700);
-  font-size: 15px;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+
+  // Comment-mark prefix in the accent colour — pure decoration.
+  &::before {
+    content: '// ';
+    @include mono(600);
+    color: var(--color-accent);
+  }
 }
 
 .card__count {
+  @include mono(500);
   margin-left: $sp-6;
-  font-family: $font-sans;
-  font-weight: 500;
-  font-size: 12.5px;
+  font-size: 11.5px;
+  letter-spacing: 0;
   color: var(--color-text-muted);
 }
 
@@ -420,14 +468,15 @@
 .tool-btn,
 .sort-btn {
   @include control;
+  @include display(600);
   padding: 5px 11px;
-  font-size: 12.5px;
-  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.04em;
   color: var(--color-text-muted);
 
   &:hover:not(:disabled) {
-    color: var(--color-text);
-    border-color: var(--color-text-subtle);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
   }
 
   &:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -449,15 +498,17 @@
 }
 
 .chart-hint {
+  @include mono(500);
   padding: $sp-10 $sp-16;
   border-top: $bd-hair solid var(--color-border);
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text-subtle);
 }
 
 // ── Tables ───────────────────────────────────────────────────
 .table-wrap {
   overflow-x: auto;
+  border-radius: 0 0 $r-md $r-md;
 }
 
 .data-table {
@@ -466,12 +517,14 @@
   font-size: 13.5px;
 
   thead th {
+    @include display(600);
     position: sticky;
     top: 0;
     padding: $sp-10 $sp-16;
     text-align: left;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--color-text-subtle);
     background: var(--color-surface-alt);
     border-bottom: $bd-hair solid var(--color-border);
@@ -485,8 +538,9 @@
     white-space: nowrap;
   }
 
+  tbody tr:nth-child(even) td { background: var(--color-zebra); }
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: var(--color-surface-alt); }
+  tbody tr:hover td { background: var(--color-accent-soft); }
 
   .is-right { text-align: right; }
 }
@@ -503,11 +557,14 @@
 
 // ── Footer ───────────────────────────────────────────────────
 .footer {
+  @include mono(500);
   margin-top: $sp-32;
   padding-top: $sp-20;
   border-top: $bd-hair solid var(--color-border);
   text-align: center;
-  font-size: 12.5px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--color-text-subtle);
 }
 
@@ -520,7 +577,13 @@
   to { transform: rotate(360deg); }
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .btn__spin.is-spinning,
-  .spinner { animation: none; }
+  .spinner,
+  .updated__dot { animation: none; }
 }

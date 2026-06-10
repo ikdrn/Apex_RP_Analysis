@@ -168,24 +168,26 @@ export class AppComponent implements OnInit {
   // Chart.js can't read CSS custom properties, so the font stacks are
   // restated here. Colours are pulled from the theme variables at
   // runtime in applyChartTheme() so the chart tracks the active theme.
-  private static readonly CHART_FONT_SANS = 'Archivo, "Noto Sans JP", system-ui, sans-serif';
-  private static readonly CHART_FONT_MONO = '"IBM Plex Mono", ui-monospace, monospace';
+  private static readonly CHART_FONT_SANS = '"Chakra Petch", "Noto Sans JP", system-ui, sans-serif';
+  private static readonly CHART_FONT_MONO = '"JetBrains Mono", ui-monospace, monospace';
 
+  // Initial values match the dark (default) theme; applyChartTheme()
+  // replaces them with the live CSS variables once data arrives.
   lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
     datasets: [
       {
         label: 'RP',
         data: [],
-        borderColor: '#2f6feb',
-        backgroundColor: 'rgba(47, 111, 235, 0.10)',
+        borderColor: '#ff4d24',
+        backgroundColor: 'rgba(255, 77, 36, 0.13)',
         borderWidth: 2,
         // Straight segments (no smoothing) with a flat area fill.
         tension: 0,
         fill: 'origin',
         pointStyle: 'circle',
-        pointBackgroundColor: '#2f6feb',
-        pointBorderColor: '#2f6feb',
+        pointBackgroundColor: '#ff4d24',
+        pointBorderColor: '#ff4d24',
         pointBorderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 4
@@ -202,13 +204,13 @@ export class AppComponent implements OnInit {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#ffffff',
-        titleColor: '#18181b',
-        bodyColor: '#18181b',
-        borderColor: '#e5e7eb',
+        backgroundColor: '#11141b',
+        titleColor: '#e9edf3',
+        bodyColor: '#e9edf3',
+        borderColor: '#232936',
         borderWidth: 1,
         padding: 11,
-        cornerRadius: 8,
+        cornerRadius: 4,
         displayColors: false,
         titleFont: { family: AppComponent.CHART_FONT_MONO, size: 11 },
         bodyFont: { family: AppComponent.CHART_FONT_MONO, size: 13, weight: 600 },
@@ -218,20 +220,20 @@ export class AppComponent implements OnInit {
     scales: {
       x: {
         ticks: {
-          color: '#8a909b',
+          color: '#5f6b7e',
           font: { family: AppComponent.CHART_FONT_SANS, size: 11 },
           maxRotation: 45
         },
         grid: { display: false },
-        border: { color: '#e5e7eb', width: 1 }
+        border: { color: '#232936', width: 1 }
       },
       y: {
         ticks: {
-          color: '#8a909b',
+          color: '#5f6b7e',
           font: { family: AppComponent.CHART_FONT_MONO, size: 11 },
           callback: (value) => value.toLocaleString()
         },
-        grid: { color: '#eef0f2', lineWidth: 1 },
+        grid: { color: '#1a1f29', lineWidth: 1 },
         border: { display: false }
       }
     }
@@ -259,17 +261,17 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const saved = localStorage.getItem('dark-mode');
-    if (saved === 'true') {
-      this.isDark = true;
-      document.documentElement.classList.add('dark');
-    }
+    // Dark is the default; `.light` on <html> is the override. The same
+    // check runs inline in index.html before first paint — this keeps
+    // the component state in sync with it.
+    this.isDark = localStorage.getItem('dark-mode') !== 'false';
+    document.documentElement.classList.toggle('light', !this.isDark);
     this.loadRecords();
   }
 
   toggleDark(): void {
     this.isDark = !this.isDark;
-    document.documentElement.classList.toggle('dark', this.isDark);
+    document.documentElement.classList.toggle('light', !this.isDark);
     localStorage.setItem('dark-mode', String(this.isDark));
     this.applyChartTheme();
     this.cdr.markForCheck();
@@ -457,7 +459,7 @@ export class AppComponent implements OnInit {
           borderColor: line,
           borderWidth: 1,
           padding: 11,
-          cornerRadius: 8,
+          cornerRadius: 4,
           displayColors: false,
           titleFont: { family: monoFont, size: 11 },
           bodyFont: { family: monoFont, size: 13, weight: 600 },

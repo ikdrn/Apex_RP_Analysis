@@ -4,16 +4,18 @@ ApexのRP推移を「グラフ」と「データ一覧」で確認できるア�
 
 ## 技術スタック
 - Frontend: Angular + SCSS (hand-written design system) + ng2-charts (Chart.js)
+- Fonts: `@fontsource`（Chakra Petch / JetBrains Mono / Noto Sans JP をセルフホスト）
 - Backend: Vercel Serverless Function (Node.js / CommonJS)
 - Database: Supabase (`player_rp`)
 - Deploy: Vercel
 
 ## 画面の主な機能
-- **期間切り替え**: 7日 / 30日 / 90日
-- **Analysisタブ**: `created_at`（横軸）と `rp`（縦軸）の時系列グラフ
-- **Data Tableタブ**: データ一覧表示
+- **期間切り替え**: 7日 / 30日 / 全期間
+- **グラフタブ**: `created_at`（横軸）と `rp`（縦軸）の時系列グラフ（ドラッグ移動・ホイールズーム）
+- **データ / 日別 / 週別タブ**: 一覧と日次・週次の集計表示
 - **最新データに更新**: APIを再取得
 - **CSVダウンロード**: 表示中期間のデータを保存
+- **テーマ切り替え**: ダーク（既定） / ライト
 - **0件時のメッセージ表示** / **エラー時の説明表示**
 
 ## APIの運用機能
