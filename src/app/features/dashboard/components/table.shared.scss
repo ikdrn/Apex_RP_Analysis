@@ -1,0 +1,75 @@
+// Shared styling for the record / aggregate tables and their card
+// shell. Imported by record-table and aggregate-table components.
+
+@use 'variables' as *;
+@use 'utilities' as *;
+
+.card {
+  @include card;
+  overflow: hidden;
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-12;
+  padding: $sp-10 $sp-12;
+  border-bottom: $bd-hair solid var(--color-border);
+}
+
+.card__title { @include display(700); font-size: 14px; }
+.card__count { @include mono(500); font-size: 12px; color: var(--color-text-subtle); margin-left: $sp-6; }
+
+.sort-btn {
+  @include control;
+  @include display(600);
+  font-size: 12px;
+  padding: $sp-3 $sp-10;
+  color: var(--color-text-muted);
+  &:hover { color: var(--color-text); border-color: var(--color-text-subtle); }
+}
+
+.table-wrap { overflow-x: auto; }
+
+.data-table {
+  width: 100%;
+  font-size: 13px;
+
+  th {
+    @include eyebrow;
+    text-align: left;
+    padding: $sp-8 $sp-12;
+    white-space: nowrap;
+    border-bottom: $bd-hair solid var(--color-border);
+    background: var(--color-surface-alt);
+    position: sticky;
+    top: 0;
+  }
+
+  td {
+    padding: $sp-6 $sp-12;
+    border-bottom: $bd-hair solid var(--color-border);
+    white-space: nowrap;
+    color: var(--color-text-muted);
+  }
+
+  tbody tr:nth-child(even) td { background: var(--color-zebra); }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .is-right { text-align: right; }
+}
+
+.col-num { @include mono(500); text-align: right; color: var(--color-text); }
+.col-num--strong { font-weight: 600; color: var(--color-text); }
+.col-id { @include mono(500); color: var(--color-text-subtle); }
+.col-date { @include mono(500); color: var(--color-text-muted); }
+.col-first { color: var(--color-text); }
+.col-muted { color: var(--color-text-muted); }
+
+.is-pos { color: var(--color-positive); }
+.is-neg { color: var(--color-negative); }
+.is-faint { color: var(--color-text-subtle); }
+
+.week-range__sep { color: var(--color-text-subtle); }
+.week-range__end { @include mono(500); color: var(--color-text-muted); }

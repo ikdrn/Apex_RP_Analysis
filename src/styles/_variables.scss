@@ -28,7 +28,7 @@ $sp-44: 44px;
 $sp-56: 56px;
 $sp-64: 64px;
 
-// ── Radii — kept tight for the angular HUD look ──────────────
+// ── Radii — restrained, business-system look ─────────────────
 $r-sm: 2px;
 $r-md: 3px;
 $r-lg: 4px;
@@ -36,16 +36,12 @@ $r-pill: 999px;
 
 // ── Border widths ────────────────────────────────────────────
 $bd-hair: 1px;   // hairline rule — the default everywhere
-$bd-thick: 2px;  // emphasis (active tab underline, HUD brackets)
-
-// ── Corner cuts (clip-path) ──────────────────────────────────
-$cut-sm: 8px;
-$cut-md: 10px;
-$cut-lg: 14px;
+$bd-thick: 2px;  // emphasis (active tab underline)
 
 // ── Type stacks ──────────────────────────────────────────────
-// Squared techno display face — headings, figures, control labels.
-$font-display: "Chakra Petch", "Noto Sans JP", system-ui, sans-serif;
+// Display / headings / labels — Japanese-first neutral sans (no
+// gaming display face; the UI reads as a business tool).
+$font-display: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif;
 // Body copy — Japanese-first sans.
 $font-sans: "Noto Sans JP", system-ui, -apple-system, sans-serif;
 // Monospace for figures so columns of numbers line up.
