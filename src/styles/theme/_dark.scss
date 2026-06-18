@@ -1,44 +1,45 @@
-// Dark theme — the default. A tactical-HUD palette: near-black
-// surfaces, Apex red-orange accent, teal for gains. Light mode is the
-// override (theme/_light.scss, applied by toggling `.light` on <html>).
+// Dark theme — the default. A sober business palette: neutral slate
+// surfaces, a single measured blue accent, green/red for gains/losses.
+// Light mode is the override (theme/_light.scss, applied by toggling
+// `.light` on <html>).
 
 :root {
   color-scheme: dark;
 
   // Surfaces
-  --color-bg: #0a0c10;          // page background
-  --color-surface: #11141b;     // cards / panels
-  --color-surface-alt: #181c25; // hover / header fills
-  --color-track: #20252f;       // progress / divider fills
+  --color-bg: #0e1116;          // page background (flat)
+  --color-surface: #161b22;     // cards / panels
+  --color-surface-alt: #1c2330; // hover / header fills
+  --color-track: #262d3a;       // divider fills
 
-  // Page texture (dot grid + top glow painted on <body>)
-  --color-bg-dot: rgba(141, 153, 174, 0.08);
-  --color-bg-glow: rgba(255, 77, 36, 0.05);
+  // Page texture — flat; no dot grid / glow in the business look.
+  --color-bg-dot: transparent;
+  --color-bg-glow: transparent;
 
   // Text
-  --color-text: #e9edf3;        // primary
-  --color-text-muted: #98a2b3;  // secondary
-  --color-text-subtle: #5f6b7e; // labels / captions
+  --color-text: #e6edf3;        // primary
+  --color-text-muted: #9aa4b2;  // secondary
+  --color-text-subtle: #6b7480; // labels / captions
 
   // Lines
-  --color-border: #232936;      // hairline borders
+  --color-border: #2a313c;      // hairline borders
 
-  // Accent (single) — Apex red-orange. Swap these four to re-skin.
-  --color-accent: #ff4d24;
-  --color-accent-strong: #ff6e4c;
-  --color-accent-soft: rgba(255, 77, 36, 0.13);
-  --color-on-accent: #0a0c10;
+  // Accent (single) — measured blue. Swap these four to re-skin.
+  --color-accent: #3b82f6;
+  --color-accent-strong: #60a5fa;
+  --color-accent-soft: rgba(59, 130, 246, 0.14);
+  --color-on-accent: #ffffff;
 
   // Semantic — gains / losses
-  --color-positive: #27e0a6;
-  --color-negative: #ff5468;
+  --color-positive: #3fb950;
+  --color-negative: #f85149;
 
   // Tables
   --color-zebra: rgba(255, 255, 255, 0.02);
 
   // Chart helpers
-  --color-grid: #1a1f29;
+  --color-grid: #20262f;
 
   // Elevation
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
 }

@@ -16,13 +16,8 @@ body {
 }
 
 body {
+  // Flat surface — a business tool, not a console. No dot grid / glow.
   background-color: var(--color-bg);
-  // Faint dot grid plus an accent glow bleeding in from the top — the
-  // page reads as a console, not a sheet of paper.
-  background-image:
-    radial-gradient(820px 360px at 16% -10%, var(--color-bg-glow), transparent 70%),
-    radial-gradient(var(--color-bg-dot) 1px, transparent 1px);
-  background-size: 100% 100%, 26px 26px;
   // Colour-only transition when the theme toggles — no layout movement.
   transition: background-color $theme-shift $ease, color $theme-shift $ease;
 }

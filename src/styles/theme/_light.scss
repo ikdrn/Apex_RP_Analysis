@@ -1,36 +1,36 @@
-// Light theme — "day ops" variant, applied by toggling `.light` on
-// <html>. Only the colour values change; the layout stays put.
+// Light theme — applied by toggling `.light` on <html>. Only the
+// colour values change; the layout stays put.
 
 html.light {
   color-scheme: light;
 
   // Surfaces
-  --color-bg: #f2f3f5;          // page background
+  --color-bg: #f5f6f8;          // page background (flat)
   --color-surface: #ffffff;     // cards / panels
-  --color-surface-alt: #e9ebef; // hover / header fills
-  --color-track: #dfe2e8;       // progress / divider fills
+  --color-surface-alt: #eef0f3; // hover / header fills
+  --color-track: #dfe2e8;       // divider fills
 
-  // Page texture (dot grid + top glow painted on <body>)
-  --color-bg-dot: rgba(20, 26, 38, 0.07);
-  --color-bg-glow: rgba(217, 58, 20, 0.05);
+  // Page texture — flat; no dot grid / glow in the business look.
+  --color-bg-dot: transparent;
+  --color-bg-glow: transparent;
 
   // Text
-  --color-text: #14181f;        // primary
-  --color-text-muted: #4f5866;  // secondary
-  --color-text-subtle: #828b99; // labels / captions
+  --color-text: #1c2025;        // primary
+  --color-text-muted: #5b6470;  // secondary
+  --color-text-subtle: #818a96; // labels / captions
 
   // Lines
-  --color-border: #d6dae1;      // hairline borders
+  --color-border: #d8dce1;      // hairline borders
 
-  // Accent (single) — deeper red-orange for light surfaces.
-  --color-accent: #d93a14;
-  --color-accent-strong: #b92f0e;
-  --color-accent-soft: rgba(217, 58, 20, 0.10);
+  // Accent (single) — deeper blue for light surfaces.
+  --color-accent: #2563eb;
+  --color-accent-strong: #1d4ed8;
+  --color-accent-soft: rgba(37, 99, 235, 0.10);
   --color-on-accent: #ffffff;
 
   // Semantic — gains / losses
-  --color-positive: #008f63;
-  --color-negative: #d92b42;
+  --color-positive: #1a7f37;
+  --color-negative: #d1242f;
 
   // Tables
   --color-zebra: rgba(16, 24, 40, 0.025);
